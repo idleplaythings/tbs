@@ -3,13 +3,13 @@
 #pragma once
 
 #include "GameFramework/HUD.h"
-#include "TBSHud.generated.h"
+#include "TBSHUD.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class TBS_API ATBSHud : public AHUD
+class TBS_API ATBSHUD : public AHUD
 {
 	GENERATED_BODY()
 	
