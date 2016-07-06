@@ -12,8 +12,9 @@ UCLASS()
 class TBS_API ATBSPlayerController : public APlayerController
 {
 	GENERATED_BODY()
-	
-	
-	
-	
+
+	ATBSPlayerController(const FObjectInitializer& ObjectInitializer);
+
+private:
+	void EnableMouse();
 };
