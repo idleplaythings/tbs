@@ -91,3 +91,13 @@ void ATBSHUD::DrawScrollHitBoxOverlays()
 		}
 	}
 }
+
+void ATBSHUD::NotifyHitBoxBeginCursorOver(FName BoxName)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString(TEXT("Begin: ")).Append(BoxName.ToString()));
+}
+
+void ATBSHUD::NotifyHitBoxEndCursorOver(FName BoxName)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString(TEXT("End: ")).Append(BoxName.ToString()));
+}

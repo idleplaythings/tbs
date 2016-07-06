@@ -23,7 +23,9 @@ class TBS_API ATBSHUD : public AHUD
 	ATBSHUD(const FObjectInitializer& ObjectInitializer);
 
 	virtual void DrawHUD() override;
-
+	virtual void NotifyHitBoxBeginCursorOver(FName BoxName);
+	virtual void NotifyHitBoxEndCursorOver(FName BoxName);
+	
 private:
 	float HitBoxWidth = 20.0;
 	bool ConsumeScrollInput = true;
