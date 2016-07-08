@@ -3,6 +3,7 @@
 #pragma once
 
 #include "GameFramework/HUD.h"
+#include "TBSDefaultPawn.h"
 #include "TBSHUD.generated.h"
 
 struct HitBox
@@ -22,10 +23,22 @@ class TBS_API ATBSHUD : public AHUD
 
 	ATBSHUD(const FObjectInitializer& ObjectInitializer);
 
+	void BeginPlay() override;
 	virtual void DrawHUD() override;
 	virtual void NotifyHitBoxBeginCursorOver(FName BoxName);
 	virtual void NotifyHitBoxEndCursorOver(FName BoxName);
 	
+	ATBSDefaultPawn* Pawn;
+
+	static const FName ScrollHitBoxNW;
+	static const FName ScrollHitBoxN;
+	static const FName ScrollHitBoxNE;
+	static const FName ScrollHitBoxE;
+	static const FName ScrollHitBoxSE;
+	static const FName ScrollHitBoxS;
+	static const FName ScrollHitBoxSW;
+	static const FName ScrollHitBoxW;
+
 private:
 	float HitBoxWidth = 20.0;
 	bool ConsumeScrollInput = true;
