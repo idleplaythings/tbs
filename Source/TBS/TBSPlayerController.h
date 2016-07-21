@@ -15,6 +15,7 @@ class TBS_API ATBSPlayerController : public APlayerController
 
 	ATBSPlayerController(const FObjectInitializer& ObjectInitializer);
 
+
 private:
 	void EnableMouse();
 };

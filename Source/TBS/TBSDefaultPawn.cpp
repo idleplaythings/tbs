@@ -2,6 +2,7 @@
 
 #include "TBS.h"
 #include "TBSDefaultPawn.h"
+#include "TBSPlayerController.h"
 
 #include "Kismet/KismetMathLibrary.h"
 
@@ -32,6 +33,11 @@ void ATBSDefaultPawn::BeginPlay()
 	SetActorLocation(FVector(0.0, 0.0, 0.0));
 	SetActorRotation(FQuat(0.0, 0.0, 0.0, 0.0));
 	UpdateCameraPositionAndRotation();
+
+	//GridCursor = (ATBSGridCursor*)GetWorld()->SpawnActor(ATBSGridCursor::StaticClass(), FName(TEXT("GridCursor")));
+	UClass* C = GetClass();
+
+	GridCursor = GetWorld()->SpawnActor<ATBSGridCursor>(C);
 }
 
 void ATBSDefaultPawn::SetupPlayerInputComponent(UInputComponent * InputComponent)
@@ -44,8 +50,25 @@ void ATBSDefaultPawn::SetupPlayerInputComponent(UInputComponent * InputComponent
 	InputComponent->BindAction("ActionZoomOut", IE_Pressed, this, &ATBSDefaultPawn::ZoomCameraOut);
 	InputComponent->BindAction("TogglePerspectiveCamera", IE_Pressed, this, &ATBSDefaultPawn::TogglePerspectiveCamera);
 
+	InputComponent->BindAction("ActionMouse", IE_Pressed, this, &ATBSDefaultPawn::MouseAction);
+
 	InputComponent->BindAxis("AxisMoveCameraForward", this, &ATBSDefaultPawn::MoveCameraForward);
 	InputComponent->BindAxis("AxisMoveCameraRight", this, &ATBSDefaultPawn::MoveCameraRight);
+}
+
+void ATBSDefaultPawn::MouseAction()
+{
+	//AController* Controller = GetController();	
+
+	//FHitResult Result;
+
+	////bool bHitSomething = Cast<ATBSPlayerController>(Controller)->GetHitResultUnderCursor(ECollisionChannel::ECC_Camera, true, Result);
+	//bool bHitSomething = Cast<ATBSPlayerController>(Controller)->GetHitResultUnderCursor(ECollisionChannel::ECC_GameTraceChannel1, true, Result);
+
+	//if (bHitSomething)
+	//{
+	//	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Hit something! (%f, %f, %f)"), Result.Location.X, Result.Location.Y, Result.Location.Z));
+	//}	
 }
 
 void ATBSDefaultPawn::TogglePerspectiveCamera()
@@ -62,6 +85,11 @@ void ATBSDefaultPawn::TogglePerspectiveCamera()
 
 void ATBSDefaultPawn::MoveCameraForward(float AxisValue)
 {
+	if (AxisValue == 0.0 && MoveForwardAxisOffset == 0.0)
+	{
+		return;
+	}
+
 	FVector CameraLocation = CameraComponent->GetRelativeTransform().GetLocation();
 	FRotator CameraYawRotation = FRotator(0, CameraComponent->GetComponentRotation().Yaw, 0);
 	FVector DeltaVector = UKismetMathLibrary::GetForwardVector(CameraYawRotation);
@@ -73,6 +101,11 @@ void ATBSDefaultPawn::MoveCameraForward(float AxisValue)
 
 void ATBSDefaultPawn::MoveCameraRight(float AxisValue)
 {
+	if (AxisValue == 0.0 && MoveRightAxisOffset == 0.0)
+	{
+		return;
+	}
+
 	FVector CameraLocation = CameraComponent->GetRelativeTransform().GetLocation();
 	FRotator CameraYawRotation = FRotator(0, CameraComponent->GetComponentRotation().Yaw, 0);
 	FVector DeltaVector = UKismetMathLibrary::GetRightVector(CameraYawRotation);

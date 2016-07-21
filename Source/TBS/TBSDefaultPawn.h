@@ -3,6 +3,7 @@
 #pragma once
 
 #include "GameFramework/DefaultPawn.h"
+#include "TBSGridCursor.h"
 #include "TBSDefaultPawn.generated.h"
 
 /**
@@ -24,6 +25,8 @@ public:
 	UPROPERTY(Category = Camera, VisibleAnywhere)
 	UCameraComponent* CameraComponent;
 
+	ATBSGridCursor* GridCursor;
+
 	void MoveCameraForward(float AxisValue);
 	void MoveCameraRight(float AxisValue);
 	void MoveLevelUp();
@@ -33,6 +36,7 @@ public:
 	void ZoomCameraIn();
 	void ZoomCameraOut();
 	void TogglePerspectiveCamera();
+	void MouseAction();
 
 	float MoveForwardAxisOffset = 0.0;
 	float MoveRightAxisOffset = 0.0;
