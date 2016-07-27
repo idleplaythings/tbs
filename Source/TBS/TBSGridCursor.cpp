@@ -28,22 +28,20 @@ void ATBSGridCursor::Tick( float DeltaTime )
 	{
 		return;
 	}
-
+/*
 	TimeSinceLastCursorUpdate = 0;
 
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Cursor update")));
+	FHitResult Result;	
 
-	//FHitResult Result;
+	ATBSPlayerController* Controller = Cast<ATBSPlayerController>(GetWorld()->GetFirstPlayerController());
 
-	////bool bHitSomething = Cast<ATBSPlayerController>(Controller)->GetHitResultUnderCursor(ECollisionChannel::ECC_Camera, true, Result);
-	//bool bHitSomething = PlayerController->GetHitResultUnderCursor(ECollisionChannel::ECC_GameTraceChannel1, true, Result);
+	if (Controller != nullptr)
+	{
+		bool bHitSomething = Controller->GetHitResultUnderCursor(ECollisionChannel::ECC_GameTraceChannel1, true, Result);
 
-	//if (bHitSomething)
-	//{
-	//	SetActorLocation(FVector(Result.Location.X, Result.Location.Y, Result.Location.Z));
-	//}
-	//{
-	//	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Hit something! (%f, %f, %f)"), Result.Location.X, Result.Location.Y, Result.Location.Z));
-
-	/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Hit something! (%f, %f, %f)"), Result.Location.X, Result.Location.Y, Result.Location.Z));*/
+		if (bHitSomething)
+		{
+			SetActorLocation(FVector(Result.Location.X, Result.Location.Y, Result.Location.Z));
+		}
+	}*/
 }

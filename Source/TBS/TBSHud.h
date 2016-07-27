@@ -4,6 +4,7 @@
 
 #include "GameFramework/HUD.h"
 #include "TBSDefaultPawn.h"
+#include "TBSGrid.h"
 #include "TBSHUD.generated.h"
 
 struct HitBox
@@ -14,7 +15,7 @@ struct HitBox
 };
 
 /**
- * 
+ *
  */
 UCLASS()
 class TBS_API ATBSHUD : public AHUD
@@ -27,7 +28,7 @@ class TBS_API ATBSHUD : public AHUD
 	virtual void DrawHUD() override;
 	virtual void NotifyHitBoxBeginCursorOver(FName BoxName);
 	virtual void NotifyHitBoxEndCursorOver(FName BoxName);
-	
+
 	ATBSDefaultPawn* Pawn;
 
 	static const FName ScrollHitBoxNW;

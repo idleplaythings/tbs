@@ -3,11 +3,12 @@
 #pragma once
 
 #include "GameFramework/DefaultPawn.h"
+#include "TBSGrid.h"
 #include "TBSGridCursor.h"
 #include "TBSDefaultPawn.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class TBS_API ATBSDefaultPawn : public ADefaultPawn
@@ -25,7 +26,14 @@ public:
 	UPROPERTY(Category = Camera, VisibleAnywhere)
 	UCameraComponent* CameraComponent;
 
+	UClass* GridCursorClass;
 	ATBSGridCursor* GridCursor;
+
+
+
+
+
+	ATBSGrid* Grid;
 
 	void MoveCameraForward(float AxisValue);
 	void MoveCameraRight(float AxisValue);

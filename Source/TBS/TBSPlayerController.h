@@ -6,7 +6,7 @@
 #include "TBSPlayerController.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class TBS_API ATBSPlayerController : public APlayerController

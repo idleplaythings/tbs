@@ -10,9 +10,9 @@ UCLASS(Blueprintable)
 class TBS_API ATBSGridCursor : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
-	float CursorUpdateFrequency = 1;
+
+public:
+	float CursorUpdateFrequency = 0.017;
 	float TimeSinceLastCursorUpdate = 0;
 
 	ATBSPlayerController* PlayerController;
@@ -22,7 +22,7 @@ public:
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	
+
 	// Called every frame
 	virtual void Tick( float DeltaSeconds ) override;
 };

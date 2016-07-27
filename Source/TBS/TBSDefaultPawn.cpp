@@ -2,7 +2,6 @@
 
 #include "TBS.h"
 #include "TBSDefaultPawn.h"
-#include "TBSPlayerController.h"
 
 #include "Kismet/KismetMathLibrary.h"
 
@@ -34,10 +33,12 @@ void ATBSDefaultPawn::BeginPlay()
 	SetActorRotation(FQuat(0.0, 0.0, 0.0, 0.0));
 	UpdateCameraPositionAndRotation();
 
-	//GridCursor = (ATBSGridCursor*)GetWorld()->SpawnActor(ATBSGridCursor::StaticClass(), FName(TEXT("GridCursor")));
-	UClass* C = GetClass();
 
-	GridCursor = GetWorld()->SpawnActor<ATBSGridCursor>(C);
+	for (TActorIterator<ATBSGrid> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		Grid = *ActorItr;
+		break;
+	}
 }
 
 void ATBSDefaultPawn::SetupPlayerInputComponent(UInputComponent * InputComponent)
@@ -58,17 +59,7 @@ void ATBSDefaultPawn::SetupPlayerInputComponent(UInputComponent * InputComponent
 
 void ATBSDefaultPawn::MouseAction()
 {
-	//AController* Controller = GetController();	
 
-	//FHitResult Result;
-
-	////bool bHitSomething = Cast<ATBSPlayerController>(Controller)->GetHitResultUnderCursor(ECollisionChannel::ECC_Camera, true, Result);
-	//bool bHitSomething = Cast<ATBSPlayerController>(Controller)->GetHitResultUnderCursor(ECollisionChannel::ECC_GameTraceChannel1, true, Result);
-
-	//if (bHitSomething)
-	//{
-	//	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Hit something! (%f, %f, %f)"), Result.Location.X, Result.Location.Y, Result.Location.Z));
-	//}	
 }
 
 void ATBSDefaultPawn::TogglePerspectiveCamera()
@@ -119,12 +110,14 @@ void ATBSDefaultPawn::MoveLevelUp()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString(TEXT("Level Up")));
 	CameraLevel = CameraLevel + 1;
+	Grid->LevelUp();
 }
 
 void ATBSDefaultPawn::MoveLevelDown()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString(TEXT("Level Down")));
 	CameraLevel = CameraLevel - 1;
+	Grid->LevelDown();
 }
 
 void ATBSDefaultPawn::TurnCameraRight()

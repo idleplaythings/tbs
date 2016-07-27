@@ -6,7 +6,7 @@
 #include "TBSGameMode.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class TBS_API ATBSGameMode : public AGameMode
@@ -15,8 +15,10 @@ class TBS_API ATBSGameMode : public AGameMode
 
 	ATBSGameMode(const FObjectInitializer& ObjectInitializer);
 
-private:
-	void SetPawn();
-	void SetHUD();
-	void SetPlayerController();
+public:
+	float TileSize = 100;
+	int GridWidth = 20;
+	int GridHeight = 20;
+	int NumOfLevels = 4;
+	float FloorHeight = 200;
 };

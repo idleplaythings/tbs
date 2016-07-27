@@ -11,13 +11,13 @@ class TBS_API UTBSTerrainWall01 : public USceneComponent
 {
 	GENERATED_BODY()
 
-public:	
+public:
 	// Sets default values for this component's properties
 	UTBSTerrainWall01();
 
 	// Called when the game starts
 	virtual void BeginPlay() override;
-	
+
 	// Called every frame
 	virtual void TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction ) override;
 
