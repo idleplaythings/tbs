@@ -21,4 +21,17 @@ public:
 	int GridHeight = 20;
 	int NumOfLevels = 4;
 	float FloorHeight = 200;
+
+	void InitGame(
+		const FString & MapName,
+		const FString & Options,
+		FString & ErrorMessage
+	);
+	void InitGameState();
+	FString  InitNewPlayer(
+		class APlayerController * NewPlayerController,
+		const TSharedPtr < const FUniqueNetId > & UniqueId,
+		const FString & Options,
+		const FString & Portal
+	);
 };

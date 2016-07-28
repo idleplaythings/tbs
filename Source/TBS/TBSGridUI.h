@@ -4,10 +4,10 @@
 
 #include "GameFramework/Actor.h"
 #include "TBSPlayerController.h"
-#include "TBSGrid.generated.h"
+#include "TBSGridUI.generated.h"
 
 UCLASS(Blueprintable)
-class TBS_API ATBSGrid : public AActor
+class TBS_API ATBSGridUI : public AActor
 {
 	GENERATED_BODY()
 
@@ -18,8 +18,8 @@ private:
 	int GridHeight;
 	float GridMeshWidth;
 	float GridMeshHeight;
-	float TileSize;
-	float FloorHeight;
+	float TileSize= 100;
+	float FloorHeight = 200;
 	
 	ATBSPlayerController* PlayerController;
 	UStaticMesh* GridMesh;
@@ -43,7 +43,7 @@ private:
 
 public:
 	// Sets default values for this actor's properties
-	ATBSGrid();
+	ATBSGridUI();
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

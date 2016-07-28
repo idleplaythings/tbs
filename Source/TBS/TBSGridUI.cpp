@@ -3,10 +3,10 @@
 #include "TBS.h"
 #include "TBSGameMode.h"
 #include "TBSGridCursor.h"
-#include "TBSGrid.h"
+#include "TBSGridUI.h"
 
 // Sets default values
-ATBSGrid::ATBSGrid()
+ATBSGridUI::ATBSGridUI()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -25,7 +25,7 @@ ATBSGrid::ATBSGrid()
 }
 
 // Called when the game starts or when spawned
-void ATBSGrid::BeginPlay()
+void ATBSGridUI::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -37,25 +37,25 @@ void ATBSGrid::BeginPlay()
 	SpawnCursor();
 }
 
-void ATBSGrid::InitialisePlayerController()
+void ATBSGridUI::InitialisePlayerController()
 {
 	PlayerController = Cast<ATBSPlayerController>(GEngine->GetFirstLocalPlayerController(GetWorld()));
 }
 
-void ATBSGrid::InitialiseParametersFromGameMode()
+void ATBSGridUI::InitialiseParametersFromGameMode()
 {
 	ATBSGameMode* GameMode = Cast<ATBSGameMode>(GetWorld()->GetAuthGameMode());
 
 	GridWidth = GameMode->GridWidth;
 	GridHeight = GameMode->GridHeight;
-	TileSize = GameMode->TileSize;
-	FloorHeight = GameMode->FloorHeight;
+	//TileSize = GameMode->TileSize;
+	//FloorHeight = GameMode->FloorHeight;
 	NumOfLevels = GameMode->NumOfLevels;
 	GridMeshWidth = (float)GridWidth * TileSize;
 	GridMeshHeight = (float)GridHeight * TileSize;
 }
 
-void ATBSGrid::CreateGridMaterialInstances()
+void ATBSGridUI::CreateGridMaterialInstances()
 {
 	for (int i = 0; i < NumOfLevels; i++)
 	{
@@ -64,7 +64,7 @@ void ATBSGrid::CreateGridMaterialInstances()
 	}
 }
 
-void ATBSGrid::CreateGridMeshComponents()
+void ATBSGridUI::CreateGridMeshComponents()
 {
 	for (int i = 0; i < NumOfLevels; i++)
 	{
@@ -76,16 +76,16 @@ void ATBSGrid::CreateGridMeshComponents()
 	}
 }
 
-UMaterialInstanceDynamic* ATBSGrid::CreateMaterialInstance()
+UMaterialInstanceDynamic* ATBSGridUI::CreateMaterialInstance()
 {
 	UMaterialInstanceDynamic* GridMaterialInstance = UMaterialInstanceDynamic::Create(GridMaterial, this);
-	GridMaterialInstance->SetScalarParameterValue(FName(TEXT("UTiling")), GridWidth);
-	GridMaterialInstance->SetScalarParameterValue(FName(TEXT("VTiling")), GridHeight);
+	GridMaterialInstance->SetScalarParameterValue(FName(TEXT("UTiling")), GridWidth + 0.02);
+	GridMaterialInstance->SetScalarParameterValue(FName(TEXT("VTiling")), GridHeight + 0.02);
 	GridMaterialInstance->SetScalarParameterValue(FName(TEXT("OpacityMultiplier")), 0.5);
 	return GridMaterialInstance;
 }
 
-UStaticMeshComponent* ATBSGrid::CreateMeshComponent()
+UStaticMeshComponent* ATBSGridUI::CreateMeshComponent()
 {
 	UStaticMeshComponent* MeshComponent = NewObject<UStaticMeshComponent>(this);
 	MeshComponent->SetStaticMesh(GridMesh);
@@ -96,13 +96,13 @@ UStaticMeshComponent* ATBSGrid::CreateMeshComponent()
 	return MeshComponent;
 }
 
-void ATBSGrid::SpawnCursor()
+void ATBSGridUI::SpawnCursor()
 {
 	GridCursor = GetWorld()->SpawnActor<ATBSGridCursor>(GridCursorClass);
 }
 
 // Called every frame
-void ATBSGrid::Tick( float DeltaTime )
+void ATBSGridUI::Tick( float DeltaTime )
 {
 	Super::Tick( DeltaTime );
 
@@ -144,7 +144,7 @@ void ATBSGrid::Tick( float DeltaTime )
 	UpdateCursorLocation(TileCenter);
 }
 
-void ATBSGrid::UpdateCursorLocation(const FVector Location)
+void ATBSGridUI::UpdateCursorLocation(const FVector Location)
 {
 	if (GridCursor != nullptr)
 	{
@@ -152,24 +152,24 @@ void ATBSGrid::UpdateCursorLocation(const FVector Location)
 	}
 }
 
-void ATBSGrid::LevelUp()
+void ATBSGridUI::LevelUp()
 {
 	CurrentLevel = FMath::Clamp<int>(CurrentLevel + 1, 0, NumOfLevels - 1);
 	UpdateLevelVisibilities();
 }
 
-void ATBSGrid::LevelDown()
+void ATBSGridUI::LevelDown()
 {
 	CurrentLevel = FMath::Clamp<int>(CurrentLevel - 1, 0, NumOfLevels - 1);
 	UpdateLevelVisibilities();
 }
 
-int ATBSGrid::GetCurrentLevel()
+int ATBSGridUI::GetCurrentLevel()
 {
 	return CurrentLevel;
 }
 
-void ATBSGrid::UpdateLevelVisibilities()
+void ATBSGridUI::UpdateLevelVisibilities()
 {
 	for (int i = 0; i < NumOfLevels; i++)
 	{

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "GameFramework/DefaultPawn.h"
-#include "TBSGrid.h"
+#include "TBSGridUI.h"
 #include "TBSGridCursor.h"
 #include "TBSDefaultPawn.generated.h"
 
@@ -33,7 +33,7 @@ public:
 
 
 
-	ATBSGrid* Grid;
+	ATBSGridUI* Grid;
 
 	void MoveCameraForward(float AxisValue);
 	void MoveCameraRight(float AxisValue);

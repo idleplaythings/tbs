@@ -4,7 +4,7 @@
 
 #include "GameFramework/HUD.h"
 #include "TBSDefaultPawn.h"
-#include "TBSGrid.h"
+#include "TBSGridUI.h"
 #include "TBSHUD.generated.h"
 
 struct HitBox
@@ -44,7 +44,7 @@ private:
 	float HitBoxWidth = 20.0;
 	bool ConsumeScrollInput = true;
 	int32 ScrollHitBoxPriority = 0;
-	bool DrawScrollOverlay = true;
+	bool DrawScrollOverlay = false;
 	TArray<HitBox> HitBoxes;
 	int32 CanvasX;
 	int32 CanvasY;

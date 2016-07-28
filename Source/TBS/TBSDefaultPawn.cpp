@@ -34,7 +34,7 @@ void ATBSDefaultPawn::BeginPlay()
 	UpdateCameraPositionAndRotation();
 
 
-	for (TActorIterator<ATBSGrid> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	for (TActorIterator<ATBSGridUI> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{
 		Grid = *ActorItr;
 		break;
