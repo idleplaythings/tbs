@@ -4,16 +4,18 @@
 
 #include "GameFramework/Actor.h"
 #include "TBSProp.h"
-#include "TBSProp_Wall01.generated.h"
+#include "TBSGrid.h"
+#include "TBSGridUI.h"
+#include "TBSPropManager.generated.h"
 
 UCLASS()
-class TBS_API ATBSProp_Wall01 : public ATBSProp
+class TBS_API ATBSPropManager : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	ATBSProp_Wall01();
+	ATBSPropManager();
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -21,9 +23,10 @@ public:
 	// Called every frame
 	virtual void Tick( float DeltaSeconds ) override;
 
-	USceneComponent* SceneComponent;
-	UStaticMesh* IntactMesh;
-	UStaticMeshComponent* Bottom;
-	UStaticMeshComponent* Middle;
-	UStaticMeshComponent* Top;
+	void Initialise(ATBSGrid* Grid, ATBSGridUI* GridUI);
+	void RenderProps();
+
+private:
+	ATBSGrid* Grid;
+	ATBSGridUI* GridUI;
 };

@@ -22,6 +22,7 @@ class TBS_API ATBSHUD : public AHUD
 {
 	GENERATED_BODY()
 
+public:
 	ATBSHUD(const FObjectInitializer& ObjectInitializer);
 
 	void BeginPlay() override;

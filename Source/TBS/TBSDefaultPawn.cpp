@@ -32,34 +32,6 @@ void ATBSDefaultPawn::BeginPlay()
 	SetActorLocation(FVector(0.0, 0.0, 0.0));
 	SetActorRotation(FQuat(0.0, 0.0, 0.0, 0.0));
 	UpdateCameraPositionAndRotation();
-
-
-	for (TActorIterator<ATBSGridUI> ActorItr(GetWorld()); ActorItr; ++ActorItr)
-	{
-		Grid = *ActorItr;
-		break;
-	}
-}
-
-void ATBSDefaultPawn::SetupPlayerInputComponent(UInputComponent * InputComponent)
-{
-	InputComponent->BindAction("ActionLevelUp", IE_Pressed, this, &ATBSDefaultPawn::MoveLevelUp);
-	InputComponent->BindAction("ActionLevelDown", IE_Pressed, this, &ATBSDefaultPawn::MoveLevelDown);
-	InputComponent->BindAction("ActionRotateCameraRight", IE_Pressed, this, &ATBSDefaultPawn::TurnCameraRight);
-	InputComponent->BindAction("ActionRotateCameraLeft", IE_Pressed, this, &ATBSDefaultPawn::TurnCameraLeft);
-	InputComponent->BindAction("ActionZoomIn", IE_Pressed, this, &ATBSDefaultPawn::ZoomCameraIn);
-	InputComponent->BindAction("ActionZoomOut", IE_Pressed, this, &ATBSDefaultPawn::ZoomCameraOut);
-	InputComponent->BindAction("TogglePerspectiveCamera", IE_Pressed, this, &ATBSDefaultPawn::TogglePerspectiveCamera);
-
-	InputComponent->BindAction("ActionMouse", IE_Pressed, this, &ATBSDefaultPawn::MouseAction);
-
-	InputComponent->BindAxis("AxisMoveCameraForward", this, &ATBSDefaultPawn::MoveCameraForward);
-	InputComponent->BindAxis("AxisMoveCameraRight", this, &ATBSDefaultPawn::MoveCameraRight);
-}
-
-void ATBSDefaultPawn::MouseAction()
-{
-
 }
 
 void ATBSDefaultPawn::TogglePerspectiveCamera()
@@ -108,16 +80,12 @@ void ATBSDefaultPawn::MoveCameraRight(float AxisValue)
 
 void ATBSDefaultPawn::MoveLevelUp()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString(TEXT("Level Up")));
-	CameraLevel = CameraLevel + 1;
-	Grid->LevelUp();
+
 }
 
 void ATBSDefaultPawn::MoveLevelDown()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString(TEXT("Level Down")));
-	CameraLevel = CameraLevel - 1;
-	Grid->LevelDown();
+
 }
 
 void ATBSDefaultPawn::TurnCameraRight()
@@ -144,16 +112,12 @@ void ATBSDefaultPawn::TurnCameraLeft()
 
 void ATBSDefaultPawn::ZoomCameraIn()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString(TEXT("Zoom In")));
-
 	CameraDistance = FMath::Clamp(CameraDistance - CameraZoomSpeed, CameraDistanceMin, CameraDistanceMax);
 	UpdateCameraPositionAndRotation();
 }
 
 void ATBSDefaultPawn::ZoomCameraOut()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString(TEXT("Zoom Out")));
-
 	CameraDistance = FMath::Clamp(CameraDistance + CameraZoomSpeed, CameraDistanceMin, CameraDistanceMax);
 	UpdateCameraPositionAndRotation();
 }
@@ -162,24 +126,11 @@ void ATBSDefaultPawn::UpdateCameraPositionAndRotation()
 {
 	CameraComponent->SetRelativeLocation(CalculateCameraPosition());
 	CameraComponent->SetRelativeRotation(CalculateCameraRotation());
-
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString(TEXT("Camera View Angle: ")).Append(FString::SanitizeFloat(CameraViewAngleDeg)));
-
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString(TEXT("Camera Height Angle: ")).Append(FString::SanitizeFloat(CameraHeightAngleDeg)));
-
 }
 
 FVector ATBSDefaultPawn::CalculateCameraPosition()
 {
 	FTransform CameraTransform = CameraComponent->GetRelativeTransform();
-
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red,
-		FString(FString::SanitizeFloat((double)GetActorLocation().X)
-			.Append(FString(TEXT(",")))
-			.Append(FString::SanitizeFloat((double)GetActorLocation().Y))
-		)
-	);
-
 	FVector CameraLocation = CameraTransform.GetLocation();
 
 	double CameraViewAngleRad = PI / 180.0  * CameraViewAngleDeg;
@@ -189,14 +140,6 @@ FVector ATBSDefaultPawn::CalculateCameraPosition()
 	float Y = CameraDistance * sin(CameraViewAngleRad) * sin(CameraHeightAngleRad);
 	float Z = CameraDistance * cos(CameraHeightAngleRad);
 
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString(TEXT("Camera: "))
-		.Append(FString::SanitizeFloat(X))
-		.Append(FString(TEXT(",")))
-		.Append(FString::SanitizeFloat(Y))
-		.Append(FString(TEXT(",")))
-		.Append(FString::SanitizeFloat(Z))
-	);
-
 	return FVector(X, Y, Z);
 }
 
@@ -205,4 +148,14 @@ FQuat ATBSDefaultPawn::CalculateCameraRotation()
 	FVector Origin = FVector(0.0, 0.0, 0.0);
 	FRotator CameraRotator = FRotationMatrix::MakeFromX(Origin - CameraComponent->RelativeLocation).Rotator();
 	return CameraRotator.Quaternion();
+}
+
+void ATBSDefaultPawn::SetMoveForwardAxisOffset(float Offset)
+{
+	MoveForwardAxisOffset = Offset;
+}
+
+void ATBSDefaultPawn::SetMoveRightAxisOffset(float Offset)
+{
+	MoveRightAxisOffset = Offset;
 }

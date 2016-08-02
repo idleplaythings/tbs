@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "TBS.h"
-#include "TBSGameMode.h"
+//#include "TBSGameMode.h"
 #include "TBSGridCursor.h"
 #include "TBSGridUI.h"
 
@@ -30,34 +30,35 @@ void ATBSGridUI::BeginPlay()
 	Super::BeginPlay();
 
 	InitialisePlayerController();
-	InitialiseParametersFromGameMode();
-	CreateGridMaterialInstances();
-	CreateGridMeshComponents();
-	UpdateLevelVisibilities();
 	SpawnCursor();
 }
 
+void ATBSGridUI::RenderGrid(ATBSGrid* Grid)
+{	
+	this->Grid = Grid;
+	InitialiseParametersFromGrid();
+	CreateGridMaterialInstances();
+	CreateGridMeshComponents();
+	UpdateLevelVisibilities();	
+}
+
 void ATBSGridUI::InitialisePlayerController()
-{
+{	
 	PlayerController = Cast<ATBSPlayerController>(GEngine->GetFirstLocalPlayerController(GetWorld()));
 }
 
-void ATBSGridUI::InitialiseParametersFromGameMode()
+void ATBSGridUI::InitialiseParametersFromGrid()
 {
-	ATBSGameMode* GameMode = Cast<ATBSGameMode>(GetWorld()->GetAuthGameMode());
-
-	GridWidth = GameMode->GridWidth;
-	GridHeight = GameMode->GridHeight;
-	//TileSize = GameMode->TileSize;
-	//FloorHeight = GameMode->FloorHeight;
-	NumOfLevels = GameMode->NumOfLevels;
+	GridWidth = Grid->GridWidth;
+	GridHeight = Grid->GridHeight;
+	NumOfLevels = Grid->NumOfLevels;
 	GridMeshWidth = (float)GridWidth * TileSize;
 	GridMeshHeight = (float)GridHeight * TileSize;
 }
 
 void ATBSGridUI::CreateGridMaterialInstances()
 {
-	for (int i = 0; i < NumOfLevels; i++)
+	for (int32 i = 0; i < NumOfLevels; i++)
 	{
 		UMaterialInstanceDynamic* GridMaterialInstance = CreateMaterialInstance();
 		GridMaterials.Push(GridMaterialInstance);
@@ -66,7 +67,7 @@ void ATBSGridUI::CreateGridMaterialInstances()
 
 void ATBSGridUI::CreateGridMeshComponents()
 {
-	for (int i = 0; i < NumOfLevels; i++)
+	for (int32 i = 0; i < NumOfLevels; i++)
 	{
 		UStaticMeshComponent* GridMeshComponent = CreateMeshComponent();
 		GridMeshComponent->AddRelativeLocation(FVector(0.0, 0.0, (float)i * FloorHeight));
@@ -106,38 +107,36 @@ void ATBSGridUI::Tick( float DeltaTime )
 {
 	Super::Tick( DeltaTime );
 
-	if (PlayerController == nullptr)
+	FHitResult HitResult = PlayerController->GetGridHitResult();
+
+	if (HitResult.Actor == nullptr)
 	{
+		Grid->NotifyCursorOffGrid();
+		HideCursor();
 		return;
 	}
 
-	FHitResult Result;
-	bool bHitSomething = PlayerController->GetHitResultUnderCursor(ECollisionChannel::ECC_GameTraceChannel1, true, Result);
+	ShowCursor();
 
-	if (!bHitSomething)
-	{
-		return;
-	}
-
-	FVector ActorLocation = Result.Actor->GetActorLocation();
-	FVector LocalLocation = Result.Location - ActorLocation; // Offset by actor location in case actor not in origin
+	FVector ActorLocation = HitResult.Actor->GetActorLocation();
+	FVector LocalLocation = HitResult.Location - ActorLocation; // Offset by actor location in case actor not in origin
 
 	// Actor location is relative to it's center point; offset by half width/height to get positive local coordinates
 	FIntVector GameCoordinates = FIntVector(
-		(int)((LocalLocation.X + GridMeshWidth / 2) / TileSize),
-		(int)((LocalLocation.Y + GridMeshHeight / 2) / TileSize),
-		(int)((LocalLocation.Z + 10) / FloorHeight)
+		(int32)((LocalLocation.X + GridMeshWidth / 2) / TileSize),
+		(int32)((LocalLocation.Y + GridMeshHeight / 2) / TileSize),
+		(int32)((LocalLocation.Z + 10) / FloorHeight)
 	);
 
 	FVector TileCenter = FVector(
 		((float)GameCoordinates.X * TileSize + TileSize / 2) + ActorLocation.X - GridMeshWidth / 2,
-		((float)GameCoordinates.Y * TileSize + TileSize / 2) + ActorLocation.Y - GridMeshWidth / 2,
+		((float)GameCoordinates.Y * TileSize + TileSize / 2) + ActorLocation.Y - GridMeshHeight / 2,
 		(float)GameCoordinates.Z * FloorHeight
 	);
 
 	if (GameCoordinates != LastGameCoordinates)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Game Coordinates (%i, %i, %i)"), GameCoordinates.X, GameCoordinates.Y, GameCoordinates.Z));
+		Grid->NotifyCursorLocationChange(LastGameCoordinates, GameCoordinates);
 		LastGameCoordinates = GameCoordinates;
 	}
 
@@ -154,24 +153,24 @@ void ATBSGridUI::UpdateCursorLocation(const FVector Location)
 
 void ATBSGridUI::LevelUp()
 {
-	CurrentLevel = FMath::Clamp<int>(CurrentLevel + 1, 0, NumOfLevels - 1);
+	CurrentLevel = FMath::Clamp<int32>(CurrentLevel + 1, 0, NumOfLevels - 1);
 	UpdateLevelVisibilities();
 }
 
 void ATBSGridUI::LevelDown()
 {
-	CurrentLevel = FMath::Clamp<int>(CurrentLevel - 1, 0, NumOfLevels - 1);
+	CurrentLevel = FMath::Clamp<int32>(CurrentLevel - 1, 0, NumOfLevels - 1);
 	UpdateLevelVisibilities();
 }
 
-int ATBSGridUI::GetCurrentLevel()
+int32 ATBSGridUI::GetCurrentLevel()
 {
 	return CurrentLevel;
 }
 
 void ATBSGridUI::UpdateLevelVisibilities()
 {
-	for (int i = 0; i < NumOfLevels; i++)
+	for (int32 i = 0; i < NumOfLevels; i++)
 	{
 		if (i == CurrentLevel)
 		{
@@ -184,4 +183,40 @@ void ATBSGridUI::UpdateLevelVisibilities()
 			GridMeshes[i]->SetCollisionProfileName(FName(TEXT("NoCollision")));
 		}
 	}
+}
+
+void ATBSGridUI::HandleMouseDown()
+{
+	Grid->NotifyClick();
+}
+
+void ATBSGridUI::ShowCursor()
+{
+	GridCursor->SetActorHiddenInGame(false);
+}
+
+void ATBSGridUI::HideCursor()
+{
+	GridCursor->SetActorHiddenInGame(true);
+}
+
+FCoordinateLocations ATBSGridUI::GetCoordinateLocations(FIntVector Coordinates)
+{
+	FVector Location = GetActorLocation() - FVector(GridMeshWidth/2, GridMeshHeight/2, Coordinates.Z * FloorHeight);
+	Location = Location + FVector((float)Coordinates.X * TileSize + TileSize/2, (float)Coordinates.Y * TileSize + TileSize/2, 0.0);
+
+	FVector Up = FVector(0.0, TileSize / -2, 0.0);
+	FVector Right = FVector(TileSize / -2, 0.0, 0.0);
+
+	FCoordinateLocations Result;
+	Result.Center = Location;
+	Result.NW = Location + Up - Right;
+	Result.N = Location + Up;
+	Result.NE = Location + Up + Right;
+	Result.E = Location + Right;
+	Result.SE = Location - Up - Right;
+	Result.S = Location - Up;
+	Result.SW = Location - Up - Right;
+	Result.W = Location - Right;
+	return Result;
 }

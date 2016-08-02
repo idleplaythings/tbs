@@ -13,13 +13,13 @@ class TBS_API ATBSGameMode : public AGameMode
 {
 	GENERATED_BODY()
 
+public:
 	ATBSGameMode(const FObjectInitializer& ObjectInitializer);
 
-public:
 	float TileSize = 100;
-	int GridWidth = 20;
-	int GridHeight = 20;
-	int NumOfLevels = 4;
+	int32 GridWidth = 20;
+	int32 GridHeight = 20;
+	int32 NumOfLevels = 4;
 	float FloorHeight = 200;
 
 	void InitGame(
@@ -34,4 +34,10 @@ public:
 		const FString & Options,
 		const FString & Portal
 	);
+
+	UFUNCTION()
+	void Click(FIntVector GameCoords);
+
+	UFUNCTION()
+	void HoverBegin(FIntVector GameCoords);
 };

@@ -3,8 +3,6 @@
 #pragma once
 
 #include "GameFramework/DefaultPawn.h"
-#include "TBSGridUI.h"
-#include "TBSGridCursor.h"
 #include "TBSDefaultPawn.generated.h"
 
 /**
@@ -19,22 +17,6 @@ class TBS_API ATBSDefaultPawn : public ADefaultPawn
 
 public:
 	void BeginPlay() override;
-	void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
-
-	USceneComponent* SceneComponent;
-
-	UPROPERTY(Category = Camera, VisibleAnywhere)
-	UCameraComponent* CameraComponent;
-
-	UClass* GridCursorClass;
-	ATBSGridCursor* GridCursor;
-
-
-
-
-
-	ATBSGridUI* Grid;
-
 	void MoveCameraForward(float AxisValue);
 	void MoveCameraRight(float AxisValue);
 	void MoveLevelUp();
@@ -44,17 +26,18 @@ public:
 	void ZoomCameraIn();
 	void ZoomCameraOut();
 	void TogglePerspectiveCamera();
-	void MouseAction();
-
-	float MoveForwardAxisOffset = 0.0;
-	float MoveRightAxisOffset = 0.0;
+	void SetMoveForwardAxisOffset(float Offset);
+	void SetMoveRightAxisOffset(float Offset);
 
 private:
+	USceneComponent* SceneComponent;
+	UCameraComponent* CameraComponent;
+
 	void UpdateCameraPositionAndRotation();
 	FVector CalculateCameraPosition();
 	FQuat CalculateCameraRotation();
 
-	float CameraViewAngleDeg = 45.0;
+	float CameraViewAngleDeg = 125;
 	float CameraHeightAngleDeg = 45.0;
 	float CameraDistance = 4000;
 	float CameraMovementSpeed = 12.0;
@@ -62,5 +45,7 @@ private:
 	float CameraDistanceMax = 10000.0;
 	float CameraZoomSpeed = 200.0;
 	float CameraOrtographicWidth = 2000.0;
-	int CameraLevel = 0;
+	int32 CameraLevel = 0;
+	float MoveForwardAxisOffset = 0.0;
+	float MoveRightAxisOffset = 0.0;
 };

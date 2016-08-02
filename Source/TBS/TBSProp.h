@@ -3,17 +3,16 @@
 #pragma once
 
 #include "GameFramework/Actor.h"
-#include "TBSProp.h"
-#include "TBSProp_Wall01.generated.h"
+#include "TBSProp.generated.h"
 
 UCLASS()
-class TBS_API ATBSProp_Wall01 : public ATBSProp
+class TBS_API ATBSProp : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	ATBSProp_Wall01();
+	ATBSProp();
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -21,9 +20,7 @@ public:
 	// Called every frame
 	virtual void Tick( float DeltaSeconds ) override;
 
-	USceneComponent* SceneComponent;
-	UStaticMesh* IntactMesh;
-	UStaticMeshComponent* Bottom;
-	UStaticMeshComponent* Middle;
-	UStaticMeshComponent* Top;
+	int32 X;
+	int32 Y;
+	int32 Z;
 };

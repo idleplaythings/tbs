@@ -110,51 +110,62 @@ void ATBSHUD::NotifyHitBoxBeginCursorOver(FName BoxName)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString(TEXT("Begin: ")).Append(BoxName.ToString()));
 
+	if (Pawn == nullptr)
+	{
+		return;
+	}
+
 	if (BoxName.IsEqual(ATBSHUD::ScrollHitBoxNW))
 	{
-		Pawn->MoveForwardAxisOffset = 1.0;
-		Pawn->MoveRightAxisOffset = -1.0;
+		Pawn->SetMoveForwardAxisOffset(1.0);
+		Pawn->SetMoveRightAxisOffset(-1.0);
 	}
 	else if (BoxName.IsEqual(ATBSHUD::ScrollHitBoxN))
 	{
-		Pawn->MoveForwardAxisOffset = 1.0;
-		Pawn->MoveRightAxisOffset = 0.0;
+		Pawn->SetMoveForwardAxisOffset(1.0);
+		Pawn->SetMoveRightAxisOffset(0.0);
 	}
 	else if (BoxName.IsEqual(ATBSHUD::ScrollHitBoxNE))
 	{
-		Pawn->MoveForwardAxisOffset = 1.0;
-		Pawn->MoveRightAxisOffset = 1.0;
+		Pawn->SetMoveForwardAxisOffset(1.0);
+		Pawn->SetMoveRightAxisOffset(1.0);
 	}
 	else if (BoxName.IsEqual(ATBSHUD::ScrollHitBoxE))
 	{
-		Pawn->MoveForwardAxisOffset = 0.0;
-		Pawn->MoveRightAxisOffset = 1.0;
+		Pawn->SetMoveForwardAxisOffset(0.0);
+		Pawn->SetMoveRightAxisOffset(1.0);
 	}
 	else if (BoxName.IsEqual(ATBSHUD::ScrollHitBoxSE))
 	{
-		Pawn->MoveForwardAxisOffset = -1.0;
-		Pawn->MoveRightAxisOffset = 1.0;
+		Pawn->SetMoveForwardAxisOffset(-1.0);
+		Pawn->SetMoveRightAxisOffset(1.0);
 	}
 	else if (BoxName.IsEqual(ATBSHUD::ScrollHitBoxS))
 	{
-		Pawn->MoveForwardAxisOffset = -1.0;
-		Pawn->MoveRightAxisOffset = 0.0;
+		Pawn->SetMoveForwardAxisOffset(-1.0);
+		Pawn->SetMoveRightAxisOffset(0.0);
 	}
 	else if (BoxName.IsEqual(ATBSHUD::ScrollHitBoxSW))
 	{
-		Pawn->MoveForwardAxisOffset = -1.0;
-		Pawn->MoveRightAxisOffset = -1.0;
+		Pawn->SetMoveForwardAxisOffset(-1.0);
+		Pawn->SetMoveRightAxisOffset(-1.0);
 	}
 	else if (BoxName.IsEqual(ATBSHUD::ScrollHitBoxW))
 	{
-		Pawn->MoveForwardAxisOffset = 0.0;
-		Pawn->MoveRightAxisOffset = -1.0;
+		Pawn->SetMoveForwardAxisOffset(0.0);
+		Pawn->SetMoveRightAxisOffset(-1.0);
 	}
 }
 
 void ATBSHUD::NotifyHitBoxEndCursorOver(FName BoxName)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString(TEXT("End: ")).Append(BoxName.ToString()));
-	Pawn->MoveForwardAxisOffset = 0.0;
-	Pawn->MoveRightAxisOffset = 0.0;
+
+	if (Pawn == nullptr)
+	{
+		return;
+	}
+
+	Pawn->SetMoveForwardAxisOffset(0.0);
+	Pawn->SetMoveRightAxisOffset(0.0);
 }
