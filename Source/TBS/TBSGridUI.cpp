@@ -33,9 +33,9 @@ void ATBSGridUI::BeginPlay()
 	SpawnCursor();
 }
 
-void ATBSGridUI::RenderGrid(ATBSGrid* Grid)
+void ATBSGridUI::RenderGrid(ATBSGrid* InGrid)
 {	
-	this->Grid = Grid;
+	Grid = InGrid;
 	InitialiseParametersFromGrid();
 	CreateGridMaterialInstances();
 	CreateGridMeshComponents();

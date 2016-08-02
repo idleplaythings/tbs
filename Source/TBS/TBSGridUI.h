@@ -56,18 +56,15 @@ private:
 	FIntVector LastGameCoordinates = FIntVector(-999, -999, -999);
 
 	void InitialisePlayerController();
-	//void EnableAndHandleInput();
 	void InitialiseParametersFromGrid();
 	void CreateGridMaterialInstances();
-	UMaterialInstanceDynamic* CreateMaterialInstance();	
 	void CreateGridMeshComponents();
+	UMaterialInstanceDynamic* CreateMaterialInstance();		
 	UStaticMeshComponent* CreateMeshComponent();
-	void SpawnCursor();
 	void UpdateLevelVisibilities();
+	void SpawnCursor();
 	void UpdateCursorLocation(const FVector Location);
 	void ShowCursor();
 	void HideCursor();
-	//void TestThing();
-	//void MouseDown();
 };
 
