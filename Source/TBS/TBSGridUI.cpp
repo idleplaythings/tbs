@@ -206,7 +206,7 @@ FCoordinateLocations ATBSGridUI::GetCoordinateLocations(FIntVector Coordinates)
 	Location = Location + FVector((float)Coordinates.X * TileSize + TileSize/2, (float)Coordinates.Y * TileSize + TileSize/2, 0.0);
 
 	FVector Up = FVector(0.0, TileSize / -2, 0.0);
-	FVector Right = FVector(TileSize / -2, 0.0, 0.0);
+	FVector Right = FVector(TileSize / 2, 0.0, 0.0);
 
 	FCoordinateLocations Result;
 	Result.Center = Location;

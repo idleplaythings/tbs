@@ -43,16 +43,21 @@ void ATBSGameMode::InitGameState()
 	Wall10.Coordinates = FIntVector(2, 7, 0);
 	Wall10.Slot = ETileSlot::W;
 	Wall10.Rotation = FRotator(0.0, 90.0, 0.0);
+
 	Wall11.PropClass = ATBSProp_Wall01::StaticClass();
 	Wall11.Coordinates = FIntVector(2, 7, 0);
 	Wall11.Slot = ETileSlot::N;
 	Wall11.Rotation = FRotator(0.0, 0.0, 0.0);
+
 	Wall20.PropClass = ATBSProp_Wall01::StaticClass();
 	Wall20.Coordinates = FIntVector(3, 7, 0);
 	Wall20.Slot = ETileSlot::N;
+	Wall20.Rotation = FRotator(0.0, 0.0, 0.0);
+
 	Wall30.PropClass = ATBSProp_Wall01::StaticClass();
 	Wall30.Coordinates = FIntVector(4, 7, 0);
 	Wall30.Slot = ETileSlot::N;
+	Wall30.Rotation = FRotator(0.0, 0.0, 0.0);
 
 	Grid->AddProp(&Wall10);
 	Grid->AddProp(&Wall11);
