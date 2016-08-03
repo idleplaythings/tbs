@@ -5,6 +5,7 @@
 #include "TBSTypes.generated.h"
 
 class ATBSProp;
+class ATBSUnit;
 
 UENUM(BlueprintType)
 enum class ETileSlot : uint8
@@ -18,6 +19,20 @@ enum class ETileSlot : uint8
 	S UMETA(DisplayName = "South"),
 	SW UMETA(DisplayName = "Southwest"),
 	W UMETA(DisplayName = "West")
+};
+
+struct FUnit
+{
+	FGuid* Guid;
+	UClass* UnitClass;
+	ATBSUnit* Unit;
+	FIntVector Coordinates;
+	FRotator Rotation;
+
+	FUnit()
+	{
+		Guid = new FGuid();
+	}
 };
 
 struct FProp

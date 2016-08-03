@@ -34,7 +34,7 @@ void ATBSPropManager::Initialise(ATBSGrid* InGrid, ATBSGridUI* InGridUI)
 
 void ATBSPropManager::RenderProps()
 {
-	for (auto It = Grid->Props.CreateConstIterator(); It; ++It)
+	for (auto It = Grid->GetPropsIterator(); It; ++It)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, It.Key());
 

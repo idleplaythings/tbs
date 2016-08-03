@@ -34,10 +34,4 @@ public:
 		const FString & Options,
 		const FString & Portal
 	);
-
-	UFUNCTION()
-	void Click(FIntVector GameCoords);
-
-	UFUNCTION()
-	void HoverBegin(FIntVector GameCoords);
 };

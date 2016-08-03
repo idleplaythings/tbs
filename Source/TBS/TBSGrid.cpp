@@ -32,6 +32,16 @@ void ATBSGrid::InitialiseGrid(int32 GridWidth, int32 GridHeight, int32 NumOfLeve
 	this->NumOfLevels = NumOfLevels;
 }
 
+TMap<FString, TArray<FProp*>>::TConstIterator ATBSGrid::GetPropsIterator()
+{
+	return Props.CreateConstIterator();
+}
+
+TArray<FUnit*>::TConstIterator ATBSGrid::GetUnitIterator()
+{
+	return Units.CreateConstIterator();
+}
+
 void ATBSGrid::AddProp(FProp* Prop)
 {
 	FString Key = FString::Printf(TEXT("%i,%i,%i"), Prop->Coordinates.X, Prop->Coordinates.Y, Prop->Coordinates.Z);
@@ -49,35 +59,7 @@ void ATBSGrid::AddProp(FProp* Prop)
 	}
 }
 
-void ATBSGrid::NotifyCursorLocationChange(FIntVector OldCoordinates, FIntVector NewCoordinates)
+void ATBSGrid::AddUnit(FUnit* Unit)
 {
-	HoverCoordinates = NewCoordinates;
-	OnGameTileHoverEnd.Broadcast(OldCoordinates);
-	OnGameTileHoverBegin.Broadcast(NewCoordinates);
-}
-
-void ATBSGrid::NotifyClick()
-{
-	if (HoverCoordinates == NullVector)
-	{
-		return;
-	}
-
-	if (SelectCoordinates != NullVector)
-	{
-		OnGameTileSelectEnd.Broadcast(SelectCoordinates);
-	}
-
-	SelectCoordinates = HoverCoordinates;
-	OnGameTileSelectBegin.Broadcast(SelectCoordinates);
-}
-
-void ATBSGrid::NotifyCursorOffGrid()
-{
-	if (HoverCoordinates != NullVector)
-	{
-		OnGameTileHoverEnd.Broadcast(HoverCoordinates);
-	}
-
-	HoverCoordinates = NullVector;
+	Units.Add(Unit);
 }

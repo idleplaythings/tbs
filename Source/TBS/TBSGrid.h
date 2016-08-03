@@ -6,11 +6,6 @@
 #include "TBSProp.h"
 #include "TBSGrid.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameTileHoverBegin, FIntVector, GameCoordinates);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameTileHoverEnd, FIntVector, GameCoordinates);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameTileSelectBegin, FIntVector, GameCoordinates);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameTileSelectEnd, FIntVector, GameCoordinates);
-
 UCLASS()
 class TBS_API ATBSGrid : public AActor
 {
@@ -32,20 +27,11 @@ public:
 
 	void InitialiseGrid(int32 GridWidth, int32 GridHeight, int32 NumOfLevels);
 	void AddProp(FProp* Prop);
-	void NotifyCursorLocationChange(FIntVector OldCoordinates, FIntVector NewCoordinates);
-	void NotifyClick();
-	void NotifyCursorOffGrid();
-
-	FIntVector NullVector = FIntVector(-999, -999, -999);
-	FIntVector HoverCoordinates = NullVector;
-	FIntVector SelectCoordinates = NullVector;
-
-	FOnGameTileHoverBegin OnGameTileHoverBegin;
-	FOnGameTileHoverEnd OnGameTileHoverEnd;
-	FOnGameTileSelectBegin OnGameTileSelectBegin;
-	FOnGameTileSelectEnd OnGameTileSelectEnd;
-	TMap<FString, TArray<FProp*>> Props;
+	void AddUnit(FUnit* Unit);
+	TMap<FString, TArray<FProp*>>::TConstIterator GetPropsIterator();
+	TArray<FUnit*>::TConstIterator GetUnitIterator();
 
 private:
-	
+	TMap<FString, TArray<FProp*>> Props;
+	TArray<FUnit*> Units;
 };

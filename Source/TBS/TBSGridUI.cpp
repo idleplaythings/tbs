@@ -111,7 +111,14 @@ void ATBSGridUI::Tick( float DeltaTime )
 
 	if (HitResult.Actor == nullptr)
 	{
-		Grid->NotifyCursorOffGrid();
+		// notify cursor off grid
+		if (HoverCoordinates != NullVector)
+		{
+			OnGameTileHoverEnd.Broadcast(HoverCoordinates);
+		}
+
+		HoverCoordinates = NullVector;
+
 		HideCursor();
 		return;
 	}
@@ -136,7 +143,11 @@ void ATBSGridUI::Tick( float DeltaTime )
 
 	if (GameCoordinates != LastGameCoordinates)
 	{
-		Grid->NotifyCursorLocationChange(LastGameCoordinates, GameCoordinates);
+		// notify cursor location change
+		HoverCoordinates = GameCoordinates;
+		OnGameTileHoverEnd.Broadcast(LastGameCoordinates);
+		OnGameTileHoverBegin.Broadcast(GameCoordinates);
+
 		LastGameCoordinates = GameCoordinates;
 	}
 
@@ -187,7 +198,19 @@ void ATBSGridUI::UpdateLevelVisibilities()
 
 void ATBSGridUI::HandleMouseDown()
 {
-	Grid->NotifyClick();
+	// notify click
+	if (HoverCoordinates == NullVector)
+	{
+		return;
+	}
+
+	if (SelectCoordinates != NullVector)
+	{
+		OnGameTileSelectEnd.Broadcast(SelectCoordinates);
+	}
+
+	SelectCoordinates = HoverCoordinates;
+	OnGameTileSelectBegin.Broadcast(SelectCoordinates);
 }
 
 void ATBSGridUI::ShowCursor()
