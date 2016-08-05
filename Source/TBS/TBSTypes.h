@@ -70,14 +70,14 @@ struct FCoordinateLocations
 struct PathStep
 {
 	FIntVector Coordinates;
-	int32 Priority;
+	float Priority;
 
 	explicit PathStep()
 	{
 
 	}
 
-	explicit PathStep(FIntVector InCoordinates, int32 InPriority)
+	explicit PathStep(FIntVector InCoordinates, float InPriority)
 	{
 		Coordinates = InCoordinates;
 		Priority = InPriority;

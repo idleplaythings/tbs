@@ -6,6 +6,7 @@
 #include "TBSPropManager.h"
 #include "TBSUnitManager.h"
 #include "TBSGridPathFinder.h"
+#include "TBSGridPathRenderer.h"
 #include "TBSGameState.generated.h"
 
 /**
@@ -39,12 +40,11 @@ private:
 	ATBSPropManager* PropManager;
 	ATBSUnitManager* UnitManager;
 	ATBSGridPathFinder* GridPathFinder;
+	ATBSGridPathRenderer* GridPathRenderer;
 
 	FUnit SelectedUnit;
 	bool UnitSelected = false;
 
-	void RenderPath(TArray<FIntVector> Path);
-	void ClearPath();
 	TArray<AActor*> RenderedPath;	
 	UClass* PathComponentClass;
 };

@@ -33,13 +33,13 @@ void ATBSGridPathFinder::Initialise(ATBSGrid* InGrid)
 TArray<FIntVector> ATBSGridPathFinder::FindPath(FIntVector Start, FIntVector End)
 {
 	TArray<PathStep> Frontier;
-	Frontier.HeapPush(PathStep(Start, 0), PathStepPredicate());
+	Frontier.HeapPush(PathStep(Start, 0.0), PathStepPredicate());
 
 	TMap<FIntVector, FIntVector> CameFrom;
 	CameFrom.Add(Start, FIntVector(-999, -999, -999));
 
-	TMap<FIntVector, int32> CostSoFar;
-	CostSoFar.Add(Start, 0);
+	TMap<FIntVector, float> CostSoFar;
+	CostSoFar.Add(Start, 0.0);
 
 	bool FoundEnd = false;
 
@@ -55,12 +55,24 @@ TArray<FIntVector> ATBSGridPathFinder::FindPath(FIntVector Start, FIntVector End
 		}
 
 		for (auto& Next : Grid->GetAccessibleNeighbours(Current.Coordinates))
-		{			
-			int32 NewCost = CostSoFar[Current.Coordinates] + 1; // Cost of moving from current to next
+		{		
+			float NewCost;
+
+			// Diagonal movement
+			if (Current.Coordinates.X != Next.X && Current.Coordinates.Y != Next.Y)
+			{
+				NewCost = CostSoFar[Current.Coordinates] + 1.42; // Cost of moving from current to next
+			}
+			// Straight movement
+			else
+			{
+				NewCost = CostSoFar[Current.Coordinates] + 1.0; // Cost of moving from current to next
+			}
+			
 			if (!CostSoFar.Contains(Next) || NewCost < CostSoFar[Next])
 			{
 				CostSoFar.Add(Next, NewCost);
-				int32 Priority = FMath::Abs(End.X - Next.X) + FMath::Abs(End.Y - Next.Y);
+				float Priority = NewCost + (float)(FMath::Abs(End.X - Next.X) + FMath::Abs(End.Y - Next.Y));
 				Frontier.HeapPush(PathStep(Next, Priority), PathStepPredicate());
 				CameFrom.Add(Next, Current.Coordinates);
 			}

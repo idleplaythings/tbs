@@ -9,8 +9,8 @@
 
 ATBSGameState::ATBSGameState()
 {
-	static ConstructorHelpers::FObjectFinder<UBlueprint> PathComponentBlueprint(TEXT("Blueprint'/Game/Blueprints/Grid/BP_TBSPathComponent.BP_TBSPathComponent'"));
-	PathComponentClass = (UClass*)PathComponentBlueprint.Object->GeneratedClass;
+	//static ConstructorHelpers::FObjectFinder<UBlueprint> PathComponentBlueprint(TEXT("Blueprint'/Game/Blueprints/Grid/BP_TBSPathComponent.BP_TBSPathComponent'"));
+	//PathComponentClass = (UClass*)PathComponentBlueprint.Object->GeneratedClass;
 }
 
 void ATBSGameState::StartGameplay()
@@ -53,6 +53,9 @@ void ATBSGameState::StartGameplay()
 	GridPathFinder = GetWorld()->SpawnActor<ATBSGridPathFinder>(ATBSGridPathFinder::StaticClass());
 	GridPathFinder->Initialise(Grid);
 
+	GridPathRenderer = GetWorld()->SpawnActor<ATBSGridPathRenderer>(ATBSGridPathRenderer::StaticClass());
+	GridPathRenderer->Initialise(Grid, GridUI);
+
 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("InitGameState")));
 }
 
@@ -64,7 +67,7 @@ void ATBSGameState::MouseRight(FIntVector GameCoords)
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Unit deselected...")));
 	}
 
-	ClearPath();
+	GridPathRenderer->ClearPath();
 }
 
 void ATBSGameState::MouseLeft(FIntVector GameCoords)
@@ -100,35 +103,11 @@ void ATBSGameState::HoverBegin(FIntVector GameCoords)
 	{
 		//FCoordinateLocations Locations = GridUI->GetCoordinateLocations(GameCoords);
 		TArray<FIntVector> Path = GridPathFinder->FindPath(SelectedUnit.Coordinates, GameCoords);
-
-		RenderPath(Path);
+		GridPathRenderer->RenderPath(Path);
 	}
 }
 
 void ATBSGameState::HoverEnd(FIntVector GameCoords)
 {
-	ClearPath();
-}
-
-void ATBSGameState::RenderPath(TArray<FIntVector> Path)
-{
-	for (auto& Step : Path)
-	{
-		AActor* PathComponent = GetWorld()->SpawnActor<AActor>(PathComponentClass);
-		FCoordinateLocations Locations = GridUI->GetCoordinateLocations(Step);
-		//PathComponent->SetMobility(EComponentMobility::Movable);
-		PathComponent->SetActorLocation(Locations.Center);
-		RenderedPath.Add(PathComponent);
-	}
-}
-
-void ATBSGameState::ClearPath()
-{
-	for (auto& PathComponent : RenderedPath)
-	{
-		if (PathComponent != nullptr && !PathComponent->IsPendingKill())
-		{
-			PathComponent->Destroy();
-		}
-	}
+	GridPathRenderer->ClearPath();
 }

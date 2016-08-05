@@ -118,6 +118,7 @@ void ATBSGridUI::Tick( float DeltaTime )
 		}
 
 		HoverCoordinates = NullVector;
+		LastGameCoordinates = NullVector;
 
 		HideCursor();
 		return;
