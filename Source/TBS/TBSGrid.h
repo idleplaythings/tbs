@@ -26,12 +26,17 @@ public:
 	int32 NumOfLevels = 0;
 
 	void InitialiseGrid(int32 GridWidth, int32 GridHeight, int32 NumOfLevels);
-	void AddProp(FProp* Prop);
-	void AddUnit(FUnit* Unit);
-	TMap<FString, TArray<FProp*>>::TConstIterator GetPropsIterator();
-	TArray<FUnit*>::TConstIterator GetUnitIterator();
+	TArray<FIntVector> GetAccessibleNeighbours(FIntVector Coordinates);
+	TArray<FIntVector> GetNeighbours(FIntVector Coordinates);
+
+	void AddProp(FProp Prop);
+	void AddUnit(FUnit Unit);
+	TMap<FIntVector, TArray<FProp>>::TConstIterator GetPropsIterator();
+	TArray<FUnit>::TIterator GetUnitIterator();
+	bool SelectUnit(FIntVector GameCoords, FUnit &InUnit);
 
 private:
-	TMap<FString, TArray<FProp*>> Props;
-	TArray<FUnit*> Units;
+	TMap<FIntVector, TArray<FProp>> Props;
+	TArray<FUnit> Units;
+	bool IsTileAccessBlockedByProp(FIntVector Coordinates, ETileSlot Slot);
 };

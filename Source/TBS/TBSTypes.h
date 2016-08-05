@@ -2,10 +2,12 @@
 
 #pragma once
 
+#include "TBSProp.h"
+#include "TBSUnit.h"
 #include "TBSTypes.generated.h"
 
-class ATBSProp;
-class ATBSUnit;
+//class ATBSProp;
+//class ATBSUnit;
 
 UENUM(BlueprintType)
 enum class ETileSlot : uint8
@@ -25,7 +27,7 @@ struct FUnit
 {
 	FGuid* Guid;
 	UClass* UnitClass;
-	ATBSUnit* Unit;
+	ATBSUnit* UnitObject;
 	FIntVector Coordinates;
 	FRotator Rotation;
 
@@ -39,10 +41,11 @@ struct FProp
 {
 	FGuid* Guid;
 	UClass* PropClass;
-	ATBSProp* Prop;
+	ATBSProp* PropObject;
 	FIntVector Coordinates;
 	ETileSlot Slot;
 	FRotator Rotation;
+	bool BlocksAccess;
 
 	FProp()
 	{
@@ -61,4 +64,30 @@ struct FCoordinateLocations
 	FVector S;
 	FVector SW;
 	FVector W;
+};
+
+// From: https://answers.unrealengine.com/questions/180188/analogue-of-priority-queue.html
+struct PathStep
+{
+	FIntVector Coordinates;
+	int32 Priority;
+
+	explicit PathStep()
+	{
+
+	}
+
+	explicit PathStep(FIntVector InCoordinates, int32 InPriority)
+	{
+		Coordinates = InCoordinates;
+		Priority = InPriority;
+	}
+};
+
+struct PathStepPredicate
+{
+	bool operator()(const PathStep& A, const PathStep& B) const
+	{
+		return A.Priority < B.Priority;
+	}
 };

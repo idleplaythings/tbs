@@ -35,13 +35,12 @@ void ATBSUnitManager::Initialise(ATBSGrid* InGrid, ATBSGridUI* InGridUI)
 void ATBSUnitManager::RenderUnits()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Rendering units")));
+
 	for (auto It = Grid->GetUnitIterator(); It; ++It)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("unit")));
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, (*It)->UnitClass->GetDescription());
-
-		ATBSUnit* UnitActor = GetWorld()->SpawnActor<ATBSUnit>((*It)->UnitClass);;
-		FCoordinateLocations Locations = GridUI->GetCoordinateLocations((*It)->Coordinates);
-		UnitActor->SetActorLocation(Locations.Center);
+		(*It).UnitObject = GetWorld()->SpawnActor<ATBSUnit>((*It).UnitClass);
+		FCoordinateLocations Locations = GridUI->GetCoordinateLocations((*It).Coordinates);
+		(*It).UnitObject->SetActorLocation(Locations.Center);
+		//(*It).UnitObject = UnitActor;
 	}
 }

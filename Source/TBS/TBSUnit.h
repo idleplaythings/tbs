@@ -6,7 +6,7 @@
 #include "TBSUnit.generated.h"
 
 UCLASS(Blueprintable)
-class TBS_API ATBSUnit : public AActor
+class TBS_API ATBSUnit : public APawn
 {
 	GENERATED_BODY()
 

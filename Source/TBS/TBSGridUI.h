@@ -11,8 +11,8 @@ class ATBSPlayerController;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameTileHoverBegin, FIntVector, GameCoordinates);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameTileHoverEnd, FIntVector, GameCoordinates);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameTileSelectBegin, FIntVector, GameCoordinates);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameTileSelectEnd, FIntVector, GameCoordinates);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameTileMouseLeft, FIntVector, GameCoordinates);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameTileMouseRight, FIntVector, GameCoordinates);
 
 UCLASS(Blueprintable)
 class TBS_API ATBSGridUI : public AActor
@@ -36,13 +36,15 @@ public:
 
 	bool bResolveGridCoordinates = true;
 
-	void HandleMouseDown();
+	void HandleMouseLeft();
+	void HandleMouseRight();
+
 	FCoordinateLocations GetCoordinateLocations(FIntVector Coordinates);
 
 	FOnGameTileHoverBegin OnGameTileHoverBegin;
 	FOnGameTileHoverEnd OnGameTileHoverEnd;
-	FOnGameTileSelectBegin OnGameTileSelectBegin;
-	FOnGameTileSelectEnd OnGameTileSelectEnd;
+	FOnGameTileMouseLeft OnGameTileMouseLeft;
+	FOnGameTileMouseRight OnGameTileMouseRight;
 
 private:
 	int32 CurrentLevel = 0;
@@ -79,6 +81,6 @@ private:
 
 	FIntVector NullVector = FIntVector(-999, -999, -999);
 	FIntVector HoverCoordinates = NullVector;
-	FIntVector SelectCoordinates = NullVector;
+	//FIntVector SelectCoordinates = NullVector;
 };
 

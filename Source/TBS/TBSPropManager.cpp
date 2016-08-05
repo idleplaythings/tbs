@@ -36,14 +36,12 @@ void ATBSPropManager::RenderProps()
 {
 	for (auto It = Grid->GetPropsIterator(); It; ++It)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, It.Key());
-
 		for (auto& Prop : It.Value())
 		{			
-			ATBSProp* PropActor = GetWorld()->SpawnActor<ATBSProp>(Prop->PropClass);
-			FCoordinateLocations Locations = GridUI->GetCoordinateLocations(Prop->Coordinates);
+			ATBSProp* PropActor = GetWorld()->SpawnActor<ATBSProp>(Prop.PropClass);
+			FCoordinateLocations Locations = GridUI->GetCoordinateLocations(Prop.Coordinates);
 
-			switch (Prop->Slot)
+			switch (Prop.Slot)
 			{
 			case ETileSlot::NW:
 				PropActor->SetActorLocation(Locations.NW);
@@ -73,7 +71,7 @@ void ATBSPropManager::RenderProps()
 				PropActor->SetActorLocation(Locations.Center);
 			}
 
-			PropActor->SetActorRotation(Prop->Rotation);
+			PropActor->SetActorRotation(Prop.Rotation);
 		}
 	}
 }

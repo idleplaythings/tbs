@@ -196,7 +196,7 @@ void ATBSGridUI::UpdateLevelVisibilities()
 	}
 }
 
-void ATBSGridUI::HandleMouseDown()
+void ATBSGridUI::HandleMouseLeft()
 {
 	// notify click
 	if (HoverCoordinates == NullVector)
@@ -204,13 +204,17 @@ void ATBSGridUI::HandleMouseDown()
 		return;
 	}
 
-	if (SelectCoordinates != NullVector)
+	OnGameTileMouseLeft.Broadcast(HoverCoordinates);
+}
+
+void ATBSGridUI::HandleMouseRight()
+{
+	if (HoverCoordinates == NullVector)
 	{
-		OnGameTileSelectEnd.Broadcast(SelectCoordinates);
+		return;
 	}
 
-	SelectCoordinates = HoverCoordinates;
-	OnGameTileSelectBegin.Broadcast(SelectCoordinates);
+	OnGameTileMouseRight.Broadcast(HoverCoordinates);
 }
 
 void ATBSGridUI::ShowCursor()
@@ -225,6 +229,7 @@ void ATBSGridUI::HideCursor()
 
 FCoordinateLocations ATBSGridUI::GetCoordinateLocations(FIntVector Coordinates)
 {
+	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Asking for coordinate locations (%i, %i, %i)"), Coordinates.X, Coordinates.Y, Coordinates.Z));
 	FVector Location = GetActorLocation() - FVector(GridMeshWidth/2, GridMeshHeight/2, Coordinates.Z * FloorHeight);
 	Location = Location + FVector((float)Coordinates.X * TileSize + TileSize/2, (float)Coordinates.Y * TileSize + TileSize/2, 0.0);
 

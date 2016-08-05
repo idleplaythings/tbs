@@ -4,48 +4,42 @@
 #include "TBSGrid.h"
 #include "TBSGridUI.h"
 #include "TBSUnitFactory.h"
-#include "TBSProp_Wall01.h"
+#include "TBSPropFactory.h"
 #include "TBSGameState.h"
+
+ATBSGameState::ATBSGameState()
+{
+	static ConstructorHelpers::FObjectFinder<UBlueprint> PathComponentBlueprint(TEXT("Blueprint'/Game/Blueprints/Grid/BP_TBSPathComponent.BP_TBSPathComponent'"));
+	PathComponentClass = (UClass*)PathComponentBlueprint.Object->GeneratedClass;
+}
 
 void ATBSGameState::StartGameplay()
 {
-	ATBSGrid* Grid = GetWorld()->SpawnActor<ATBSGrid>(ATBSGrid::StaticClass());
+	Grid = GetWorld()->SpawnActor<ATBSGrid>(ATBSGrid::StaticClass());
 	Grid->InitialiseGrid(10, 20, 3);
 
-	FProp Wall10, Wall11, Wall20, Wall30;
+	ATBSPropFactory* PropFactory = GetWorld()->SpawnActor<ATBSPropFactory>(ATBSPropFactory::StaticClass());
+	FProp Wall1 = PropFactory->CreateWall(FIntVector(2, 7, 0), ETileSlot::W, FRotator(0.0, 90.0, 0.0));
+	FProp Wall2 = PropFactory->CreateWall(FIntVector(2, 7, 0), ETileSlot::N, FRotator(0.0, 0.0, 0.0));
+	FProp Wall3 = PropFactory->CreateWall(FIntVector(3, 7, 0), ETileSlot::N, FRotator(0.0, 0.0, 0.0));
+	FProp Wall4 = PropFactory->CreateWall(FIntVector(4, 7, 0), ETileSlot::N, FRotator(0.0, 0.0, 0.0));
 
-	Wall10.PropClass = ATBSProp_Wall01::StaticClass();
-	Wall10.Coordinates = FIntVector(2, 7, 0);
-	Wall10.Slot = ETileSlot::W;
-	Wall10.Rotation = FRotator(0.0, 90.0, 0.0);
-
-	Wall11.PropClass = ATBSProp_Wall01::StaticClass();
-	Wall11.Coordinates = FIntVector(2, 7, 0);
-	Wall11.Slot = ETileSlot::N;
-	Wall11.Rotation = FRotator(0.0, 0.0, 0.0);
-
-	Wall20.PropClass = ATBSProp_Wall01::StaticClass();
-	Wall20.Coordinates = FIntVector(3, 7, 0);
-	Wall20.Slot = ETileSlot::N;
-	Wall20.Rotation = FRotator(0.0, 0.0, 0.0);
-
-	Wall30.PropClass = ATBSProp_Wall01::StaticClass();
-	Wall30.Coordinates = FIntVector(4, 7, 0);
-	Wall30.Slot = ETileSlot::N;
-	Wall30.Rotation = FRotator(0.0, 0.0, 0.0);
-
-	Grid->AddProp(&Wall10);
-	Grid->AddProp(&Wall11);
-	Grid->AddProp(&Wall20);
-	Grid->AddProp(&Wall30);
+	Grid->AddProp(Wall1);
+	Grid->AddProp(Wall2);
+	Grid->AddProp(Wall3);
+	Grid->AddProp(Wall4);
 
 	ATBSUnitFactory* UnitFactory = GetWorld()->SpawnActor<ATBSUnitFactory>(ATBSUnitFactory::StaticClass());
 	FUnit Unit10 = UnitFactory->CreateUnit(FIntVector(1, 1, 0), FRotator(0.0, 0.0, 0.0));
-	Grid->AddUnit(&Unit10);
+	FUnit Unit20 = UnitFactory->CreateUnit(FIntVector(7, 7, 0), FRotator(0.0, 0.0, 0.0));
+	Grid->AddUnit(Unit10);
+	Grid->AddUnit(Unit20);
 
-	ATBSGridUI* GridUI = GetWorld()->SpawnActor<ATBSGridUI>(ATBSGridUI::StaticClass());
-	GridUI->OnGameTileSelectBegin.AddDynamic(this, &ATBSGameState::Click);
+	GridUI = GetWorld()->SpawnActor<ATBSGridUI>(ATBSGridUI::StaticClass());
+	GridUI->OnGameTileMouseLeft.AddDynamic(this, &ATBSGameState::MouseLeft);
+	GridUI->OnGameTileMouseRight.AddDynamic(this, &ATBSGameState::MouseRight);
 	GridUI->OnGameTileHoverBegin.AddDynamic(this, &ATBSGameState::HoverBegin);
+	GridUI->OnGameTileHoverEnd.AddDynamic(this, &ATBSGameState::HoverEnd);
 	GridUI->RenderGrid(Grid);
 
 	PropManager = GetWorld()->SpawnActor<ATBSPropManager>(ATBSPropManager::StaticClass());
@@ -56,15 +50,85 @@ void ATBSGameState::StartGameplay()
 	UnitManager->Initialise(Grid, GridUI);
 	UnitManager->RenderUnits();
 
+	GridPathFinder = GetWorld()->SpawnActor<ATBSGridPathFinder>(ATBSGridPathFinder::StaticClass());
+	GridPathFinder->Initialise(Grid);
+
 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("InitGameState")));
 }
 
-void ATBSGameState::Click(FIntVector GameCoords)
+void ATBSGameState::MouseRight(FIntVector GameCoords)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Click (%i, %i, %i)"), GameCoords.X, GameCoords.Y, GameCoords.Z));
+	if (UnitSelected)
+	{		
+		UnitSelected = false;
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Unit deselected...")));
+	}
+
+	ClearPath();
+}
+
+void ATBSGameState::MouseLeft(FIntVector GameCoords)
+{	
+	FUnit Unit;
+
+	if (Grid->SelectUnit(GameCoords, Unit))
+	{
+		if (!UnitSelected || SelectedUnit.Guid != Unit.Guid)
+		{
+			SelectedUnit = Unit;
+			UnitSelected = true;
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Unit selected!")));
+		}
+	}
+	else
+	{
+		//if (UnitSelected)
+		//{
+		//	//FCoordinateLocations Locations = GridUI->GetCoordinateLocations(GameCoords);
+		//	TArray<FIntVector> Path = GridPathFinder->FindPath(SelectedUnit.Coordinates, GameCoords);
+
+		//	RenderPath(Path);
+		//}
+	}
 }
 
 void ATBSGameState::HoverBegin(FIntVector GameCoords)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Hover (%i, %i, %i)"), GameCoords.X, GameCoords.Y, GameCoords.Z));
+
+	if (UnitSelected)
+	{
+		//FCoordinateLocations Locations = GridUI->GetCoordinateLocations(GameCoords);
+		TArray<FIntVector> Path = GridPathFinder->FindPath(SelectedUnit.Coordinates, GameCoords);
+
+		RenderPath(Path);
+	}
+}
+
+void ATBSGameState::HoverEnd(FIntVector GameCoords)
+{
+	ClearPath();
+}
+
+void ATBSGameState::RenderPath(TArray<FIntVector> Path)
+{
+	for (auto& Step : Path)
+	{
+		AActor* PathComponent = GetWorld()->SpawnActor<AActor>(PathComponentClass);
+		FCoordinateLocations Locations = GridUI->GetCoordinateLocations(Step);
+		//PathComponent->SetMobility(EComponentMobility::Movable);
+		PathComponent->SetActorLocation(Locations.Center);
+		RenderedPath.Add(PathComponent);
+	}
+}
+
+void ATBSGameState::ClearPath()
+{
+	for (auto& PathComponent : RenderedPath)
+	{
+		if (PathComponent != nullptr && !PathComponent->IsPendingKill())
+		{
+			PathComponent->Destroy();
+		}
+	}
 }

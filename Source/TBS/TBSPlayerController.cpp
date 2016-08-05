@@ -35,7 +35,8 @@ void ATBSPlayerController::SetupInputComponent()
 	InputComponent->BindAction("ActionZoomIn", IE_Pressed, this, &ATBSPlayerController::ZoomCameraIn);
 	InputComponent->BindAction("ActionZoomOut", IE_Pressed, this, &ATBSPlayerController::ZoomCameraOut);
 	InputComponent->BindAction("TogglePerspectiveCamera", IE_Pressed, this, &ATBSPlayerController::TogglePerspectiveCamera);
-	InputComponent->BindAction("ActionMouseDown", IE_Pressed, this, &ATBSPlayerController::OnMouseDown);
+	InputComponent->BindAction("ActionMouseLeft", IE_Pressed, this, &ATBSPlayerController::OnMouseLeft);
+	InputComponent->BindAction("ActionMouseRight", IE_Pressed, this, &ATBSPlayerController::OnMouseRight);
 	InputComponent->BindAxis("AxisMoveCameraForward", this, &ATBSPlayerController::MoveCameraForward);
 	InputComponent->BindAxis("AxisMoveCameraRight", this, &ATBSPlayerController::MoveCameraRight);	
 }
@@ -87,9 +88,14 @@ void ATBSPlayerController::MoveCameraRight(float AxisValue)
 	DefaultPawn->MoveCameraRight(AxisValue);
 }
 
-void ATBSPlayerController::OnMouseDown()
+void ATBSPlayerController::OnMouseLeft()
 {
-	GridUI->HandleMouseDown();
+	GridUI->HandleMouseLeft();
+}
+
+void ATBSPlayerController::OnMouseRight()
+{
+	GridUI->HandleMouseRight();
 }
 
 FHitResult ATBSPlayerController::GetGridHitResult()

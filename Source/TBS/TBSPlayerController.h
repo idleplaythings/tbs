@@ -24,7 +24,8 @@ public:
 	void SetupInputComponent() override;
 	void BeginPlay() override;
 
-	void OnMouseDown();	
+	void OnMouseLeft();	
+	void OnMouseRight();
 	void MoveLevelUp();
 	void MoveLevelDown();
 	void MoveCameraForward(float AxisValue);
