@@ -15,7 +15,11 @@ class TBS_API UTBSUnitMovementComponent : public UPawnMovementComponent
 	
 public:
 	void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction);
-	
+
+
 private:
+	FMovement CurrentMovement;
+	bool IsProcessingMovement;
+
 	void PerformMovement(float DeltaTime);
 };

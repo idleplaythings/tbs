@@ -7,6 +7,23 @@
 #include "TBSGridUI.h"
 #include "TBSUnitManager.generated.h"
 
+struct FMovementCommand
+{
+	FUnit Unit;
+	FMovement Movement;
+
+	FMovementCommand()
+	{
+
+	}
+
+	FMovementCommand(FUnit &InUnit, FMovement InMovement)
+	{
+		Unit = InUnit;
+		Movement = InMovement;
+	}
+};
+
 UCLASS()
 class TBS_API ATBSUnitManager : public AActor
 {
@@ -24,8 +41,15 @@ public:
 
 	void Initialise(ATBSGrid* Grid, ATBSGridUI* GridUI);
 	void RenderUnits();
+	void MoveUnit(FUnit &Unit, FMovement Movements);
 
 private:
 	ATBSGrid* Grid;
 	ATBSGridUI* GridUI;
+	bool IsProcessingMovement;
+	FMovementCommand CurrentMovementCommand;
+	TQueue<FMovementCommand> MovementCommandQueue;
+	bool ConsumeMovementCommand(FMovementCommand &MovementCommand);
+	void StartMovement();
+	void MoveUnit(float DeltaTime);
 };

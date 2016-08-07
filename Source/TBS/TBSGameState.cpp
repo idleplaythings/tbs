@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "TBS.h"
+#include "TBSUnit.h"
 #include "TBSGrid.h"
 #include "TBSGridUI.h"
 #include "TBSUnitFactory.h"
@@ -67,6 +68,7 @@ void ATBSGameState::MouseRight(FIntVector GameCoords)
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Unit deselected...")));
 	}
 
+	PathSelected = false;
 	GridPathRenderer->ClearPath();
 }
 
@@ -79,31 +81,44 @@ void ATBSGameState::MouseLeft(FIntVector GameCoords)
 		if (!UnitSelected || SelectedUnit.Guid != Unit.Guid)
 		{
 			SelectedUnit = Unit;
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Selected unit addr (%#010x)"), &SelectedUnit));
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("X unit addr (%#010x)"), &Unit));
 			UnitSelected = true;
 			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Unit selected!")));
 		}
 	}
 	else
 	{
-		//if (UnitSelected)
-		//{
-		//	//FCoordinateLocations Locations = GridUI->GetCoordinateLocations(GameCoords);
-		//	TArray<FIntVector> Path = GridPathFinder->FindPath(SelectedUnit.Coordinates, GameCoords);
+		if (UnitSelected && PathSelected)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Adding some movement!")));
 
-		//	RenderPath(Path);
-		//}
+			TArray<FMovement> Movements;
+
+			for (auto& Component : CurrentPath)
+			{
+				FCoordinateLocations Locations = GridUI->GetCoordinateLocations(Component);
+				FMovement Movement;
+				Movement.TargetWorldCoordinates = Locations.Center;
+				Movement.TargetGameCoordinates = Component;
+
+				UnitManager->MoveUnit(SelectedUnit, Movement);				
+			}			
+
+			PathSelected = false;
+		}
 	}
 }
 
 void ATBSGameState::HoverBegin(FIntVector GameCoords)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Hover (%i, %i, %i)"), GameCoords.X, GameCoords.Y, GameCoords.Z));
+	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Hover (%i, %i, %i)"), GameCoords.X, GameCoords.Y, GameCoords.Z));
 
 	if (UnitSelected)
 	{
-		//FCoordinateLocations Locations = GridUI->GetCoordinateLocations(GameCoords);
-		TArray<FIntVector> Path = GridPathFinder->FindPath(SelectedUnit.Coordinates, GameCoords);
-		GridPathRenderer->RenderPath(Path);
+		PathSelected = true;
+		CurrentPath = GridPathFinder->FindPath(SelectedUnit.Coordinates, GameCoords);
+		GridPathRenderer->RenderPath(CurrentPath);
 	}
 }
 

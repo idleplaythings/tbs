@@ -30,7 +30,7 @@ public:
 	TArray<FIntVector> GetNeighbours(FIntVector Coordinates);
 
 	void AddProp(FProp Prop);
-	void AddUnit(FUnit Unit);
+	void AddUnit(FUnit &Unit);
 	TMap<FIntVector, TArray<FProp>>::TConstIterator GetPropsIterator();
 	TArray<FUnit>::TIterator GetUnitIterator();
 	bool SelectUnit(FIntVector GameCoords, FUnit &InUnit);

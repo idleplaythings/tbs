@@ -3,6 +3,7 @@
 #pragma once
 
 #include "GameFramework/Character.h"
+#include "TBSTypes.h"
 #include "TBSUnit.generated.h"
 
 UCLASS(Blueprintable)
@@ -19,4 +20,11 @@ public:
 	
 	// Called every frame
 	virtual void Tick( float DeltaSeconds ) override;
+
+	void AddGridMovement(FMovement Movement);
+	bool ConsumeGridMovement(FMovement &Movement);
+
+private:
+	TQueue<FMovement> MovementQueue;
+	float Speed = 0.0;
 };

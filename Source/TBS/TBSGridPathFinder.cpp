@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "TBS.h"
+#include "Algo/Reverse.h"
 #include "TBSGridPathFinder.h"
 
 // Sets default values
@@ -87,6 +88,8 @@ TArray<FIntVector> ATBSGridPathFinder::FindPath(FIntVector Start, FIntVector End
 		Path.Add(Current);
 		Current = CameFrom[Current];
 	} while (Current != FIntVector(-999, -999, -999));
+
+	Algo::Reverse(Path);
 
 	return Path;
 }

@@ -58,18 +58,19 @@ void ATBSGrid::AddProp(FProp Prop)
 	}
 }
 
-void ATBSGrid::AddUnit(FUnit Unit)
+void ATBSGrid::AddUnit(FUnit &Unit)
 {
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Add unit addr (%#010x)"), &Unit));
 	Units.Add(Unit);
 }
 
 bool ATBSGrid::SelectUnit(FIntVector GameCoords, FUnit &InUnit)
 {
 	bool UnitFound = false;
-	for (auto& Unit : Units)
+	for (auto &Unit : Units)
 	{
 		if (Unit.Coordinates == GameCoords)
-		{
+		{ 
 			InUnit = Unit;
 			UnitFound = true;
 			break;

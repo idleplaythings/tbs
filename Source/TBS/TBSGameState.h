@@ -45,6 +45,6 @@ private:
 	FUnit SelectedUnit;
 	bool UnitSelected = false;
 
-	TArray<AActor*> RenderedPath;	
-	UClass* PathComponentClass;
+	bool PathSelected = false;
+	TArray<FIntVector> CurrentPath;
 };

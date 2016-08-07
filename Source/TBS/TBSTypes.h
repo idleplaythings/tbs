@@ -2,12 +2,12 @@
 
 #pragma once
 
-#include "TBSProp.h"
-#include "TBSUnit.h"
+//#include "TBSProp.h"
+//#include "TBSUnit.h"
 #include "TBSTypes.generated.h"
 
-//class ATBSProp;
-//class ATBSUnit;
+class ATBSProp;
+class ATBSUnit;
 
 UENUM(BlueprintType)
 enum class ETileSlot : uint8
@@ -35,6 +35,12 @@ struct FUnit
 	{
 		Guid = new FGuid();
 	}
+};
+
+struct FMovement
+{
+	FIntVector TargetGameCoordinates;
+	FVector TargetWorldCoordinates;
 };
 
 struct FProp
@@ -91,3 +97,4 @@ struct PathStepPredicate
 		return A.Priority < B.Priority;
 	}
 };
+
