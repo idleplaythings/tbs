@@ -20,7 +20,7 @@ public:
 	// Called every frame
 	virtual void Tick( float DeltaSeconds ) override;
 
-	FUnit CreateUnit(FIntVector Coordinates, FRotator Rotation);
+	FUnit* CreateUnit(FIntVector Coordinates, FRotator Rotation);
 
 private:
 	UClass* UnitBPClass;

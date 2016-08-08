@@ -32,11 +32,11 @@ void ATBSUnitFactory::Tick( float DeltaTime )
 
 }
 
-FUnit ATBSUnitFactory::CreateUnit(FIntVector Coordinates, FRotator Rotation)
+FUnit* ATBSUnitFactory::CreateUnit(FIntVector Coordinates, FRotator Rotation)
 {
-	FUnit Unit;
-	Unit.UnitClass = UnitBPClass;
-	Unit.Coordinates = Coordinates;
-	Unit.Rotation = Rotation;
+	FUnit* Unit = new FUnit;
+	Unit->UnitClass = UnitBPClass;
+	Unit->Coordinates = Coordinates;
+	Unit->Rotation = Rotation;
 	return Unit;
 }

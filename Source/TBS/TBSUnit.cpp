@@ -26,12 +26,12 @@ void ATBSUnit::Tick( float DeltaTime )
 
 }
 
-void ATBSUnit::AddGridMovement(FMovement Movement)
-{
-	MovementQueue.Enqueue(Movement);
-}
-
-bool ATBSUnit::ConsumeGridMovement(FMovement &Movement)
-{
-	return MovementQueue.Dequeue(Movement);
-}
+//void ATBSUnit::AddGridMovement(FMovement Movement)
+//{
+//	MovementQueue.Enqueue(Movement);
+//}
+//
+//bool ATBSUnit::ConsumeGridMovement(FMovement &Movement)
+//{
+//	return MovementQueue.Dequeue(Movement);
+//}

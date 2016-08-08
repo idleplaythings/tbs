@@ -30,13 +30,13 @@ public:
 	TArray<FIntVector> GetNeighbours(FIntVector Coordinates);
 
 	void AddProp(FProp Prop);
-	void AddUnit(FUnit &Unit);
+	void AddUnit(FUnit* Unit);
 	TMap<FIntVector, TArray<FProp>>::TConstIterator GetPropsIterator();
-	TArray<FUnit>::TIterator GetUnitIterator();
-	bool SelectUnit(FIntVector GameCoords, FUnit &InUnit);
+	TArray<FUnit*>::TIterator GetUnitIterator();
+	FUnit* SelectUnit(FIntVector GameCoords);
 
 private:
 	TMap<FIntVector, TArray<FProp>> Props;
-	TArray<FUnit> Units;
+	TArray<FUnit*> Units;
 	bool IsTileAccessBlockedByProp(FIntVector Coordinates, ETileSlot Slot);
 };

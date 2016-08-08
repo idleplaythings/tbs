@@ -9,7 +9,7 @@
 
 struct FMovementCommand
 {
-	FUnit Unit;
+	FUnit* Unit;
 	FMovement Movement;
 
 	FMovementCommand()
@@ -17,7 +17,7 @@ struct FMovementCommand
 
 	}
 
-	FMovementCommand(FUnit &InUnit, FMovement InMovement)
+	FMovementCommand(FUnit* InUnit, FMovement InMovement)
 	{
 		Unit = InUnit;
 		Movement = InMovement;
@@ -41,13 +41,13 @@ public:
 
 	void Initialise(ATBSGrid* Grid, ATBSGridUI* GridUI);
 	void RenderUnits();
-	void MoveUnit(FUnit &Unit, FMovement Movements);
+	void MoveUnit(FUnit* Unit, FMovement Movements);
 
 private:
 	ATBSGrid* Grid;
 	ATBSGridUI* GridUI;
 	bool IsProcessingMovement;
-	FMovementCommand CurrentMovementCommand;
+	FMovementCommand CurrentMovement;
 	TQueue<FMovementCommand> MovementCommandQueue;
 	bool ConsumeMovementCommand(FMovementCommand &MovementCommand);
 	void StartMovement();

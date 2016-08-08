@@ -42,7 +42,7 @@ private:
 	ATBSGridPathFinder* GridPathFinder;
 	ATBSGridPathRenderer* GridPathRenderer;
 
-	FUnit SelectedUnit;
+	FUnit* SelectedUnit;
 	bool UnitSelected = false;
 
 	bool PathSelected = false;

@@ -31,10 +31,8 @@ void ATBSGameState::StartGameplay()
 	Grid->AddProp(Wall4);
 
 	ATBSUnitFactory* UnitFactory = GetWorld()->SpawnActor<ATBSUnitFactory>(ATBSUnitFactory::StaticClass());
-	FUnit Unit10 = UnitFactory->CreateUnit(FIntVector(1, 1, 0), FRotator(0.0, 0.0, 0.0));
-	FUnit Unit20 = UnitFactory->CreateUnit(FIntVector(7, 7, 0), FRotator(0.0, 0.0, 0.0));
-	Grid->AddUnit(Unit10);
-	Grid->AddUnit(Unit20);
+	Grid->AddUnit(UnitFactory->CreateUnit(FIntVector(1, 1, 0), FRotator(0.0, 0.0, 0.0)));
+	Grid->AddUnit(UnitFactory->CreateUnit(FIntVector(7, 7, 0), FRotator(0.0, 0.0, 0.0)));
 
 	GridUI = GetWorld()->SpawnActor<ATBSGridUI>(ATBSGridUI::StaticClass());
 	GridUI->OnGameTileMouseLeft.AddDynamic(this, &ATBSGameState::MouseLeft);
@@ -74,15 +72,13 @@ void ATBSGameState::MouseRight(FIntVector GameCoords)
 
 void ATBSGameState::MouseLeft(FIntVector GameCoords)
 {	
-	FUnit Unit;
+	FUnit* Unit = Grid->SelectUnit(GameCoords);
 
-	if (Grid->SelectUnit(GameCoords, Unit))
+	if (Unit != nullptr)
 	{
-		if (!UnitSelected || SelectedUnit.Guid != Unit.Guid)
+		if (!UnitSelected || SelectedUnit->Guid != Unit->Guid)
 		{
 			SelectedUnit = Unit;
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Selected unit addr (%#010x)"), &SelectedUnit));
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("X unit addr (%#010x)"), &Unit));
 			UnitSelected = true;
 			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Unit selected!")));
 		}
@@ -102,7 +98,9 @@ void ATBSGameState::MouseLeft(FIntVector GameCoords)
 				Movement.TargetWorldCoordinates = Locations.Center;
 				Movement.TargetGameCoordinates = Component;
 
-				UnitManager->MoveUnit(SelectedUnit, Movement);				
+				UnitManager->MoveUnit(SelectedUnit, Movement);
+				UnitSelected = false;
+				GridPathRenderer->ClearPath();
 			}			
 
 			PathSelected = false;
@@ -117,7 +115,7 @@ void ATBSGameState::HoverBegin(FIntVector GameCoords)
 	if (UnitSelected)
 	{
 		PathSelected = true;
-		CurrentPath = GridPathFinder->FindPath(SelectedUnit.Coordinates, GameCoords);
+		CurrentPath = GridPathFinder->FindPath(SelectedUnit->Coordinates, GameCoords);
 		GridPathRenderer->RenderPath(CurrentPath);
 	}
 }

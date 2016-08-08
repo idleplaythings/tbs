@@ -37,7 +37,7 @@ TMap<FIntVector, TArray<FProp>>::TConstIterator ATBSGrid::GetPropsIterator()
 	return Props.CreateConstIterator();
 }
 
-TArray<FUnit>::TIterator ATBSGrid::GetUnitIterator()
+TArray<FUnit*>::TIterator ATBSGrid::GetUnitIterator()
 {
 	return Units.CreateIterator();
 }
@@ -58,26 +58,28 @@ void ATBSGrid::AddProp(FProp Prop)
 	}
 }
 
-void ATBSGrid::AddUnit(FUnit &Unit)
+void ATBSGrid::AddUnit(FUnit* Unit)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Add unit addr (%#010x)"), &Unit));
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Add unit addr (%#010x)"), Unit));
 	Units.Add(Unit);
 }
 
-bool ATBSGrid::SelectUnit(FIntVector GameCoords, FUnit &InUnit)
+FUnit* ATBSGrid::SelectUnit(FIntVector GameCoords)
 {
-	bool UnitFound = false;
+	//bool UnitFound = false;
 	for (auto &Unit : Units)
 	{
-		if (Unit.Coordinates == GameCoords)
+		if (Unit->Coordinates == GameCoords)
 		{ 
-			InUnit = Unit;
-			UnitFound = true;
+			return Unit;
+			//InUnit = Unit;
+			//UnitFound = true;
 			break;
 		}
 	}
 
-	return UnitFound;
+	return nullptr;
+	//return UnitFound;
 }
 
 TArray<FIntVector> ATBSGrid::GetNeighbours(FIntVector Coordinates)

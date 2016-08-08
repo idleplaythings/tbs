@@ -21,10 +21,15 @@ public:
 	// Called every frame
 	virtual void Tick( float DeltaSeconds ) override;
 
-	void AddGridMovement(FMovement Movement);
-	bool ConsumeGridMovement(FMovement &Movement);
-
-private:
-	TQueue<FMovement> MovementQueue;
+	UPROPERTY(BlueprintReadWrite)
 	float Speed = 0.0;
+
+	float AccelerationTime = 1.0;
+	float TurnTime = 0.5;
+
+	float Acceleration = 0.5;
+
+	float TurningSpeed = 10;
+
+	float MaxSpeed = 2;
 };
