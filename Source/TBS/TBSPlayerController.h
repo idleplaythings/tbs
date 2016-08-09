@@ -22,7 +22,8 @@ public:
 	ATBSGridUI* GridUI;
 
 	void SetupInputComponent() override;
-	void BeginPlay() override;
+	//void BeginPlay() override;
+	void Initialise();
 
 	void OnMouseLeft();	
 	void OnMouseRight();

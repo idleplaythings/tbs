@@ -21,30 +21,31 @@ public:
 	ATBSGameState();
 
 	void StartGameplay();
+	void InitPlayer();
 
-	UFUNCTION()
-	void MouseLeft(FIntVector GameCoords);
+	//UFUNCTION()
+	//void MouseLeft(FIntVector GameCoords);
 
-	UFUNCTION()
-	void MouseRight(FIntVector GameCoords);
+	//UFUNCTION()
+	//void MouseRight(FIntVector GameCoords);
 
-	UFUNCTION()
-	void HoverBegin(FIntVector GameCoords);
+	//UFUNCTION()
+	//void HoverBegin(FIntVector GameCoords);
 
-	UFUNCTION()
-	void HoverEnd(FIntVector GameCoords);
+	//UFUNCTION()
+	//void HoverEnd(FIntVector GameCoords);
 
-private:
-	ATBSGrid* Grid;
-	ATBSGridUI* GridUI;
-	ATBSPropManager* PropManager;
-	ATBSUnitManager* UnitManager;
-	ATBSGridPathFinder* GridPathFinder;
-	ATBSGridPathRenderer* GridPathRenderer;
+//private:
+	//ATBSGrid* Grid;
+	//ATBSGridUI* GridUI;
+	//ATBSPropManager* PropManager;
+	//ATBSUnitManager* UnitManager;
+	//ATBSGridPathFinder* GridPathFinder;
+	//ATBSGridPathRenderer* GridPathRenderer;
 
-	FUnit* SelectedUnit;
-	bool UnitSelected = false;
+	//FUnit* SelectedUnit;
+	//bool UnitSelected = false;
 
-	bool PathSelected = false;
-	TArray<FIntVector> CurrentPath;
+	//bool PathSelected = false;
+	//TArray<FIntVector> CurrentPath;
 };

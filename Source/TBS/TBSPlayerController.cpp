@@ -17,9 +17,10 @@ void ATBSPlayerController::EnableMouse()
 	bEnableTouchOverEvents = true;
 }
 
-void ATBSPlayerController::BeginPlay()
+void ATBSPlayerController::Initialise()
 {
-	Super::BeginPlay();
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Controller initialise")));
+
 	DefaultPawn = Cast<ATBSDefaultPawn>(GetPawn());
 	GridUI = GetGridUI();
 }
@@ -27,6 +28,8 @@ void ATBSPlayerController::BeginPlay()
 void ATBSPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
+
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Setting up input component in player controller")));
 
 	InputComponent->BindAction("ActionLevelUp", IE_Pressed, this, &ATBSPlayerController::MoveLevelUp);
 	InputComponent->BindAction("ActionLevelDown", IE_Pressed, this, &ATBSPlayerController::MoveLevelDown);
@@ -43,59 +46,102 @@ void ATBSPlayerController::SetupInputComponent()
 
 void ATBSPlayerController::MoveLevelUp()
 {
-	DefaultPawn->MoveLevelUp();
-	GridUI->LevelUp();
+	if (DefaultPawn)
+	{
+		DefaultPawn->MoveLevelUp();
+	}
+	
+	if (GridUI)
+	{
+		GridUI->LevelUp();
+	}	
 }
 
 void ATBSPlayerController::MoveLevelDown()
 {
-	DefaultPawn->MoveLevelDown();
-	GridUI->LevelDown();
+	if (DefaultPawn)
+	{
+		DefaultPawn->MoveLevelDown();
+	}
+
+	if (GridUI)
+	{
+		GridUI->LevelDown();
+	}
 }
 
 void ATBSPlayerController::TurnCameraRight()
 {
-	DefaultPawn->TurnCameraRight();
+	if (DefaultPawn)
+	{
+		DefaultPawn->TurnCameraRight();
+	}
 }
 
 void ATBSPlayerController::TurnCameraLeft()
 {
-	DefaultPawn->TurnCameraLeft();
+	if (DefaultPawn)
+	{
+		DefaultPawn->TurnCameraLeft();
+	}
 }
 
 void ATBSPlayerController::ZoomCameraIn()
 {
-	DefaultPawn->ZoomCameraIn();
+	if (DefaultPawn)
+	{
+		DefaultPawn->ZoomCameraIn();
+	}
 }
 
 void ATBSPlayerController::ZoomCameraOut()
 {
-	DefaultPawn->ZoomCameraOut();
+	if (DefaultPawn)
+	{
+		DefaultPawn->ZoomCameraOut();
+	}
 }
 
 void ATBSPlayerController::TogglePerspectiveCamera()
 {
-	DefaultPawn->TogglePerspectiveCamera();
+	if (DefaultPawn)
+	{
+		DefaultPawn->TogglePerspectiveCamera();
+	}
 }
 
 void ATBSPlayerController::MoveCameraForward(float AxisValue)
 {
-	DefaultPawn->MoveCameraForward(AxisValue);
+	DefaultPawn = Cast<ATBSDefaultPawn>(GetPawn());
+
+	if (DefaultPawn)
+	{
+		DefaultPawn->MoveCameraForward(AxisValue);
+	}
 }
 
 void ATBSPlayerController::MoveCameraRight(float AxisValue)
 {
-	DefaultPawn->MoveCameraRight(AxisValue);
+	if (DefaultPawn)
+	{
+		DefaultPawn->MoveCameraRight(AxisValue);
+	}
 }
 
 void ATBSPlayerController::OnMouseLeft()
 {
-	GridUI->HandleMouseLeft();
+	if (GridUI)
+	{
+		GridUI->HandleMouseLeft();
+	}
 }
 
 void ATBSPlayerController::OnMouseRight()
 {
-	GridUI->HandleMouseRight();
+	if (GridUI)
+	{
+		GridUI->HandleMouseRight();
+	}
 }
 
 FHitResult ATBSPlayerController::GetGridHitResult()
@@ -111,6 +157,8 @@ ATBSGridUI* ATBSPlayerController::GetGridUI()
 	{
 		return *ActorItr;
 	}
+
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("No grid ui actor found")));
 
 	return nullptr;
 }

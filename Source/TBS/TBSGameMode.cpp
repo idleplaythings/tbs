@@ -5,6 +5,7 @@
 #include "TBSHUD.h"
 #include "TBSPlayerController.h"
 #include "TBSGameState.h"
+#include "TBSPlayerState.h"
 #include "TBSGridUI.h"
 #include "TBSGrid.h"
 #include "TBSProp_Wall01.h"
@@ -17,6 +18,7 @@ ATBSGameMode::ATBSGameMode(const FObjectInitializer& ObjectInitializer) : Super(
 	HUDClass = ATBSHUD::StaticClass();
 	PlayerControllerClass = ATBSPlayerController::StaticClass();
 	GameStateClass = ATBSGameState::StaticClass();
+	PlayerStateClass = ATBSPlayerState::StaticClass();
 }
 
 void ATBSGameMode::InitGame(
@@ -48,4 +50,14 @@ FString ATBSGameMode::InitNewPlayer(
 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("InitNewPlayer")));
 
 	return Super::InitNewPlayer(NewPlayerController, UniqueId, Options, Portal);
+}
+
+void ATBSGameMode::PostLogin(APlayerController* PlayerController)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Post Login")));
+
+	Super::PostLogin(PlayerController);
+
+	//GetGameState<ATBSGameState>()->InitPlayer();
+	//Cast<ATBSPlayerController>(PlayerController)->Initialise();
 }

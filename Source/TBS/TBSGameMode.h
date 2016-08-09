@@ -34,4 +34,5 @@ public:
 		const FString & Options,
 		const FString & Portal
 	);
+	void PostLogin(APlayerController* PlayerController);
 };
