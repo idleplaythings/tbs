@@ -23,19 +23,19 @@ enum class ETileSlot : uint8
 	W UMETA(DisplayName = "West")
 };
 
-struct FUnit
-{
-	FGuid* Guid;
-	UClass* UnitClass;
-	ATBSUnit* UnitObject;
-	FIntVector Coordinates;
-	FRotator Rotation;
-
-	FUnit()
-	{
-		Guid = new FGuid();
-	}
-};
+//struct FUnit
+//{
+//	FGuid* Guid;
+//	UClass* UnitClass;
+//	ATBSUnit* UnitObject;
+//	FIntVector Coordinates;
+//	FRotator Rotation;
+//
+//	FUnit()
+//	{
+//		Guid = new FGuid();
+//	}
+//};
 
 struct FMovement
 {

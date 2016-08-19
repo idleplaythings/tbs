@@ -1,11 +1,14 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "TBS.h"
+#include "TBSPlayerState.h"
 #include "TBSPlayerController.h"
 
 ATBSPlayerController::ATBSPlayerController(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	EnableMouse();
+
+	//bAutoManageActiveCameraTarget = false;
 }
 
 void ATBSPlayerController::EnableMouse()
@@ -17,19 +20,22 @@ void ATBSPlayerController::EnableMouse()
 	bEnableTouchOverEvents = true;
 }
 
-void ATBSPlayerController::Initialise()
+void ATBSPlayerController::BeginPlay()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Controller initialise")));
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("ATBSPlayerController::BeginPlay")));
 
-	DefaultPawn = Cast<ATBSDefaultPawn>(GetPawn());
-	GridUI = GetGridUI();
+	if (IsLocalPlayerController())
+	{
+		PlayerContext = FLocalPlayerContext(this);
+		GetWorldTimerManager().SetTimer(InitTimer, this, &ATBSPlayerController::InitLocalClasses, 0.2f, true);
+	}		
 }
 
 void ATBSPlayerController::SetupInputComponent()
 {
-	Super::SetupInputComponent();
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("ATBSPlayerController::SetupInputComponent")));
 
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Setting up input component in player controller")));
+	Super::SetupInputComponent();
 
 	InputComponent->BindAction("ActionLevelUp", IE_Pressed, this, &ATBSPlayerController::MoveLevelUp);
 	InputComponent->BindAction("ActionLevelDown", IE_Pressed, this, &ATBSPlayerController::MoveLevelDown);
@@ -130,6 +136,27 @@ void ATBSPlayerController::MoveCameraRight(float AxisValue)
 
 void ATBSPlayerController::OnMouseLeft()
 {
+	if (Role == ROLE_Authority)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("ATBSPlayerController::OnMouseLeft ROLE_Authority")));
+	}
+	else if (Role == ROLE_AutonomousProxy)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("ATBSPlayerController::OnMouseLeftd ROLE_AutonomousProxy")));
+	}
+	else if (Role == ROLE_SimulatedProxy)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("ATBSPlayerController::OnMouseLeftd ROLE_SimulatedProxy")));
+	}
+	else if (Role == ROLE_None)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("ATBSPlayerController::OnMouseLeft ROLE_None")));
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("ATBSPlayerController::OnMouseLeft Other")));
+	}
+
 	if (GridUI)
 	{
 		GridUI->HandleMouseLeft();
@@ -150,15 +177,116 @@ FHitResult ATBSPlayerController::GetGridHitResult()
 	bool bHitSomething = GetHitResultUnderCursor(ECollisionChannel::ECC_GameTraceChannel1, true, Result);
 	return Result;
 }
+//
+//void ATBSPlayerController::Server_Possess_Implementation(ATBSUnit* Unit)
+//{
+//	if (HasAuthority())
+//	{
+//		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Possessing on server")));
+//		Possess(Unit);
+//	}
+//}
+//
+//bool ATBSPlayerController::Server_Possess_Validate(ATBSUnit* Unit)
+//{
+//	return true;
+//}
+//
+//void ATBSPlayerController::Server_UnPossess_Implementation()
+//{
+//	if (HasAuthority())
+//	{
+//		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Unpossessing on server")));
+//		UnPossess();
+//	}
+//}
+//
+//bool ATBSPlayerController::Server_UnPossess_Validate()
+//{
+//	return true;
+//}
 
-ATBSGridUI* ATBSPlayerController::GetGridUI()
+void ATBSPlayerController::InitLocalClasses()
 {
-	for (TActorIterator<ATBSGridUI> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	if (DefaultPawn && Grid && GridUI && PlayerState2)
 	{
-		return *ActorItr;
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("All local classes Initialised")));
+
+		GridUI->OnGameTileMouseLeft.AddDynamic(PlayerState2, &ATBSPlayerState::MouseLeft);
+		GridUI->OnGameTileMouseRight.AddDynamic(PlayerState2, &ATBSPlayerState::MouseRight);
+		GridUI->OnGameTileHoverBegin.AddDynamic(PlayerState2, &ATBSPlayerState::HoverBegin);
+		GridUI->OnGameTileHoverEnd.AddDynamic(PlayerState2, &ATBSPlayerState::HoverEnd);
+
+		GetWorldTimerManager().ClearTimer(InitTimer);
+		return;
 	}
 
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("No grid ui actor found")));
-
-	return nullptr;
+	InitDefaultPawn();
+	InitGrid();
+	InitGridUI();
+	InitPlayerState2();
 }
+
+bool ATBSPlayerController::InitDefaultPawn()
+{
+	if (DefaultPawn)
+	{
+		return true;
+	}
+
+	DefaultPawn = Cast<ATBSDefaultPawn>(GetPawn());
+
+	return true;
+}
+
+bool ATBSPlayerController::InitGrid()
+{
+	if (Grid)
+	{
+		return true;
+	}
+
+	for (TActorIterator<ATBSGrid> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		Grid = *ActorItr;
+		return true;
+	}
+
+	return false;
+}
+
+bool ATBSPlayerController::InitGridUI()
+{
+	if (!InitGrid())
+	{
+		return false;
+	}
+
+	if (GridUI)
+	{
+		return true;
+	}
+
+	GridUI = GetWorld()->SpawnActor<ATBSGridUI>(ATBSGridUI::StaticClass());
+	GridUI->RenderGrid(Grid);
+	return true;
+}
+
+bool ATBSPlayerController::InitPlayerState2()
+{
+	if (!InitGrid())
+	{
+		return false;
+	}
+
+	if (!InitGridUI())
+	{
+		return false;
+	}
+
+	PlayerState2 = Cast<ATBSPlayerState>(PlayerState);
+	PlayerState2->Initialise(Grid, GridUI);
+
+	return true;
+}
+

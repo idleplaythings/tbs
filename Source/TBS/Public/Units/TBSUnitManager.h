@@ -9,7 +9,7 @@
 
 struct FMovementCommand
 {
-	FUnit* Unit;
+	ATBSUnit* Unit;
 	FMovement Movement;
 
 	FMovementCommand()
@@ -17,7 +17,7 @@ struct FMovementCommand
 
 	}
 
-	FMovementCommand(FUnit* InUnit, FMovement InMovement)
+	FMovementCommand(ATBSUnit* InUnit, FMovement InMovement)
 	{
 		Unit = InUnit;
 		Movement = InMovement;
@@ -40,8 +40,9 @@ public:
 	virtual void Tick( float DeltaSeconds ) override;
 
 	void Initialise(ATBSGrid* Grid, ATBSGridUI* GridUI);
-	void RenderUnits();
-	void MoveUnit(FUnit* Unit, FMovement Movements);
+	void ResetUnit(ATBSUnit* Unit);
+	void ResetUnits();
+	void MoveUnit(ATBSUnit* Unit, FMovement Movements);
 
 private:
 	ATBSGrid* Grid;

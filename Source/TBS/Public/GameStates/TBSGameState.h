@@ -5,6 +5,7 @@
 #include "GameFramework/GameState.h"
 #include "TBSPropManager.h"
 #include "TBSUnitManager.h"
+#include "TBSUnitFactory.h"
 #include "TBSGridPathFinder.h"
 #include "TBSGridPathRenderer.h"
 #include "TBSGameState.generated.h"
@@ -18,10 +19,9 @@ class TBS_API ATBSGameState : public AGameState
 	GENERATED_BODY()
 	
 public:
-	ATBSGameState();
 
 	void StartGameplay();
-	void InitPlayer();
+	void PostInitializeComponents() override;
 
 	//UFUNCTION()
 	//void MouseLeft(FIntVector GameCoords);
@@ -35,9 +35,16 @@ public:
 	//UFUNCTION()
 	//void HoverEnd(FIntVector GameCoords);
 
-//private:
-	//ATBSGrid* Grid;
-	//ATBSGridUI* GridUI;
+	void  SpawnUnitsForPlayer(APlayerController* PlayerController);
+
+private:
+	ATBSGrid* Grid;
+
+	ATBSPropManager* PropManager;
+	ATBSUnitManager* UnitManager;
+	ATBSUnitFactory* UnitFactory;
+
+	ATBSGridUI* GridUI;
 	//ATBSPropManager* PropManager;
 	//ATBSUnitManager* UnitManager;
 	//ATBSGridPathFinder* GridPathFinder;

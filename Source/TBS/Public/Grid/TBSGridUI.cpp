@@ -49,9 +49,9 @@ void ATBSGridUI::InitialisePlayerController()
 
 void ATBSGridUI::InitialiseParametersFromGrid()
 {
-	GridWidth = Grid->GridWidth;
-	GridHeight = Grid->GridHeight;
-	NumOfLevels = Grid->NumOfLevels;
+	GridWidth = Grid->GridDimensions.X;
+	GridHeight = Grid->GridDimensions.Y;
+	NumOfLevels = Grid->GridDimensions.Z;
 	GridMeshWidth = (float)GridWidth * TileSize;
 	GridMeshHeight = (float)GridHeight * TileSize;
 }
@@ -72,7 +72,8 @@ void ATBSGridUI::CreateGridMeshComponents()
 		UStaticMeshComponent* GridMeshComponent = CreateMeshComponent();
 		GridMeshComponent->AddRelativeLocation(FVector(0.0, 0.0, (float)i * FloorHeight));
 		GridMeshComponent->SetRelativeScale3D(FVector(GridMeshWidth, GridMeshHeight, 0.01));
-		GridMeshComponent->SetMaterial(0, GridMaterials[i]);
+		GridMeshComponent->SetMaterial(0, GridMaterials[i]);		
+		//GridMeshComponent->SetIsReplicated(true);
 		GridMeshes.Push(GridMeshComponent);
 	}
 }
@@ -82,7 +83,7 @@ UMaterialInstanceDynamic* ATBSGridUI::CreateMaterialInstance()
 	UMaterialInstanceDynamic* GridMaterialInstance = UMaterialInstanceDynamic::Create(GridMaterial, this);
 	GridMaterialInstance->SetScalarParameterValue(FName(TEXT("UTiling")), GridWidth + 0.02);
 	GridMaterialInstance->SetScalarParameterValue(FName(TEXT("VTiling")), GridHeight + 0.02);
-	GridMaterialInstance->SetScalarParameterValue(FName(TEXT("OpacityMultiplier")), 0.5);
+	GridMaterialInstance->SetScalarParameterValue(FName(TEXT("OpacityMultiplier")), 0.5);	
 	return GridMaterialInstance;
 }
 
@@ -92,7 +93,7 @@ UStaticMeshComponent* ATBSGridUI::CreateMeshComponent()
 	MeshComponent->SetStaticMesh(GridMesh);
 	MeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	MeshComponent->SetCollisionProfileName(FName(TEXT("GridCollisionProfile")));
-	MeshComponent->AttachTo(RootComponent);
+	MeshComponent->AttachTo(RootComponent);	
 	FinishAndRegisterComponent(MeshComponent);
 	return MeshComponent;
 }
@@ -106,6 +107,11 @@ void ATBSGridUI::SpawnCursor()
 void ATBSGridUI::Tick( float DeltaTime )
 {
 	Super::Tick( DeltaTime );
+
+	if (!PlayerController)
+	{
+		return;
+	}
 
 	FHitResult HitResult = PlayerController->GetGridHitResult();
 

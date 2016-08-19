@@ -22,8 +22,11 @@ class TBS_API ATBSPlayerState : public APlayerState
 public:
 	void ClientInitialize(AController* Controller);	
 
-	void StartGameplay();
-	void InitPlayer();
+	//void StartGameplay();
+	//void InitPlayer();
+	void BeginPlay() override;
+	void PostInitializeComponents() override;
+	void Initialise(ATBSGrid* Grid, ATBSGridUI* GridUI);
 
 	UFUNCTION()
 	void MouseLeft(FIntVector GameCoords);
@@ -38,6 +41,7 @@ public:
 	void HoverEnd(FIntVector GameCoords);
 
 private:
+	ATBSPlayerController* PlayerController;
 	ATBSGrid* Grid;
 	ATBSGridUI* GridUI;
 	ATBSPropManager* PropManager;
@@ -45,7 +49,7 @@ private:
 	ATBSGridPathFinder* GridPathFinder;
 	ATBSGridPathRenderer* GridPathRenderer;
 
-	FUnit* SelectedUnit;
+	ATBSUnit* SelectedUnit;
 	bool UnitSelected = false;
 
 	bool PathSelected = false;

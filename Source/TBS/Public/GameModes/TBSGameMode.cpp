@@ -27,13 +27,15 @@ void ATBSGameMode::InitGame(
 	FString & ErrorMessage
 )
 {
-	Super::InitGame(MapName, Options, ErrorMessage);
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("ATBSGameMode::InitGame")));
 
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("InitGame")));
+	Super::InitGame(MapName, Options, ErrorMessage);	
 }
 
 void ATBSGameMode::InitGameState()
 {
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("ATBSGameMode::InitGameState")));
+
 	Super::InitGameState();
 
 	ATBSGameState* GameState = GetGameState<ATBSGameState>();
@@ -47,17 +49,17 @@ FString ATBSGameMode::InitNewPlayer(
 	const FString & Portal
 )
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("InitNewPlayer")));
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("ATBSGameMode::InitNewPlayer")));
 
-	return Super::InitNewPlayer(NewPlayerController, UniqueId, Options, Portal);
+	return Super::InitNewPlayer(NewPlayerController, UniqueId, Options, Portal);	
 }
 
 void ATBSGameMode::PostLogin(APlayerController* PlayerController)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Post Login")));
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("ATBSGameMode::PostLogin")));
 
 	Super::PostLogin(PlayerController);
 
-	//GetGameState<ATBSGameState>()->InitPlayer();
-	//Cast<ATBSPlayerController>(PlayerController)->Initialise();
+	ATBSGameState* GameState = GetGameState<ATBSGameState>();
+	GameState->SpawnUnitsForPlayer(PlayerController);
 }

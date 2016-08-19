@@ -40,42 +40,52 @@ void ATBSUnitManager::Initialise(ATBSGrid* InGrid, ATBSGridUI* InGridUI)
 	GridUI = InGridUI;
 }
 
-void ATBSUnitManager::RenderUnits()
+void ATBSUnitManager::ResetUnits()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Rendering units")));
+	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Rendering units")));
 
 	for (auto It = Grid->GetUnitIterator(); It; ++It)
 	{
-		(*It)->UnitObject = GetWorld()->SpawnActor<ATBSUnit>((*It)->UnitClass);
-		FCoordinateLocations Locations = GridUI->GetCoordinateLocations((*It)->Coordinates);
-		(*It)->UnitObject->SetActorLocation(Locations.Center);
+		//(*It)->UnitObject = GetWorld()->SpawnActor<ATBSUnit>((*It)->UnitClass);
+		FCoordinateLocations Locations = GridUI->GetCoordinateLocations((*It)->GameCoordinates);
+		(*It)->SetActorLocation(Locations.Center);
 		//(*It).UnitObject = UnitActor;
 	}
 }
 
-void ATBSUnitManager::MoveUnit(FUnit* Unit, FMovement Movement)
+void ATBSUnitManager::ResetUnit(ATBSUnit* Unit)
 {
-	MovementCommandQueue.Enqueue(FMovementCommand(Unit, Movement));
+	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Rendering units")));
+
+	FCoordinateLocations Locations = GridUI->GetCoordinateLocations(Unit->GameCoordinates);
+	Unit->SetActorLocation(Locations.Center);
+}
+
+void ATBSUnitManager::MoveUnit(ATBSUnit* Unit, FMovement Movement)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Movement")));
+	//MovementCommandQueue.Enqueue(FMovementCommand(Unit, Movement));
 }
 
 bool ATBSUnitManager::ConsumeMovementCommand(FMovementCommand &MovementCommand)
 {
-	return MovementCommandQueue.Dequeue(MovementCommand);
+	//return MovementCommandQueue.Dequeue(MovementCommand);
+	return false;
 }
 
 void ATBSUnitManager::StartMovement()
 {
 	IsProcessingMovement = true;
-	CurrentMovement.Unit->Coordinates = CurrentMovement.Movement.TargetGameCoordinates;
+	CurrentMovement.Unit->GameCoordinates = CurrentMovement.Movement.TargetGameCoordinates;
 }
 
 void ATBSUnitManager::MoveUnit(float DeltaTime)
-{
+{	
 	if (IsProcessingMovement)
 	{
-		FVector RemainingMovement = CurrentMovement.Movement.TargetWorldCoordinates - CurrentMovement.Unit->UnitObject->GetActorLocation();
+		FVector RemainingMovement = CurrentMovement.Movement.TargetWorldCoordinates - CurrentMovement.Unit->GetActorLocation();
 
-		ATBSUnit* UnitActor = CurrentMovement.Unit->UnitObject;
+		ATBSUnit* UnitActor = CurrentMovement.Unit;
 
 		UnitActor->Speed = FMath::Clamp(UnitActor->Speed + UnitActor->Acceleration, 0.0f, UnitActor->MaxSpeed);
 	

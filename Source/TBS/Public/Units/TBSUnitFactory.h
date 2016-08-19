@@ -3,6 +3,7 @@
 #pragma once
 
 #include "GameFramework/Actor.h"
+#include "TBSUnit.h"
 #include "TBSUnitFactory.generated.h"
 
 UCLASS()
@@ -20,7 +21,7 @@ public:
 	// Called every frame
 	virtual void Tick( float DeltaSeconds ) override;
 
-	FUnit* CreateUnit(FIntVector Coordinates, FRotator Rotation);
+	ATBSUnit* CreateUnit(FIntVector Coordinates, FRotator Rotation);
 
 private:
 	UClass* UnitBPClass;

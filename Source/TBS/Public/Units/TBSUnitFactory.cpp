@@ -32,11 +32,10 @@ void ATBSUnitFactory::Tick( float DeltaTime )
 
 }
 
-FUnit* ATBSUnitFactory::CreateUnit(FIntVector Coordinates, FRotator Rotation)
+ATBSUnit* ATBSUnitFactory::CreateUnit(FIntVector Coordinates, FRotator Rotation)
 {
-	FUnit* Unit = new FUnit;
-	Unit->UnitClass = UnitBPClass;
-	Unit->Coordinates = Coordinates;
-	Unit->Rotation = Rotation;
+	ATBSUnit* Unit = GetWorld()->SpawnActor<ATBSUnit>(UnitBPClass);
+	Unit->GameCoordinates = Coordinates;
+	Unit->SetActorRotation(Rotation);
 	return Unit;
 }

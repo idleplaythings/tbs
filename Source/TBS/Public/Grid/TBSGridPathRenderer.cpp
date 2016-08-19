@@ -41,6 +41,8 @@ void ATBSGridPathRenderer::Initialise(ATBSGrid* InGrid, ATBSGridUI* InGridUI)
 
 void ATBSGridPathRenderer::RenderPath(TArray<FIntVector> InPath)
 {
+	//return; 
+
 	if (RenderedPath.Num() < InPath.Num())
 	{
 		int ComponentsToAdd = InPath.Num() - RenderedPath.Num();
@@ -60,6 +62,8 @@ void ATBSGridPathRenderer::RenderPath(TArray<FIntVector> InPath)
 
 void ATBSGridPathRenderer::ClearPath()
 {
+	//return;
+
 	for (auto& PathComponent : RenderedPath)
 	{
 		PathComponent->SetVisibility(false);

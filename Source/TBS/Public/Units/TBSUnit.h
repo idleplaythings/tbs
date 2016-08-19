@@ -21,15 +21,26 @@ public:
 	// Called every frame
 	virtual void Tick( float DeltaSeconds ) override;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(Replicated, BlueprintReadWrite)
 	float Speed = 0.0;
 
+	UPROPERTY(Replicated)
 	float AccelerationTime = 1.0;
+
+	UPROPERTY(Replicated)
 	float TurnTime = 0.5;
 
+	UPROPERTY(Replicated)
 	float Acceleration = 0.5;
 
+	UPROPERTY(Replicated)
 	float TurningSpeed = 10;
 
+	UPROPERTY(Replicated)
 	float MaxSpeed = 2;
+
+	UPROPERTY(Replicated)
+	FIntVector GameCoordinates;
+
+	void AddMovementCommand();
 };

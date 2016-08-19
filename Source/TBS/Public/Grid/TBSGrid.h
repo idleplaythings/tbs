@@ -4,6 +4,7 @@
 
 #include "GameFramework/Actor.h"
 #include "TBSProp.h"
+#include "TBSUnit.h"
 #include "TBSGrid.generated.h"
 
 UCLASS()
@@ -19,24 +20,26 @@ public:
 	virtual void BeginPlay() override;
 	
 	// Called every frame
-	virtual void Tick( float DeltaSeconds ) override;
+	//virtual void Tick( float DeltaSeconds ) override;
 	
-	int32 GridWidth = 0;
-	int32 GridHeight = 0;
-	int32 NumOfLevels = 0;
+	UPROPERTY(Replicated)
+	FIntVector GridDimensions;
 
-	void InitialiseGrid(int32 GridWidth, int32 GridHeight, int32 NumOfLevels);
+	UPROPERTY(Replicated)
+	TArray<ATBSUnit*> Units;
+
+	void InitialiseGrid(FIntVector GridDimensions);
 	TArray<FIntVector> GetAccessibleNeighbours(FIntVector Coordinates);
 	TArray<FIntVector> GetNeighbours(FIntVector Coordinates);
 
 	void AddProp(FProp Prop);
-	void AddUnit(FUnit* Unit);
+	void AddUnit(ATBSUnit* Unit);
 	TMap<FIntVector, TArray<FProp>>::TConstIterator GetPropsIterator();
-	TArray<FUnit*>::TIterator GetUnitIterator();
-	FUnit* SelectUnit(FIntVector GameCoords);
+	TArray<ATBSUnit*>::TIterator GetUnitIterator();
+	ATBSUnit* SelectUnit(FIntVector GameCoords);
 
 private:
 	TMap<FIntVector, TArray<FProp>> Props;
-	TArray<FUnit*> Units;
+	
 	bool IsTileAccessBlockedByProp(FIntVector Coordinates, ETileSlot Slot);
 };

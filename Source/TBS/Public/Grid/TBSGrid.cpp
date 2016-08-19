@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "TBS.h"
+#include "UnrealNetwork.h"
 #include "TBSGrid.h"
 
 
@@ -8,7 +9,15 @@
 ATBSGrid::ATBSGrid()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
+	bReplicates = true;
+	bAlwaysRelevant = true;
+}
+
+void ATBSGrid::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
+{
+	DOREPLIFETIME(ATBSGrid, GridDimensions);
+	DOREPLIFETIME(ATBSGrid, Units);
 }
 
 // Called when the game starts or when spawned
@@ -19,17 +28,15 @@ void ATBSGrid::BeginPlay()
 }
 
 // Called every frame
-void ATBSGrid::Tick( float DeltaTime )
-{
-	Super::Tick( DeltaTime );
+//void ATBSGrid::Tick( float DeltaTime )
+//{
+//	Super::Tick( DeltaTime );
+//
+//}
 
-}
-
-void ATBSGrid::InitialiseGrid(int32 GridWidth, int32 GridHeight, int32 NumOfLevels)
+void ATBSGrid::InitialiseGrid(FIntVector InGridDimensions)
 {
-	this->GridWidth = GridWidth;
-	this->GridHeight = GridHeight;
-	this->NumOfLevels = NumOfLevels;
+	GridDimensions = InGridDimensions;
 }
 
 TMap<FIntVector, TArray<FProp>>::TConstIterator ATBSGrid::GetPropsIterator()
@@ -37,7 +44,7 @@ TMap<FIntVector, TArray<FProp>>::TConstIterator ATBSGrid::GetPropsIterator()
 	return Props.CreateConstIterator();
 }
 
-TArray<FUnit*>::TIterator ATBSGrid::GetUnitIterator()
+TArray<ATBSUnit*>::TIterator ATBSGrid::GetUnitIterator()
 {
 	return Units.CreateIterator();
 }
@@ -58,18 +65,20 @@ void ATBSGrid::AddProp(FProp Prop)
 	}
 }
 
-void ATBSGrid::AddUnit(FUnit* Unit)
+void ATBSGrid::AddUnit(ATBSUnit* Unit)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Add unit addr (%#010x)"), Unit));
 	Units.Add(Unit);
 }
 
-FUnit* ATBSGrid::SelectUnit(FIntVector GameCoords)
+ATBSUnit* ATBSGrid::SelectUnit(FIntVector GameCoords)
 {
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Looking for units")));
 	//bool UnitFound = false;
 	for (auto &Unit : Units)
 	{
-		if (Unit->Coordinates == GameCoords)
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Unit coords (%i, %i, %i)"), Unit->GameCoordinates.X, Unit->GameCoordinates.Y, Unit->GameCoordinates.Z));
+
+		if (Unit->GameCoordinates == GameCoords)
 		{ 
 			return Unit;
 			//InUnit = Unit;
@@ -99,9 +108,9 @@ TArray<FIntVector> ATBSGrid::GetNeighbours(FIntVector Coordinates)
 
 	return Neighbours.FilterByPredicate([this, Coordinates](const FIntVector& Neighbour) {
 		return Neighbour != Coordinates
-			&& Neighbour.X >= 0 && Neighbour.X < this->GridWidth
-			&& Neighbour.Y >= 0 && Neighbour.Y < this->GridHeight
-			&& Neighbour.Z >= 0 && Neighbour.Z < this->NumOfLevels;
+			&& Neighbour.X >= 0 && Neighbour.X < this->GridDimensions.X
+			&& Neighbour.Y >= 0 && Neighbour.Y < this->GridDimensions.Y
+			&& Neighbour.Z >= 0 && Neighbour.Z < this->GridDimensions.Z;
 	});
 }
 
