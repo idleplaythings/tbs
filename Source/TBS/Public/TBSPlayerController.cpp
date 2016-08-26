@@ -1,7 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "TBS.h"
+#include "UnrealNetwork.h"
 #include "TBSPlayerState.h"
+#include "TBSGameMode.h"
+#include "TBSGameState.h"
 #include "TBSPlayerController.h"
 
 ATBSPlayerController::ATBSPlayerController(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
@@ -19,6 +22,14 @@ void ATBSPlayerController::EnableMouse()
 	bEnableMouseOverEvents = true;
 	bEnableTouchOverEvents = true;
 }
+
+void ATBSPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ATBSPlayerController, TeamNumber);
+}
+
 
 void ATBSPlayerController::BeginPlay()
 {
@@ -177,6 +188,34 @@ FHitResult ATBSPlayerController::GetGridHitResult()
 	bool bHitSomething = GetHitResultUnderCursor(ECollisionChannel::ECC_GameTraceChannel1, true, Result);
 	return Result;
 }
+
+void ATBSPlayerController::Server_HandleCommand_Implementation(ATBSUnit* Unit, const TArray<FIntVector>& Movements)
+{
+	if (!HasAuthority())
+	{
+		return;		
+	}
+
+	ATBSGameMode* GameMode = GetWorld()->GetAuthGameMode<ATBSGameMode>();
+	ATBSGameState* GameState = Cast<ATBSGameState>(GameMode->GameState);
+
+	for (auto& Movement : Movements)
+	{
+		GameState->UnitManager->MoveUnit(Unit, Movement);
+	}	
+}
+
+bool ATBSPlayerController::Server_HandleCommand_Validate(ATBSUnit* Unit, const TArray<FIntVector>& Movements)
+{
+	if (TeamNumber != Unit->TeamNumber)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("This is not your unit!")));
+		return false;
+	}
+
+	return true;
+}
+
 //
 //void ATBSPlayerController::Server_Possess_Implementation(ATBSUnit* Unit)
 //{

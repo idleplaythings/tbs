@@ -32,47 +32,12 @@ void ATBSPropManager::Initialise(ATBSGrid* InGrid, ATBSGridUI* InGridUI)
 	GridUI = InGridUI;
 }
 
-void ATBSPropManager::RenderProps()
+void ATBSPropManager::ResetProps()
 {
 	for (auto It = Grid->GetPropsIterator(); It; ++It)
 	{
-		for (auto& Prop : It.Value())
-		{			
-			ATBSProp* PropActor = GetWorld()->SpawnActor<ATBSProp>(Prop.PropClass);
-			FCoordinateLocations Locations = GridUI->GetCoordinateLocations(Prop.Coordinates);
-
-			switch (Prop.Slot)
-			{
-			case ETileSlot::NW:
-				PropActor->SetActorLocation(Locations.NW);
-				break;
-			case ETileSlot::N:
-				PropActor->SetActorLocation(Locations.N);
-				break;
-			case ETileSlot::NE:
-				PropActor->SetActorLocation(Locations.NE);
-				break;
-			case ETileSlot::E:
-				PropActor->SetActorLocation(Locations.E);
-				break;
-			case ETileSlot::SE:
-				PropActor->SetActorLocation(Locations.SE);
-				break;
-			case ETileSlot::S:
-				PropActor->SetActorLocation(Locations.S);
-				break;
-			case ETileSlot::SW:
-				PropActor->SetActorLocation(Locations.SW);
-				break;
-			case ETileSlot::W:
-				PropActor->SetActorLocation(Locations.W);
-				break;
-			default:
-				PropActor->SetActorLocation(Locations.Center);
-			}
-
-			PropActor->SetActorRotation(Prop.Rotation);
-		}
+		FCoordinateLocations Locations = GridUI->GetCoordinateLocations((*It)->GameCoordinates);
+		(*It)->SetActorLocation(Locations.Center);
 	}
 }
 

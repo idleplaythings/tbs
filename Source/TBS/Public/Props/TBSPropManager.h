@@ -24,7 +24,7 @@ public:
 	virtual void Tick( float DeltaSeconds ) override;
 
 	void Initialise(ATBSGrid* Grid, ATBSGridUI* GridUI);
-	void RenderProps();
+	void ResetProps();
 
 private:
 	ATBSGrid* Grid;

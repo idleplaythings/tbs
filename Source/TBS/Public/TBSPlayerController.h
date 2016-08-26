@@ -7,6 +7,7 @@
 #include "TBSGridUI.h"
 #include "TBSPlayerState.h"
 #include "TBSDefaultPawn.h"
+#include "TBSTypes.h"
 #include "TBSPlayerController.generated.h"
 
 UCLASS()
@@ -31,10 +32,14 @@ public:
 	void OnMouseLeft();
 	void OnMouseRight();
 	FHitResult GetGridHitResult();
-	void Server_Possess_Implementation(ATBSUnit* Unit);
-	bool Server_Possess_Validate(ATBSUnit* Unit);
-	void Server_UnPossess_Implementation();
-	bool Server_UnPossess_Validate();
+	//void Server_Possess_Implementation(ATBSUnit* Unit);
+	//bool Server_Possess_Validate(ATBSUnit* Unit);
+	//void Server_UnPossess_Implementation();
+	//bool Server_UnPossess_Validate();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_HandleCommand(ATBSUnit* Unit, const TArray<FIntVector>& Movements);
+
 	void InitLocalClasses();
 	bool InitDefaultPawn();
 	bool InitGrid();
@@ -48,5 +53,8 @@ public:
 	ATBSDefaultPawn* DefaultPawn;
 	FLocalPlayerContext PlayerContext;
 	FTimerHandle InitTimer;
+
+	UPROPERTY(Replicated)
+	int32 TeamNumber = 0;
 };
 

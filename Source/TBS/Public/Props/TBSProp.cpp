@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "TBS.h"
+#include "UnrealNetwork.h"
 #include "TBSProp.h"
 
 
@@ -26,3 +27,11 @@ void ATBSProp::Tick( float DeltaTime )
 
 }
 
+void ATBSProp::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ATBSProp, BlocksAccess);
+	DOREPLIFETIME(ATBSProp, Rotation);
+	DOREPLIFETIME(ATBSProp, GameCoordinates);
+}

@@ -7,20 +7,22 @@
 #include "TBSGridUI.h"
 #include "TBSUnitManager.generated.h"
 
-struct FMovementCommand
+struct MovementCommand
 {
 	ATBSUnit* Unit;
-	FMovement Movement;
+	FIntVector Movement;
+	FVector TargetWorldCoordinates;
 
-	FMovementCommand()
+	MovementCommand()
 	{
 
 	}
 
-	FMovementCommand(ATBSUnit* InUnit, FMovement InMovement)
+	MovementCommand(ATBSUnit* InUnit, FIntVector InMovement, FVector InTargetWorldCoordinates)
 	{
 		Unit = InUnit;
 		Movement = InMovement;
+		TargetWorldCoordinates = InTargetWorldCoordinates;
 	}
 };
 
@@ -42,15 +44,16 @@ public:
 	void Initialise(ATBSGrid* Grid, ATBSGridUI* GridUI);
 	void ResetUnit(ATBSUnit* Unit);
 	void ResetUnits();
-	void MoveUnit(ATBSUnit* Unit, FMovement Movements);
+	void MoveUnit(ATBSUnit* Unit, FIntVector Movements);
 
 private:
 	ATBSGrid* Grid;
 	ATBSGridUI* GridUI;
 	bool IsProcessingMovement;
-	FMovementCommand CurrentMovement;
-	TQueue<FMovementCommand> MovementCommandQueue;
-	bool ConsumeMovementCommand(FMovementCommand &MovementCommand);
+	MovementCommand CurrentMovement;
+	FVector CurrentMovementTarget;
+	TQueue<MovementCommand> MovementCommandQueue;
+	bool ConsumeMovementCommand(MovementCommand &MovementCommand);
 	void StartMovement();
 	void MoveUnit(float DeltaTime);
 };

@@ -22,7 +22,7 @@ public:
 	virtual void Tick( float DeltaSeconds ) override;
 
 	void Initialise(ATBSGrid* InGrid);	
-	TArray<FIntVector> FindPath(FIntVector Start, FIntVector End);
+	bool FindPath(FIntVector Start, FIntVector End, TArray<FIntVector> &OutPath);
 
 private:
 	ATBSGrid* Grid;

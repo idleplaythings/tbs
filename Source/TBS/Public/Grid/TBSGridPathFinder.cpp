@@ -31,15 +31,14 @@ void ATBSGridPathFinder::Initialise(ATBSGrid* InGrid)
 	Grid = InGrid;
 }
 
-TArray<FIntVector> ATBSGridPathFinder::FindPath(FIntVector Start, FIntVector End)
+bool ATBSGridPathFinder::FindPath(FIntVector Start, FIntVector End, TArray<FIntVector> &OutPath)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Find path (%i, %i, %i) -> (%i, %i, %i)"), Start.X, Start.Y, Start.Z, End.X, End.Y, End.Z));
+	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Find path (%i, %i, %i) -> (%i, %i, %i)"), Start.X, Start.Y, Start.Z, End.X, End.Y, End.Z));
 
 	if (Grid == nullptr)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Null grid")));
-		TArray<FIntVector> RetVal;
-		return RetVal;
+		return false;
 	}
 
 	TArray<PathStep> Frontier;
@@ -92,8 +91,7 @@ TArray<FIntVector> ATBSGridPathFinder::FindPath(FIntVector Start, FIntVector End
 	if (!FoundEnd)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("No end found")));
-		TArray<FIntVector> RetVal;
-		return RetVal;
+		return false;
 	}
 
 	FIntVector Current = End;
@@ -107,7 +105,7 @@ TArray<FIntVector> ATBSGridPathFinder::FindPath(FIntVector Start, FIntVector End
 
 	Algo::Reverse(Path);
 
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Path length: %i"), Path.Num()));
+	OutPath = Path;
 
-	return Path;
+	return true;
 }

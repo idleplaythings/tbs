@@ -7,6 +7,8 @@
 #include "TBSUnit.h"
 #include "TBSGrid.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnActorNoLongerVisible, int32, TeamNumber, AActor*, Actor);
+
 UCLASS()
 class TBS_API ATBSGrid : public AActor
 {
@@ -26,20 +28,36 @@ public:
 	FIntVector GridDimensions;
 
 	UPROPERTY(Replicated)
+	TArray<ATBSProp*> Props;
+
+	UPROPERTY(Replicated)
 	TArray<ATBSUnit*> Units;
+
+	UFUNCTION(NetMulticast, Reliable)
+	void ReindexProps();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void ReindexUnits();
+
+	TArray<ATBSUnit*> GetUnitsByTeam(int32 TeamNumber);
+	bool CanDrawLineOfFire(FIntVector Start, FIntVector End);
+
+	TArray<FIntVector> Trace(FIntVector Start, FIntVector End);
 
 	void InitialiseGrid(FIntVector GridDimensions);
 	TArray<FIntVector> GetAccessibleNeighbours(FIntVector Coordinates);
 	TArray<FIntVector> GetNeighbours(FIntVector Coordinates);
+	bool IsAccessible(FIntVector Coordinates);
 
-	void AddProp(FProp Prop);
+	void AddProp(ATBSProp* Prop);
 	void AddUnit(ATBSUnit* Unit);
-	TMap<FIntVector, TArray<FProp>>::TConstIterator GetPropsIterator();
+	TArray<ATBSProp*>::TIterator GetPropsIterator();
 	TArray<ATBSUnit*>::TIterator GetUnitIterator();
 	ATBSUnit* SelectUnit(FIntVector GameCoords);
 
-private:
-	TMap<FIntVector, TArray<FProp>> Props;
+	FOnActorNoLongerVisible OnActorNoLongerVisible;
+
+private:	
 	
-	bool IsTileAccessBlockedByProp(FIntVector Coordinates, ETileSlot Slot);
+	//bool IsTileAccessBlockedByProp(FIntVector Coordinates, ETileSlot Slot);
 };

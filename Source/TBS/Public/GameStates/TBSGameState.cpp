@@ -5,6 +5,7 @@
 #include "TBSGrid.h"
 #include "TBSGridUI.h"
 #include "TBSPropFactory.h"
+#include "Engine/ActorChannel.h"
 #include "TBSGameState.h"
 
 void ATBSGameState::StartGameplay()
@@ -15,15 +16,16 @@ void ATBSGameState::StartGameplay()
 	Grid->InitialiseGrid(FIntVector(10, 20, 3));
 
 	ATBSPropFactory* PropFactory = GetWorld()->SpawnActor<ATBSPropFactory>(ATBSPropFactory::StaticClass());
-	FProp Wall1 = PropFactory->CreateWall(FIntVector(2, 7, 0), ETileSlot::W, FRotator(0.0, 90.0, 0.0));
-	FProp Wall2 = PropFactory->CreateWall(FIntVector(2, 7, 0), ETileSlot::N, FRotator(0.0, 0.0, 0.0));
-	FProp Wall3 = PropFactory->CreateWall(FIntVector(3, 7, 0), ETileSlot::N, FRotator(0.0, 0.0, 0.0));
-	FProp Wall4 = PropFactory->CreateWall(FIntVector(4, 7, 0), ETileSlot::N, FRotator(0.0, 0.0, 0.0));
 
-	Grid->AddProp(Wall1);
-	Grid->AddProp(Wall2);
-	Grid->AddProp(Wall3);
-	Grid->AddProp(Wall4);
+	Grid->AddProp(PropFactory->CreateWall(FIntVector(2, 8, 0), FRotator(0.0, 90.0, 0.0)));
+	Grid->AddProp(PropFactory->CreateWall(FIntVector(2, 7, 0), FRotator(0.0, 0.0, 0.0)));
+	Grid->AddProp(PropFactory->CreateWall(FIntVector(3, 7, 0), FRotator(0.0, 0.0, 0.0)));
+	Grid->AddProp(PropFactory->CreateWall(FIntVector(4, 7, 0), FRotator(0.0, 0.0, 0.0)));
+
+	if (HasAuthority())
+	{
+		Grid->OnActorNoLongerVisible.AddDynamic(this, &ATBSGameState::ForceCloseActorChannel);
+	}
 
 	UnitFactory = GetWorld()->SpawnActor<ATBSUnitFactory>(ATBSUnitFactory::StaticClass());
 
@@ -32,16 +34,44 @@ void ATBSGameState::StartGameplay()
 
 	PropManager = GetWorld()->SpawnActor<ATBSPropManager>(ATBSPropManager::StaticClass());
 	PropManager->Initialise(Grid, GridUI);
-	PropManager->RenderProps();
+	PropManager->ResetProps();
 
 	UnitManager = GetWorld()->SpawnActor<ATBSUnitManager>(ATBSUnitManager::StaticClass());
 	UnitManager->Initialise(Grid, GridUI);
 	UnitManager->ResetUnits();
 }
 
-void ATBSGameState::SpawnUnitsForPlayer(APlayerController* PlayerController)
+void ATBSGameState::ForceCloseActorChannel(int32 TeamNumber, AActor* Actor)
 {
-	ATBSUnit* Unit = UnitFactory->CreateUnit(FIntVector(FMath::RandRange(0, 10), FMath::RandRange(0, 10), 0), FRotator(0.0, 0.0, 0.0));
+	if (HasAuthority())
+	{
+		UNetConnection* Connection = PlayerControllers[TeamNumber]->GetNetConnection();
+		UActorChannel* Channel = Connection->ActorChannels.FindRef(Actor);
+
+		if (Channel)
+		{
+			Channel->Close();
+		}		
+	}
+}
+
+void ATBSGameState::SpawnUnitsForPlayer(APlayerController* PlayerController, int32 TeamNumber)
+{
+	ATBSUnit* Unit;
+
+	PlayerControllers.Add(TeamNumber, PlayerController);
+
+	if (TeamNumber == 0)
+	{
+		Unit = UnitFactory->CreateUnit(FIntVector(3, 3, 0), FRotator(0.0, 0.0, 0.0));
+	}
+	else
+	{
+		Unit = UnitFactory->CreateUnit(FIntVector(3, 11, 0), FRotator(0.0, 0.0, 0.0));
+	}
+
+	/*ATBSUnit* Unit = UnitFactory->CreateUnit(FIntVector(FMath::RandRange(0, 9), FMath::RandRange(0, 9), 0), FRotator(0.0, 0.0, 0.0));*/
+	Unit->TeamNumber = TeamNumber;
 	Grid->AddUnit(Unit);
 	UnitManager->ResetUnit(Unit);
 	//Grid->AddUnit(UnitFactory->CreateUnit(FIntVector(7, 7, 0), FRotator(0.0, 0.0, 0.0)));

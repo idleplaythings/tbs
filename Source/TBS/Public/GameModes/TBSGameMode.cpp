@@ -60,6 +60,10 @@ void ATBSGameMode::PostLogin(APlayerController* PlayerController)
 
 	Super::PostLogin(PlayerController);
 
+	int32 TeamNumber = NumberOfPlayers;
+	NumberOfPlayers = NumberOfPlayers + 1;
+
 	ATBSGameState* GameState = GetGameState<ATBSGameState>();
-	GameState->SpawnUnitsForPlayer(PlayerController);
+	Cast<ATBSPlayerController>(PlayerController)->TeamNumber = TeamNumber;
+	GameState->SpawnUnitsForPlayer(PlayerController, TeamNumber);	
 }

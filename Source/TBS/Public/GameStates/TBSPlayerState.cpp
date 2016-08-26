@@ -62,68 +62,6 @@ void ATBSPlayerState::ClientInitialize(AController* Controller)
 	PlayerController = Cast<ATBSPlayerController>(Controller);
 
 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("PlayerController %p"), PlayerController));
-
-	//Grid = GetWorld()->SpawnActor<ATBSGrid>(ATBSGrid::StaticClass());
-	//Grid->InitialiseGrid(10, 20, 3);
-
-	//ATBSPropFactory* PropFactory = GetWorld()->SpawnActor<ATBSPropFactory>(ATBSPropFactory::StaticClass());
-	//FProp Wall1 = PropFactory->CreateWall(FIntVector(2, 7, 0), ETileSlot::W, FRotator(0.0, 90.0, 0.0));
-	//FProp Wall2 = PropFactory->CreateWall(FIntVector(2, 7, 0), ETileSlot::N, FRotator(0.0, 0.0, 0.0));
-	//FProp Wall3 = PropFactory->CreateWall(FIntVector(3, 7, 0), ETileSlot::N, FRotator(0.0, 0.0, 0.0));
-	//FProp Wall4 = PropFactory->CreateWall(FIntVector(4, 7, 0), ETileSlot::N, FRotator(0.0, 0.0, 0.0));
-
-	//Grid->AddProp(Wall1);
-	//Grid->AddProp(Wall2);
-	//Grid->AddProp(Wall3);
-	//Grid->AddProp(Wall4);
-
-	//ATBSUnitFactory* UnitFactory = GetWorld()->SpawnActor<ATBSUnitFactory>(ATBSUnitFactory::StaticClass());
-	//Grid->AddUnit(UnitFactory->CreateUnit(FIntVector(1, 1, 0), FRotator(0.0, 0.0, 0.0)));
-	//Grid->AddUnit(UnitFactory->CreateUnit(FIntVector(7, 7, 0), FRotator(0.0, 0.0, 0.0)));
-
-	//for (TActorIterator<ATBSGrid> ActorItr(GetWorld()); ActorItr; ++ActorItr)
-	//{
-	//	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Init found grid")));
-	//	Grid = *ActorItr;
-	//	break;
-	//}
-
-	//for (TActorIterator<ATBSGridUI> ActorItr(GetWorld()); ActorItr; ++ActorItr)
-	//{
-	//	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Init found grid UI")));
-	//	GridUI = *ActorItr;
-	//	break;
-	//}
-
-	//if (Grid && GridUI)
-	//{
-	//	GridUI->RenderGrid(Grid);
-	//}	
-
-	//if (Grid)
-	//{
-	
-
-	//}
-
-	//PropManager = GetWorld()->SpawnActor<ATBSPropManager>(ATBSPropManager::StaticClass());
-	//PropManager->Initialise(Grid, GridUI);
-	//PropManager->RenderProps();
-
-
-	/*if (Grid)
-	{
-		GridPathFinder = GetWorld()->SpawnActor<ATBSGridPathFinder>(ATBSGridPathFinder::StaticClass());
-		GridPathFinder->Initialise(Grid);
-	}
-
-	if (Grid && GridUI)
-	{
-		GridPathRenderer = GetWorld()->SpawnActor<ATBSGridPathRenderer>(ATBSGridPathRenderer::StaticClass());
-		GridPathRenderer->Initialise(Grid, GridUI);
-	}
-*/
-	//Cast<ATBSPlayerController>(Controller)->Initialise();	
 }
 
 
@@ -152,13 +90,21 @@ void ATBSPlayerState::MouseLeft(FIntVector GameCoords)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Found unit!")));
 
-		if (!UnitSelected || SelectedUnit != Unit)
+		if (Unit->TeamNumber == PlayerController->TeamNumber)
 		{
-			SelectedUnit = Unit;
-			UnitSelected = true;
-			//PlayerController->Server_Possess(Unit);
-			
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Unit selected!")));
+			if (!UnitSelected || SelectedUnit != Unit)
+			{
+				SelectedUnit = Unit;
+				UnitSelected = true;
+				//PlayerController->Server_Possess(Unit);
+				//PlayerController->Server_HandleCommand(FCommand(SelectedUnit));
+
+				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Unit selected!")));
+			}
+		}
+		else
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Not your unit")));
 		}
 	}
 	else
@@ -167,20 +113,17 @@ void ATBSPlayerState::MouseLeft(FIntVector GameCoords)
 
 		if (UnitSelected && PathSelected)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Adding some movement!")));
+			TArray<FIntVector> Movements;
 
 			for (auto& Component : CurrentPath)
 			{
-				FCoordinateLocations Locations = GridUI->GetCoordinateLocations(Component);
-				FMovement Movement;
-				Movement.TargetWorldCoordinates = Locations.Center;
-				Movement.TargetGameCoordinates = Component;				
-
-				SelectedUnit->AddMovementCommand();
-				//UnitManager->MoveUnit(SelectedUnit, Movement);
-				UnitSelected = false;
-				GridPathRenderer->ClearPath();
+				Movements.Add(Component);
 			}
+
+			PlayerController->Server_HandleCommand(SelectedUnit, Movements);
+
+			UnitSelected = false;
+			GridPathRenderer->ClearPath();
 
 			PathSelected = false;
 		}
@@ -189,19 +132,20 @@ void ATBSPlayerState::MouseLeft(FIntVector GameCoords)
 
 void ATBSPlayerState::HoverBegin(FIntVector GameCoords)
 {
-	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Hover (%i, %i, %i)"), GameCoords.X, GameCoords.Y, GameCoords.Z));
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Hover (%i, %i, %i)"), GameCoords.X, GameCoords.Y, GameCoords.Z));
 
 	if (UnitSelected)
 	{
 		PathSelected = true;
 
 		if (GridPathFinder)
-		{
-			CurrentPath = GridPathFinder->FindPath(SelectedUnit->GameCoordinates, GameCoords);
-
-			if (GridPathRenderer)
+		{			
+			if (GridPathFinder->FindPath(SelectedUnit->GameCoordinates, GameCoords, CurrentPath))
 			{
-				GridPathRenderer->RenderPath(CurrentPath);
+				if (GridPathRenderer)
+				{
+					GridPathRenderer->RenderPath(CurrentPath);
+				}
 			}
 		}		
 	}

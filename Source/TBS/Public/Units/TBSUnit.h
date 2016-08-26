@@ -21,25 +21,33 @@ public:
 	// Called every frame
 	virtual void Tick( float DeltaSeconds ) override;
 
-	UPROPERTY(Replicated, BlueprintReadWrite)
+	virtual bool IsNetRelevantFor(const AActor* RealViewer, const AActor* ViewTarget, const FVector& SrcLocation) const override;
+
+	UPROPERTY(Replicated, BlueprintReadOnly, Category="Unit")
+	int32 TeamNumber = 0;
+
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Unit")
+	TArray<int32> SeenByTeams;
+
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Unit")
 	float Speed = 0.0;
 
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Unit")
 	float AccelerationTime = 1.0;
 
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Unit")
 	float TurnTime = 0.5;
 
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Unit")
 	float Acceleration = 0.5;
 
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Unit")
 	float TurningSpeed = 10;
 
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Unit")
 	float MaxSpeed = 2;
 
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Unit")
 	FIntVector GameCoordinates;
 
 	void AddMovementCommand();

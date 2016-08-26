@@ -2,61 +2,27 @@
 
 #pragma once
 
-//#include "TBSProp.h"
-//#include "TBSUnit.h"
 #include "TBSTypes.generated.h"
 
 class ATBSProp;
 class ATBSUnit;
 
-UENUM(BlueprintType)
-enum class ETileSlot : uint8
+USTRUCT()
+struct FCommand
 {
-	Center UMETA(DisplayName = "Center"),
-	NW UMETA(DisplayName = "Northwest"),
-	N UMETA(DisplayName = "North"),
-	NE UMETA(DisplayName = "Northeast"),
-	E UMETA(DisplayName = "East"),
-	SE UMETA(DisplayName = "SouthEast"),
-	S UMETA(DisplayName = "South"),
-	SW UMETA(DisplayName = "Southwest"),
-	W UMETA(DisplayName = "West")
+	GENERATED_BODY()
 };
 
-//struct FUnit
-//{
-//	FGuid* Guid;
-//	UClass* UnitClass;
-//	ATBSUnit* UnitObject;
-//	FIntVector Coordinates;
-//	FRotator Rotation;
-//
-//	FUnit()
-//	{
-//		Guid = new FGuid();
-//	}
-//};
-
-struct FMovement
+USTRUCT()
+struct FMovementCommand
 {
-	FIntVector TargetGameCoordinates;
-	FVector TargetWorldCoordinates;
-};
+	GENERATED_BODY()
 
-struct FProp
-{
-	FGuid* Guid;
-	UClass* PropClass;
-	ATBSProp* PropObject;
-	FIntVector Coordinates;
-	ETileSlot Slot;
-	FRotator Rotation;
-	bool BlocksAccess;
+	UPROPERTY()
+	ATBSUnit* Unit;
 
-	FProp()
-	{
-		Guid = new FGuid();
-	}
+	UPROPERTY()
+	TArray<FIntVector> Movements;
 };
 
 struct FCoordinateLocations

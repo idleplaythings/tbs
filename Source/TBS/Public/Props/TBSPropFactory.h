@@ -20,5 +20,5 @@ public:
 	// Called every frame
 	virtual void Tick( float DeltaSeconds ) override;
 
-	FProp CreateWall(FIntVector Coordinates, ETileSlot Slot, FRotator Rotation);
+	ATBSProp* CreateWall(FIntVector Coordinates, FRotator Rotation);
 };

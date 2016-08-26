@@ -20,7 +20,12 @@ public:
 	// Called every frame
 	virtual void Tick( float DeltaSeconds ) override;
 
-	int32 X;
-	int32 Y;
-	int32 Z;
+	UPROPERTY(Replicated)
+	FIntVector GameCoordinates;
+
+	UPROPERTY(Replicated)
+	FRotator Rotation;
+
+	UPROPERTY(Replicated)
+	bool BlocksAccess;
 };

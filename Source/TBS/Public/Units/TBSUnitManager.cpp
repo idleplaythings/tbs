@@ -27,6 +27,7 @@ void ATBSUnitManager::Tick( float DeltaTime )
 	{
 		if (ConsumeMovementCommand(CurrentMovement))
 		{
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("ATBSUnitManager::Tick (%i, %i, %i)"), CurrentMovement.Movement.X, CurrentMovement.Movement.Y, CurrentMovement.Movement.Z));
 			StartMovement();
 		}
 	}
@@ -61,68 +62,69 @@ void ATBSUnitManager::ResetUnit(ATBSUnit* Unit)
 	Unit->SetActorLocation(Locations.Center);
 }
 
-void ATBSUnitManager::MoveUnit(ATBSUnit* Unit, FMovement Movement)
+void ATBSUnitManager::MoveUnit(ATBSUnit* Unit, FIntVector Movement)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Movement")));
-	//MovementCommandQueue.Enqueue(FMovementCommand(Unit, Movement));
+	FCoordinateLocations Locations = GridUI->GetCoordinateLocations(Movement);
+	MovementCommandQueue.Enqueue(MovementCommand(Unit, Movement, Locations.Center));
 }
 
-bool ATBSUnitManager::ConsumeMovementCommand(FMovementCommand &MovementCommand)
+bool ATBSUnitManager::ConsumeMovementCommand(MovementCommand &MovementCommand)
 {
-	//return MovementCommandQueue.Dequeue(MovementCommand);
-	return false;
+	return MovementCommandQueue.Dequeue(MovementCommand);
 }
 
 void ATBSUnitManager::StartMovement()
 {
 	IsProcessingMovement = true;
-	CurrentMovement.Unit->GameCoordinates = CurrentMovement.Movement.TargetGameCoordinates;
+	CurrentMovement.Unit->GameCoordinates = CurrentMovement.Movement;
+	Grid->ReindexUnits();
 }
 
 void ATBSUnitManager::MoveUnit(float DeltaTime)
 {	
 	if (IsProcessingMovement)
 	{
-		FVector RemainingMovement = CurrentMovement.Movement.TargetWorldCoordinates - CurrentMovement.Unit->GetActorLocation();
+		FVector RemainingMovement = CurrentMovement.TargetWorldCoordinates - CurrentMovement.Unit->GetActorLocation();
 
-		ATBSUnit* UnitActor = CurrentMovement.Unit;
+		ATBSUnit* Unit = CurrentMovement.Unit;
 
-		UnitActor->Speed = FMath::Clamp(UnitActor->Speed + UnitActor->Acceleration, 0.0f, UnitActor->MaxSpeed);
+		Unit->Speed = FMath::Clamp(Unit->Speed + Unit->Acceleration, 0.0f, Unit->MaxSpeed);
 	
-		if (RemainingMovement.Size() <= UnitActor->Speed)
+		if (RemainingMovement.Size() <= Unit->Speed)
 		{
-			UnitActor->SetActorLocation(CurrentMovement.Movement.TargetWorldCoordinates);
+			//Unit->SetActorLocation(CurrentMovement.Movement.TargetWorldCoordinates);
+			Unit->SetActorLocation(CurrentMovement.TargetWorldCoordinates);
 			IsProcessingMovement = false;
 
 			if (MovementCommandQueue.IsEmpty())
 			{
-				UnitActor->Speed = 0;
-			}
+				Unit->Speed = 0;
+			}			
 		}
 		else
 		{
 			RemainingMovement.Normalize();
-			UnitActor->AddActorWorldOffset(RemainingMovement * UnitActor->Speed);
+			Unit->SetActorLocation(Unit->GetActorLocation() + RemainingMovement * Unit->Speed);
 		}
 
 		FRotator TargetRotation = FRotationMatrix::MakeFromX(RemainingMovement).Rotator();
-		FRotator CurrentRotation = UnitActor->GetActorRotation();
+		FRotator CurrentRotation = Unit->GetActorRotation();
 
 		float Diff = TargetRotation.Yaw - CurrentRotation.Yaw;
 
 		if (FMath::Abs(Diff) < 5 || FMath::Abs(FMath::Abs(Diff) - 360) < 5)
 		{
-			UnitActor->SetActorRotation(TargetRotation);
+			Unit->SetActorRotation(TargetRotation);
 		}
 		else
 		{
 			if (Diff > 0 && Diff <= 180)
 			{
-				UnitActor->AddActorWorldRotation(FRotator(0.0, UnitActor->TurningSpeed, 0.0));
+				Unit->AddActorWorldRotation(FRotator(0.0, Unit->TurningSpeed, 0.0));
 			}
 			else
 			{
-				UnitActor->AddActorWorldRotation(FRotator(0.0, UnitActor->TurningSpeed * -1, 0.0));
+				Unit->AddActorWorldRotation(FRotator(0.0, Unit->TurningSpeed * -1, 0.0));
 			}
 		}
 	}

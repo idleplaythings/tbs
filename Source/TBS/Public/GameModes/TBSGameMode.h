@@ -16,6 +16,7 @@ class TBS_API ATBSGameMode : public AGameMode
 public:
 	ATBSGameMode(const FObjectInitializer& ObjectInitializer);
 
+	int32 NumberOfPlayers = 0;
 	float TileSize = 100;
 	int32 GridWidth = 20;
 	int32 GridHeight = 20;

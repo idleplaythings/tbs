@@ -2,6 +2,7 @@
 
 #include "TBS.h"
 #include "UnrealNetwork.h"
+#include "TBSPlayerController.h"
 #include "TBSUnit.h"
 
 
@@ -11,10 +12,26 @@ ATBSUnit::ATBSUnit()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
+	bReplicateMovement = true;
 }
+
+bool ATBSUnit::IsNetRelevantFor(const AActor * RealViewer, const AActor * ViewTarget, const FVector & SrcLocation) const
+{
+	if (Cast<ATBSPlayerController>(RealViewer)->TeamNumber == TeamNumber)
+	{
+		return true;
+	}
+
+	return SeenByTeams.Find(Cast<ATBSPlayerController>(RealViewer)->TeamNumber) != INDEX_NONE;
+}
+
 
 void ATBSUnit::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
 {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ATBSUnit, TeamNumber);
+	DOREPLIFETIME(ATBSUnit, SeenByTeams);
 	DOREPLIFETIME(ATBSUnit, Speed);
 	DOREPLIFETIME(ATBSUnit, AccelerationTime);
 	DOREPLIFETIME(ATBSUnit, TurnTime);

@@ -35,9 +35,8 @@ public:
 	//UFUNCTION()
 	//void HoverEnd(FIntVector GameCoords);
 
-	void  SpawnUnitsForPlayer(APlayerController* PlayerController);
+	void  SpawnUnitsForPlayer(APlayerController* PlayerController, int32 TeamNumber);
 
-private:
 	ATBSGrid* Grid;
 
 	ATBSPropManager* PropManager;
@@ -45,6 +44,13 @@ private:
 	ATBSUnitFactory* UnitFactory;
 
 	ATBSGridUI* GridUI;
+
+	UFUNCTION()
+	void ForceCloseActorChannel(int32 TeamNumber, AActor* Actor);
+
+	TMap<int32, APlayerController*> PlayerControllers;
+
+//private:
 	//ATBSPropManager* PropManager;
 	//ATBSUnitManager* UnitManager;
 	//ATBSGridPathFinder* GridPathFinder;
