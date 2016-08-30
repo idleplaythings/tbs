@@ -140,30 +140,30 @@ void ATBSGrid::ReindexUnits_Implementation()
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Server Reindex Units")));
 
-		TArray<ATBSUnit*> Team0Units = GetUnitsByTeam(0);
-		TArray<ATBSUnit*> Team1Units = GetUnitsByTeam(1);
+		TArray<ATBSUnit*> Player0Units = GetUnitsByPlayer(0);
+		TArray<ATBSUnit*> Player1Units = GetUnitsByPlayer(1);
 
-		for (auto& Unit0 : Team0Units)
+		for (auto& Unit0 : Player0Units)
 		{
-			for (auto& Unit1 : Team1Units)
+			for (auto& Unit1 : Player1Units)
 			{
 				if (CanDrawLineOfFire(Unit0->GameCoordinates, Unit1->GameCoordinates))
 				{
 					GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Can draw line of fire (%i, %i, %i) -> (%i, %i, %i)"), Unit0->GameCoordinates.X, Unit0->GameCoordinates.Y, Unit0->GameCoordinates.Z, Unit1->GameCoordinates.X, Unit1->GameCoordinates.Y, Unit1->GameCoordinates.Z));
 
-					Unit0->SeenByTeams.Empty();
-					Unit0->SeenByTeams.Add(1);
+					Unit0->SeenByPlayers.Empty();
+					Unit0->SeenByPlayers.Add(1);
 					Unit0->NetPriority = 3;
 
-					Unit1->SeenByTeams.Empty();
-					Unit1->SeenByTeams.Add(0);
+					Unit1->SeenByPlayers.Empty();
+					Unit1->SeenByPlayers.Add(0);
 				}
 				else
 				{
 					OnActorNoLongerVisible.Broadcast(0, Unit1);
 					OnActorNoLongerVisible.Broadcast(1, Unit0);
-					Unit0->SeenByTeams.Empty();
-					Unit1->SeenByTeams.Empty();
+					Unit0->SeenByPlayers.Empty();
+					Unit1->SeenByPlayers.Empty();
 				}
 			}
 		}
@@ -226,10 +226,10 @@ TArray<FIntVector> ATBSGrid::Trace(FIntVector Start, FIntVector End)
 	return Trace;
 }
 
-TArray<ATBSUnit*> ATBSGrid::GetUnitsByTeam(int32 TeamNumber)
+TArray<ATBSUnit*> ATBSGrid::GetUnitsByPlayer(int32 PlayerNumber)
 {
 	return Units.FilterByPredicate([&](const ATBSUnit* Unit) {
-		return Unit->TeamNumber == TeamNumber;
+		return Unit->PlayerNumber == PlayerNumber;
 	});
 }
 

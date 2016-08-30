@@ -17,12 +17,12 @@ ATBSUnit::ATBSUnit()
 
 bool ATBSUnit::IsNetRelevantFor(const AActor * RealViewer, const AActor * ViewTarget, const FVector & SrcLocation) const
 {
-	if (Cast<ATBSPlayerController>(RealViewer)->TeamNumber == TeamNumber)
+	if (Cast<ATBSPlayerController>(RealViewer)->PlayerNumber == PlayerNumber)
 	{
 		return true;
 	}
 
-	return SeenByTeams.Find(Cast<ATBSPlayerController>(RealViewer)->TeamNumber) != INDEX_NONE;
+	return SeenByPlayers.Find(Cast<ATBSPlayerController>(RealViewer)->PlayerNumber) != INDEX_NONE;
 }
 
 
@@ -30,8 +30,8 @@ void ATBSUnit::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetime
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ATBSUnit, TeamNumber);
-	DOREPLIFETIME(ATBSUnit, SeenByTeams);
+	DOREPLIFETIME(ATBSUnit, PlayerNumber);
+	DOREPLIFETIME(ATBSUnit, SeenByPlayers);
 	DOREPLIFETIME(ATBSUnit, Speed);
 	DOREPLIFETIME(ATBSUnit, AccelerationTime);
 	DOREPLIFETIME(ATBSUnit, TurnTime);

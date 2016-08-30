@@ -27,7 +27,7 @@ void ATBSPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> 
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ATBSPlayerController, TeamNumber);
+	DOREPLIFETIME(ATBSPlayerController, PlayerNumber);
 }
 
 
@@ -207,7 +207,7 @@ void ATBSPlayerController::Server_HandleCommand_Implementation(ATBSUnit* Unit, c
 
 bool ATBSPlayerController::Server_HandleCommand_Validate(ATBSUnit* Unit, const TArray<FIntVector>& Movements)
 {
-	if (TeamNumber != Unit->TeamNumber)
+	if (PlayerNumber != Unit->PlayerNumber)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("This is not your unit!")));
 		return false;

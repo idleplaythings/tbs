@@ -90,7 +90,7 @@ void ATBSPlayerState::MouseLeft(FIntVector GameCoords)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Found unit!")));
 
-		if (Unit->TeamNumber == PlayerController->TeamNumber)
+		if (Unit->PlayerNumber == PlayerController->PlayerNumber)
 		{
 			if (!UnitSelected || SelectedUnit != Unit)
 			{

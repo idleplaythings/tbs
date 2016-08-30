@@ -21,44 +21,18 @@ class TBS_API ATBSGameState : public AGameState
 public:
 
 	void StartGameplay();
-	void PostInitializeComponents() override;
+	void AddPlayer(APlayerController* PlayerController);
 
-	//UFUNCTION()
-	//void MouseLeft(FIntVector GameCoords);
-
-	//UFUNCTION()
-	//void MouseRight(FIntVector GameCoords);
-
-	//UFUNCTION()
-	//void HoverBegin(FIntVector GameCoords);
-
-	//UFUNCTION()
-	//void HoverEnd(FIntVector GameCoords);
-
-	void  SpawnUnitsForPlayer(APlayerController* PlayerController, int32 TeamNumber);
-
-	ATBSGrid* Grid;
-
+	int32 NumberOfPlayers;
 	ATBSPropManager* PropManager;
 	ATBSUnitManager* UnitManager;
 	ATBSUnitFactory* UnitFactory;
-
+	ATBSGrid* Grid;
 	ATBSGridUI* GridUI;
 
 	UFUNCTION()
 	void ForceCloseActorChannel(int32 TeamNumber, AActor* Actor);
 
+private:
 	TMap<int32, APlayerController*> PlayerControllers;
-
-//private:
-	//ATBSPropManager* PropManager;
-	//ATBSUnitManager* UnitManager;
-	//ATBSGridPathFinder* GridPathFinder;
-	//ATBSGridPathRenderer* GridPathRenderer;
-
-	//FUnit* SelectedUnit;
-	//bool UnitSelected = false;
-
-	//bool PathSelected = false;
-	//TArray<FIntVector> CurrentPath;
 };

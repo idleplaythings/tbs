@@ -39,7 +39,7 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void ReindexUnits();
 
-	TArray<ATBSUnit*> GetUnitsByTeam(int32 TeamNumber);
+	TArray<ATBSUnit*> GetUnitsByPlayer(int32 PlayerNumber);
 	bool CanDrawLineOfFire(FIntVector Start, FIntVector End);
 
 	TArray<FIntVector> Trace(FIntVector Start, FIntVector End);

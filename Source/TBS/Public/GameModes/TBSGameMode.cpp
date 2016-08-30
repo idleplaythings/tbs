@@ -21,11 +21,7 @@ ATBSGameMode::ATBSGameMode(const FObjectInitializer& ObjectInitializer) : Super(
 	PlayerStateClass = ATBSPlayerState::StaticClass();
 }
 
-void ATBSGameMode::InitGame(
-	const FString & MapName,
-	const FString & Options,
-	FString & ErrorMessage
-)
+void ATBSGameMode::InitGame(const FString & MapName, const FString & Options, FString & ErrorMessage)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("ATBSGameMode::InitGame")));
 
@@ -38,13 +34,12 @@ void ATBSGameMode::InitGameState()
 
 	Super::InitGameState();
 
-	ATBSGameState* GameState = GetGameState<ATBSGameState>();
-	GameState->StartGameplay();
+	GetGameState<ATBSGameState>()->StartGameplay();
 }
 
 FString ATBSGameMode::InitNewPlayer(
 	class APlayerController * NewPlayerController,
-	const TSharedPtr < const FUniqueNetId > & UniqueId,
+	const TSharedPtr <const FUniqueNetId> & UniqueId,
 	const FString & Options,
 	const FString & Portal
 )
@@ -60,10 +55,11 @@ void ATBSGameMode::PostLogin(APlayerController* PlayerController)
 
 	Super::PostLogin(PlayerController);
 
-	int32 TeamNumber = NumberOfPlayers;
-	NumberOfPlayers = NumberOfPlayers + 1;
+	//int32 TeamNumber = NumberOfPlayers;
+	//NumberOfPlayers = NumberOfPlayers + 1;
 
-	ATBSGameState* GameState = GetGameState<ATBSGameState>();
-	Cast<ATBSPlayerController>(PlayerController)->TeamNumber = TeamNumber;
-	GameState->SpawnUnitsForPlayer(PlayerController, TeamNumber);	
+	//ATBSGameState* GameState = GetGameState<ATBSGameState>();
+	//Cast<ATBSPlayerController>(PlayerController)->TeamNumber = TeamNumber;
+
+	GetGameState<ATBSGameState>()->AddPlayer(PlayerController);
 }

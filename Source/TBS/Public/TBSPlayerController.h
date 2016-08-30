@@ -55,6 +55,6 @@ public:
 	FTimerHandle InitTimer;
 
 	UPROPERTY(Replicated)
-	int32 TeamNumber = 0;
+	int32 PlayerNumber = 0;
 };
 
