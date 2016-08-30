@@ -4,46 +4,46 @@
 #include "TBSUnit.h"
 #include "TBSGrid.h"
 #include "TBSGridUI.h"
-#include "TBSPropFactory.h"
-#include "TBSPlayerController.h"
+#include "UnrealNetwork.h"
 #include "Engine/ActorChannel.h"
 #include "TBSGameState.h"
 
 void ATBSGameState::StartGameplay()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("ATBSGameState::StartGameplay")));
-
-	Grid = GetWorld()->SpawnActor<ATBSGrid>(ATBSGrid::StaticClass());
-	Grid->InitialiseGrid(FIntVector(10, 20, 3));
-
-	ATBSPropFactory* PropFactory = GetWorld()->SpawnActor<ATBSPropFactory>(ATBSPropFactory::StaticClass());
-
-	Grid->AddProp(PropFactory->CreateWall(FIntVector(2, 8, 0), FRotator(0.0, 90.0, 0.0)));
-	Grid->AddProp(PropFactory->CreateWall(FIntVector(2, 7, 0), FRotator(0.0, 0.0, 0.0)));
-	Grid->AddProp(PropFactory->CreateWall(FIntVector(3, 7, 0), FRotator(0.0, 0.0, 0.0)));
-	Grid->AddProp(PropFactory->CreateWall(FIntVector(4, 7, 0), FRotator(0.0, 0.0, 0.0)));
+	InitGrid(FIntVector(10, 20, 3));
+	InitGridUI();
 
 	if (HasAuthority())
 	{
+		InitFactoriesAndManagers();
+
+		// Create dummy map
+		Grid->AddProp(PropFactory->CreateWall(FIntVector(2, 8, 0), FRotator(0.0, 90.0, 0.0)));
+		Grid->AddProp(PropFactory->CreateWall(FIntVector(2, 7, 0), FRotator(0.0, 0.0, 0.0)));
+		Grid->AddProp(PropFactory->CreateWall(FIntVector(3, 7, 0), FRotator(0.0, 0.0, 0.0)));
+		Grid->AddProp(PropFactory->CreateWall(FIntVector(4, 7, 0), FRotator(0.0, 0.0, 0.0)));		
+		PropManager->ResetProps();
+
 		Grid->OnActorNoLongerVisible.AddDynamic(this, &ATBSGameState::ForceCloseActorChannel);
 	}
+}
 
-	UnitFactory = GetWorld()->SpawnActor<ATBSUnitFactory>(ATBSUnitFactory::StaticClass());
+void ATBSGameState::AddPlayer(APlayerController* PlayerController)
+{
+	int32 PlayerNumber = NumberOfPlayers;
 
-	GridUI = GetWorld()->SpawnActor<ATBSGridUI>(ATBSGridUI::StaticClass());
-	GridUI->RenderGrid(Grid);
+	InitPlayerController(PlayerNumber, PlayerController);
+	SpawnUnits(PlayerNumber);
 
-	PropManager = GetWorld()->SpawnActor<ATBSPropManager>(ATBSPropManager::StaticClass());
-	PropManager->Initialise(Grid, GridUI);
-	PropManager->ResetProps();
-
-	UnitManager = GetWorld()->SpawnActor<ATBSUnitManager>(ATBSUnitManager::StaticClass());
-	UnitManager->Initialise(Grid, GridUI);
-	UnitManager->ResetUnits();
+	NumberOfPlayers++;
 }
 
 /**
- * 
+ * Force close a replication channel associated with an actor.
+
+ * By default UE4 will keep the replication channel open for an actor for five seconds after the actor is
+ * no longer relevant, which is something we specifically don't want as that might reveal hidden
+ * information about unit that has moved out of enemy LOF.
  */
 void ATBSGameState::ForceCloseActorChannel(int32 PlayerNumber, AActor* Actor)
 {
@@ -59,20 +59,56 @@ void ATBSGameState::ForceCloseActorChannel(int32 PlayerNumber, AActor* Actor)
 	}
 }
 
-void ATBSGameState::AddPlayer(APlayerController* PlayerController)
+void ATBSGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
 {
-	ATBSUnit* Unit;
-	FIntVector StartCoordinates = NumberOfPlayers == 0 ? FIntVector(3, 3, 0) : FIntVector(3, 11, 0);
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	PlayerControllers.Add(NumberOfPlayers, PlayerController);
+	DOREPLIFETIME(ATBSGameState, NumberOfPlayers);
+}
 
-	Unit = UnitFactory->CreateUnit(StartCoordinates, FRotator(0.0, 0.0, 0.0));
+void ATBSGameState::InitGrid(FIntVector Dimensions)
+{
+	Grid = GetWorld()->SpawnActor<ATBSGrid>(ATBSGrid::StaticClass());
+	Grid->InitialiseGrid(Dimensions);
+}
 
-	Cast<ATBSPlayerController>(PlayerController)->PlayerNumber = NumberOfPlayers;
-	
-	Unit->PlayerNumber = NumberOfPlayers;
+void ATBSGameState::InitGridUI()
+{
+	if (Grid)
+	{
+		GridUI = GetWorld()->SpawnActor<ATBSGridUI>(ATBSGridUI::StaticClass());
+		GridUI->RenderGrid(Grid);
+	}
+}
+
+void ATBSGameState::InitFactoriesAndManagers()
+{
+	PropFactory = GetWorld()->SpawnActor<ATBSPropFactory>(ATBSPropFactory::StaticClass());
+	UnitFactory = GetWorld()->SpawnActor<ATBSUnitFactory>(ATBSUnitFactory::StaticClass());
+
+	if (Grid && GridUI)
+	{
+		PropManager = GetWorld()->SpawnActor<ATBSPropManager>(ATBSPropManager::StaticClass());
+		PropManager->Initialise(Grid, GridUI);
+
+		UnitManager = GetWorld()->SpawnActor<ATBSUnitManager>(ATBSUnitManager::StaticClass());
+		UnitManager->Initialise(Grid, GridUI);
+	}
+}
+
+void ATBSGameState::InitPlayerController(int32 PlayerNumber, APlayerController* PlayerController)
+{
+	ATBSPlayerController* Controller = Cast<ATBSPlayerController>(PlayerController);
+	Controller->PlayerNumber = PlayerNumber;
+	PlayerControllers.Add(PlayerNumber, Controller);
+}
+
+void ATBSGameState::SpawnUnits(int32 PlayerNumber)
+{
+	FIntVector StartCoordinates = PlayerNumber == 0 ? FIntVector(3, 3, 0) : FIntVector(3, 11, 0);
+	ATBSUnit* Unit = UnitFactory->CreateUnit(StartCoordinates, FRotator(0.0, 0.0, 0.0));
+	Unit->PlayerNumber = PlayerNumber;
+
 	Grid->AddUnit(Unit);
 	UnitManager->ResetUnit(Unit);
-
-	NumberOfPlayers++;
 }

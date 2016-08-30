@@ -25,6 +25,7 @@ public:
 
 	void Initialise(ATBSGrid* Grid, ATBSGridUI* GridUI);
 	void ResetProps();
+	void ResetProp(ATBSProp* Prop);
 
 private:
 	ATBSGrid* Grid;

@@ -36,8 +36,12 @@ void ATBSPropManager::ResetProps()
 {
 	for (auto It = Grid->GetPropsIterator(); It; ++It)
 	{
-		FCoordinateLocations Locations = GridUI->GetCoordinateLocations((*It)->GameCoordinates);
-		(*It)->SetActorLocation(Locations.Center);
+		ResetProp(*It);
 	}
 }
 
+void ATBSPropManager::ResetProp(ATBSProp* Prop)
+{
+	FCoordinateLocations Locations = GridUI->GetCoordinateLocations(Prop->GameCoordinates);
+	Prop->SetActorLocation(Locations.Center);
+}
