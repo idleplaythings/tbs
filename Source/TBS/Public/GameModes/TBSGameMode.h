@@ -16,23 +16,6 @@ class TBS_API ATBSGameMode : public AGameMode
 public:
 	ATBSGameMode(const FObjectInitializer& ObjectInitializer);
 
-	float TileSize = 100;
-	int32 GridWidth = 20;
-	int32 GridHeight = 20;
-	int32 NumOfLevels = 4;
-	float FloorHeight = 200;
-
-	void InitGame(
-		const FString & MapName,
-		const FString & Options,
-		FString & ErrorMessage
-	);
 	void InitGameState();
-	FString  InitNewPlayer(
-		class APlayerController * NewPlayerController,
-		const TSharedPtr < const FUniqueNetId > & UniqueId,
-		const FString & Options,
-		const FString & Portal
-	);
 	void PostLogin(APlayerController* PlayerController);
 };
