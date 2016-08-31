@@ -37,6 +37,8 @@ public:
 	void OnClassesLoaded();
 
 	ATBSUnit* SelectedUnit;
+	TArray<FIntVector> SelectedPath;
+	bool PathSelected = false;
 
 private:
 	void ViewLevelUp();
@@ -50,6 +52,7 @@ private:
 	void MoveCameraRight(float AxisValue);
 	void MouseLeft();
 	void MouseRight();
+	void Escape();
 
 	TBSUIContextStack* UIContextStack;
 	ATBSClassLoader* ClassLoader;

@@ -2,18 +2,26 @@
 
 #include "TBS.h"
 #include "TBSDefaultPawn.h"
+#include "TBSClassLoader.h"
+#include "TBSPlayerController.h"
 #include "TBSUIContextEvent.h"
 #include "TBSUIContextAxisEvent.h"
 #include "TBSUIContextCoordinateEvent.h"
+#include "TBSUIFriendlyUnitContext.h"
 #include "TBSUIDefaultContext.h"
 
 void TBSUIDefaultContext::HandleEvent(TBSUIContextEvent* Event)
 {
-	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("waat %s"), Event->Type.ToString()));
-
 	if (Event->Type == FName(TEXT("TileClick")))
 	{
+		FIntVector Coordinates = ((TBSUIContextCoordinateEvent*)Event)->Coordinates;
+		ATBSUnit* Unit = ClassLoader->Grid->SelectUnit(Coordinates);
 
+		if (Unit)
+		{
+			ClassLoader->PlayerController->SelectedUnit = Unit;
+			ContextStack->PushContext(new TBSUIFriendlyUnitContext);
+		}		
 	}
 	else if (Event->Type == FName(TEXT("TileRightClick")))
 	{

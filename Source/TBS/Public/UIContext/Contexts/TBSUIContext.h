@@ -3,8 +3,8 @@
 #pragma once
 
 #include "TBSClassLoader.h"
-#include "TBSUIContextStack.h"
 
+class TBSUIContextStack;
 class TBSUIContextEvent;
 
 /**
@@ -16,7 +16,7 @@ public:
 	TBSUIContext();
 	~TBSUIContext();
 
-	void Initialise(TBSUIContextStack* ContextStack, ATBSClassLoader* InClassLoader);
+	void Initialise(TBSUIContextStack* InContextStack, ATBSClassLoader* InClassLoader);
 
 	virtual void HandleEvent(TBSUIContextEvent* Event);
 

@@ -14,7 +14,7 @@ TBSUIContextStack::~TBSUIContextStack()
 void TBSUIContextStack::PushContext(TBSUIContext* Context)
 {
 	Context->Initialise(this, ClassLoader);
-	UIContexts.push_back(Context);
+	UIContexts.push_back((TBSUIContext*) Context);
 }
 
 void TBSUIContextStack::PopContext()
@@ -24,8 +24,14 @@ void TBSUIContextStack::PopContext()
 
 void TBSUIContextStack::HandleEvent(TBSUIContextEvent* Event)
 {
-	for (std::vector<TBSUIContext*>::iterator It = UIContexts.begin(); It != UIContexts.end(); ++It)
+	// The contexts may mutate the context vector, so operate on a copy
+	std::vector<TBSUIContext*> CopyOfContexts = UIContexts;
+
+	for (std::vector<TBSUIContext*>::reverse_iterator It = CopyOfContexts.rbegin(); It != CopyOfContexts.rend(); ++It)
 	{
-		(*It)->HandleEvent(Event);
+		if (*It)
+		{
+			(*It)->HandleEvent(Event);
+		}		
 	}
 }

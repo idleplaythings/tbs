@@ -59,6 +59,7 @@ void ATBSPlayerController::OnClassesLoaded()
 	InputComponent->BindAction("TogglePerspectiveCamera", IE_Pressed, this, &ATBSPlayerController::TogglePerspectiveCamera);
 	InputComponent->BindAction("ActionMouseLeft", IE_Pressed, this, &ATBSPlayerController::MouseLeft);
 	InputComponent->BindAction("ActionMouseRight", IE_Pressed, this, &ATBSPlayerController::MouseRight);
+	InputComponent->BindAction("ActionEscape", IE_Pressed, this, &ATBSPlayerController::Escape);
 	InputComponent->BindAxis("AxisMoveCameraForward", this, &ATBSPlayerController::MoveCameraForward);
 	InputComponent->BindAxis("AxisMoveCameraRight", this, &ATBSPlayerController::MoveCameraRight);
 }
@@ -144,6 +145,11 @@ void ATBSPlayerController::MouseRight()
 	{
 		UIContextStack->HandleEvent(new TBSUIContextCoordinateEvent(FName(TEXT("TileRightClick")), ClassLoader->GridUI->CurrentCoordinates));
 	}
+}
+
+void ATBSPlayerController::Escape()
+{
+	UIContextStack->HandleEvent(new TBSUIContextEvent(FName(TEXT("Escape"))));
 }
 
 void ATBSPlayerController::Server_HandleCommand_Implementation(ATBSUnit* Unit, const TArray<FIntVector>& Movements)

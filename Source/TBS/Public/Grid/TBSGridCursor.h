@@ -12,11 +12,6 @@ class TBS_API ATBSGridCursor : public AActor
 	GENERATED_BODY()
 
 public:
-	float CursorUpdateFrequency = 0.017;
-	float TimeSinceLastCursorUpdate = 0;
-
-	ATBSPlayerController* PlayerController;
-
 	// Sets default values for this actor's properties
 	ATBSGridCursor();
 

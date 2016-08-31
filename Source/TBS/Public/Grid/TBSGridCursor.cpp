@@ -21,27 +21,4 @@ void ATBSGridCursor::BeginPlay()
 void ATBSGridCursor::Tick( float DeltaTime )
 {
 	Super::Tick( DeltaTime );
-
-	TimeSinceLastCursorUpdate += DeltaTime;
-
-	if (TimeSinceLastCursorUpdate < CursorUpdateFrequency)
-	{
-		return;
-	}
-/*
-	TimeSinceLastCursorUpdate = 0;
-
-	FHitResult Result;	
-
-	ATBSPlayerController* Controller = Cast<ATBSPlayerController>(GetWorld()->GetFirstPlayerController());
-
-	if (Controller != nullptr)
-	{
-		bool bHitSomething = Controller->GetHitResultUnderCursor(ECollisionChannel::ECC_GameTraceChannel1, true, Result);
-
-		if (bHitSomething)
-		{
-			SetActorLocation(FVector(Result.Location.X, Result.Location.Y, Result.Location.Z));
-		}
-	}*/
 }
