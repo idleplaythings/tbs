@@ -5,13 +5,14 @@
 #include "TBSPlayerState.h"
 #include "TBSGameMode.h"
 #include "TBSGameState.h"
+#include "TBSUIDefaultContext.h"
+#include "TBSUIContextAxisEvent.h"
+#include "TBSUIContextCoordinateEvent.h"
 #include "TBSPlayerController.h"
 
 ATBSPlayerController::ATBSPlayerController(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	EnableMouse();
-
-	//bAutoManageActiveCameraTarget = false;
 }
 
 void ATBSPlayerController::EnableMouse()
@@ -30,163 +31,119 @@ void ATBSPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> 
 	DOREPLIFETIME(ATBSPlayerController, PlayerNumber);
 }
 
-
 void ATBSPlayerController::BeginPlay()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("ATBSPlayerController::BeginPlay")));
-
 	if (IsLocalPlayerController())
 	{
-		PlayerContext = FLocalPlayerContext(this);
-		GetWorldTimerManager().SetTimer(InitTimer, this, &ATBSPlayerController::InitLocalClasses, 0.2f, true);
+		ClassLoader = GetWorld()->SpawnActor<ATBSClassLoader>(ATBSClassLoader::StaticClass());
+		ClassLoader->Initialise(this);
+		ClassLoader->OnClassesLoaded.AddDynamic(this, &ATBSPlayerController::OnClassesLoaded);
 	}		
 }
 
-void ATBSPlayerController::SetupInputComponent()
+void ATBSPlayerController::OnClassesLoaded()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("ATBSPlayerController::SetupInputComponent")));
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("ATBSPlayerController::ClassesLoaded")));
 
-	Super::SetupInputComponent();
+	ClassesLoaded = true;
 
-	InputComponent->BindAction("ActionLevelUp", IE_Pressed, this, &ATBSPlayerController::MoveLevelUp);
-	InputComponent->BindAction("ActionLevelDown", IE_Pressed, this, &ATBSPlayerController::MoveLevelDown);
-	InputComponent->BindAction("ActionRotateCameraRight", IE_Pressed, this, &ATBSPlayerController::TurnCameraRight);
-	InputComponent->BindAction("ActionRotateCameraLeft", IE_Pressed, this, &ATBSPlayerController::TurnCameraLeft);
+	UIContextStack = new TBSUIContextStack(ClassLoader);
+	UIContextStack->PushContext(new TBSUIDefaultContext);
+
+	InputComponent->BindAction("ActionLevelUp", IE_Pressed, this, &ATBSPlayerController::ViewLevelUp);
+	InputComponent->BindAction("ActionLevelDown", IE_Pressed, this, &ATBSPlayerController::ViewLevelDown);
+	InputComponent->BindAction("ActionRotateCameraRight", IE_Pressed, this, &ATBSPlayerController::RotateCameraRight);
+	InputComponent->BindAction("ActionRotateCameraLeft", IE_Pressed, this, &ATBSPlayerController::RotateCameraLeft);
 	InputComponent->BindAction("ActionZoomIn", IE_Pressed, this, &ATBSPlayerController::ZoomCameraIn);
 	InputComponent->BindAction("ActionZoomOut", IE_Pressed, this, &ATBSPlayerController::ZoomCameraOut);
 	InputComponent->BindAction("TogglePerspectiveCamera", IE_Pressed, this, &ATBSPlayerController::TogglePerspectiveCamera);
-	InputComponent->BindAction("ActionMouseLeft", IE_Pressed, this, &ATBSPlayerController::OnMouseLeft);
-	InputComponent->BindAction("ActionMouseRight", IE_Pressed, this, &ATBSPlayerController::OnMouseRight);
+	InputComponent->BindAction("ActionMouseLeft", IE_Pressed, this, &ATBSPlayerController::MouseLeft);
+	InputComponent->BindAction("ActionMouseRight", IE_Pressed, this, &ATBSPlayerController::MouseRight);
 	InputComponent->BindAxis("AxisMoveCameraForward", this, &ATBSPlayerController::MoveCameraForward);
-	InputComponent->BindAxis("AxisMoveCameraRight", this, &ATBSPlayerController::MoveCameraRight);	
+	InputComponent->BindAxis("AxisMoveCameraRight", this, &ATBSPlayerController::MoveCameraRight);
 }
 
-void ATBSPlayerController::MoveLevelUp()
+void ATBSPlayerController::PlayerTick(float DeltaTime)
 {
-	if (DefaultPawn)
-	{
-		DefaultPawn->MoveLevelUp();
-	}
-	
-	if (GridUI)
-	{
-		GridUI->LevelUp();
-	}	
-}
+	Super::PlayerTick(DeltaTime);
 
-void ATBSPlayerController::MoveLevelDown()
-{
-	if (DefaultPawn)
+	if (ClassesLoaded)
 	{
-		DefaultPawn->MoveLevelDown();
-	}
+		FHitResult Result;
+		GetHitResultUnderCursor(ECollisionChannel::ECC_GameTraceChannel1, true, Result);
+		ClassLoader->GridUI->HandleGridHitResult(Result);
 
-	if (GridUI)
-	{
-		GridUI->LevelDown();
+		if (ClassLoader->GridUI->CoordinatesChanged)
+		{
+			UIContextStack->HandleEvent(new TBSUIContextCoordinateEvent(FName(TEXT("TileHoverEnd")), ClassLoader->GridUI->CurrentCoordinates));
+
+			if (ClassLoader->GridUI->CursorOnGrid)
+			{
+				UIContextStack->HandleEvent(new TBSUIContextCoordinateEvent(FName(TEXT("TileHoverBegin")), ClassLoader->GridUI->CurrentCoordinates));
+			}
+		}
 	}
 }
 
-void ATBSPlayerController::TurnCameraRight()
+void ATBSPlayerController::ViewLevelUp()
 {
-	if (DefaultPawn)
-	{
-		DefaultPawn->TurnCameraRight();
-	}
+	UIContextStack->HandleEvent(new TBSUIContextEvent(FName(TEXT("ViewLevelUp"))));
 }
 
-void ATBSPlayerController::TurnCameraLeft()
+void ATBSPlayerController::ViewLevelDown()
 {
-	if (DefaultPawn)
-	{
-		DefaultPawn->TurnCameraLeft();
-	}
+	UIContextStack->HandleEvent(new TBSUIContextEvent(FName(TEXT("ViewLevelDown"))));
+}
+
+void ATBSPlayerController::RotateCameraRight()
+{
+	UIContextStack->HandleEvent(new TBSUIContextEvent(FName(TEXT("RotateCameraRight"))));
+}
+
+void ATBSPlayerController::RotateCameraLeft()
+{
+	UIContextStack->HandleEvent(new TBSUIContextEvent(FName(TEXT("RotateCameraLeft"))));
 }
 
 void ATBSPlayerController::ZoomCameraIn()
 {
-	if (DefaultPawn)
-	{
-		DefaultPawn->ZoomCameraIn();
-	}
+	UIContextStack->HandleEvent(new TBSUIContextEvent(FName(TEXT("ZoomCameraIn"))));
 }
 
 void ATBSPlayerController::ZoomCameraOut()
 {
-	if (DefaultPawn)
-	{
-		DefaultPawn->ZoomCameraOut();
-	}
+	UIContextStack->HandleEvent(new TBSUIContextEvent(FName(TEXT("ZoomCameraOut"))));
 }
 
 void ATBSPlayerController::TogglePerspectiveCamera()
 {
-	if (DefaultPawn)
-	{
-		DefaultPawn->TogglePerspectiveCamera();
-	}
+	UIContextStack->HandleEvent(new TBSUIContextEvent(FName(TEXT("TogglePerspectiveCamera"))));
 }
 
 void ATBSPlayerController::MoveCameraForward(float AxisValue)
 {
-	DefaultPawn = Cast<ATBSDefaultPawn>(GetPawn());
-
-	if (DefaultPawn)
-	{
-		DefaultPawn->MoveCameraForward(AxisValue);
-	}
+	UIContextStack->HandleEvent(new TBSUIContextAxisEvent(FName(TEXT("MoveCameraForward")), AxisValue));
 }
 
 void ATBSPlayerController::MoveCameraRight(float AxisValue)
 {
-	if (DefaultPawn)
+	UIContextStack->HandleEvent(new TBSUIContextAxisEvent(FName(TEXT("MoveCameraRight")), AxisValue));
+}
+
+void ATBSPlayerController::MouseLeft()
+{
+	if (ClassLoader->GridUI->CursorOnGrid)
 	{
-		DefaultPawn->MoveCameraRight(AxisValue);
+		UIContextStack->HandleEvent(new TBSUIContextCoordinateEvent(FName(TEXT("TileClick")), ClassLoader->GridUI->CurrentCoordinates));
 	}
 }
 
-void ATBSPlayerController::OnMouseLeft()
+void ATBSPlayerController::MouseRight()
 {
-	if (Role == ROLE_Authority)
+	if (ClassLoader->GridUI->CursorOnGrid)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("ATBSPlayerController::OnMouseLeft ROLE_Authority")));
+		UIContextStack->HandleEvent(new TBSUIContextCoordinateEvent(FName(TEXT("TileRightClick")), ClassLoader->GridUI->CurrentCoordinates));
 	}
-	else if (Role == ROLE_AutonomousProxy)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("ATBSPlayerController::OnMouseLeftd ROLE_AutonomousProxy")));
-	}
-	else if (Role == ROLE_SimulatedProxy)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("ATBSPlayerController::OnMouseLeftd ROLE_SimulatedProxy")));
-	}
-	else if (Role == ROLE_None)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("ATBSPlayerController::OnMouseLeft ROLE_None")));
-	}
-	else
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("ATBSPlayerController::OnMouseLeft Other")));
-	}
-
-	if (GridUI)
-	{
-		GridUI->HandleMouseLeft();
-	}
-}
-
-void ATBSPlayerController::OnMouseRight()
-{
-	if (GridUI)
-	{
-		GridUI->HandleMouseRight();
-	}
-}
-
-FHitResult ATBSPlayerController::GetGridHitResult()
-{
-	FHitResult Result;
-	bool bHitSomething = GetHitResultUnderCursor(ECollisionChannel::ECC_GameTraceChannel1, true, Result);
-	return Result;
 }
 
 void ATBSPlayerController::Server_HandleCommand_Implementation(ATBSUnit* Unit, const TArray<FIntVector>& Movements)
@@ -215,117 +172,3 @@ bool ATBSPlayerController::Server_HandleCommand_Validate(ATBSUnit* Unit, const T
 
 	return true;
 }
-
-//
-//void ATBSPlayerController::Server_Possess_Implementation(ATBSUnit* Unit)
-//{
-//	if (HasAuthority())
-//	{
-//		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Possessing on server")));
-//		Possess(Unit);
-//	}
-//}
-//
-//bool ATBSPlayerController::Server_Possess_Validate(ATBSUnit* Unit)
-//{
-//	return true;
-//}
-//
-//void ATBSPlayerController::Server_UnPossess_Implementation()
-//{
-//	if (HasAuthority())
-//	{
-//		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Unpossessing on server")));
-//		UnPossess();
-//	}
-//}
-//
-//bool ATBSPlayerController::Server_UnPossess_Validate()
-//{
-//	return true;
-//}
-
-void ATBSPlayerController::InitLocalClasses()
-{
-	if (DefaultPawn && Grid && GridUI && PlayerState2)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("All local classes Initialised")));
-
-		GridUI->OnGameTileMouseLeft.AddDynamic(PlayerState2, &ATBSPlayerState::MouseLeft);
-		GridUI->OnGameTileMouseRight.AddDynamic(PlayerState2, &ATBSPlayerState::MouseRight);
-		GridUI->OnGameTileHoverBegin.AddDynamic(PlayerState2, &ATBSPlayerState::HoverBegin);
-		GridUI->OnGameTileHoverEnd.AddDynamic(PlayerState2, &ATBSPlayerState::HoverEnd);
-
-		GetWorldTimerManager().ClearTimer(InitTimer);
-		return;
-	}
-
-	InitDefaultPawn();
-	InitGrid();
-	InitGridUI();
-	InitPlayerState2();
-}
-
-bool ATBSPlayerController::InitDefaultPawn()
-{
-	if (DefaultPawn)
-	{
-		return true;
-	}
-
-	DefaultPawn = Cast<ATBSDefaultPawn>(GetPawn());
-
-	return true;
-}
-
-bool ATBSPlayerController::InitGrid()
-{
-	if (Grid)
-	{
-		return true;
-	}
-
-	for (TActorIterator<ATBSGrid> ActorItr(GetWorld()); ActorItr; ++ActorItr)
-	{
-		Grid = *ActorItr;
-		return true;
-	}
-
-	return false;
-}
-
-bool ATBSPlayerController::InitGridUI()
-{
-	if (!InitGrid())
-	{
-		return false;
-	}
-
-	if (GridUI)
-	{
-		return true;
-	}
-
-	GridUI = GetWorld()->SpawnActor<ATBSGridUI>(ATBSGridUI::StaticClass());
-	GridUI->RenderGrid(Grid);
-	return true;
-}
-
-bool ATBSPlayerController::InitPlayerState2()
-{
-	if (!InitGrid())
-	{
-		return false;
-	}
-
-	if (!InitGridUI())
-	{
-		return false;
-	}
-
-	PlayerState2 = Cast<ATBSPlayerState>(PlayerState);
-	PlayerState2->Initialise(Grid, GridUI);
-
-	return true;
-}
-

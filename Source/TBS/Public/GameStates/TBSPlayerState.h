@@ -42,12 +42,12 @@ public:
 
 private:
 	ATBSPlayerController* PlayerController;
-	ATBSGrid* Grid;
-	ATBSGridUI* GridUI;
-	ATBSPropManager* PropManager;
-	ATBSUnitManager* UnitManager;
-	ATBSGridPathFinder* GridPathFinder;
-	ATBSGridPathRenderer* GridPathRenderer;
+	//ATBSGrid* Grid;
+	//ATBSGridUI* GridUI;
+	//ATBSPropManager* PropManager;
+	//ATBSUnitManager* UnitManager;
+	//ATBSGridPathFinder* GridPathFinder;
+	//ATBSGridPathRenderer* GridPathRenderer;
 
 	ATBSUnit* SelectedUnit;
 	bool UnitSelected = false;

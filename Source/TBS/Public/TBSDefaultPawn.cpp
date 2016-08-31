@@ -78,17 +78,17 @@ void ATBSDefaultPawn::MoveCameraRight(float AxisValue)
 	SetActorLocation(GetActorLocation() + (AxisValueTotal * CameraMovementSpeed * DeltaVector));
 }
 
-void ATBSDefaultPawn::MoveLevelUp()
+void ATBSDefaultPawn::ViewLevelUp()
 {
 
 }
 
-void ATBSDefaultPawn::MoveLevelDown()
+void ATBSDefaultPawn::ViewLevelDown()
 {
 
 }
 
-void ATBSDefaultPawn::TurnCameraRight()
+void ATBSDefaultPawn::RotateCameraRight()
 {
 	CameraViewAngleDeg = CameraViewAngleDeg - 90.0;
 	if (CameraViewAngleDeg < 0)
@@ -98,7 +98,7 @@ void ATBSDefaultPawn::TurnCameraRight()
 	UpdateCameraPositionAndRotation();
 }
 
-void ATBSDefaultPawn::TurnCameraLeft()
+void ATBSDefaultPawn::RotateCameraLeft()
 {
 	CameraViewAngleDeg = CameraViewAngleDeg + 90.0;
 

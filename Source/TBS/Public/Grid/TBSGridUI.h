@@ -9,10 +9,10 @@
 
 class ATBSPlayerController;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameTileHoverBegin, FIntVector, GameCoordinates);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameTileHoverEnd, FIntVector, GameCoordinates);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameTileMouseLeft, FIntVector, GameCoordinates);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameTileMouseRight, FIntVector, GameCoordinates);
+//DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameTileHoverBegin, FIntVector, GameCoordinates);
+//DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameTileHoverEnd, FIntVector, GameCoordinates);
+//DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameTileMouseLeft, FIntVector, GameCoordinates);
+//DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameTileMouseRight, FIntVector, GameCoordinates);
 
 UCLASS(Blueprintable)
 class TBS_API ATBSGridUI : public AActor
@@ -26,38 +26,39 @@ public:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	// Called every frame
-	virtual void Tick(float DeltaSeconds) override;
-
 	void RenderGrid(ATBSGrid* Grid);
-	void LevelUp();
-	void LevelDown();
-	int32 GetCurrentLevel();
-
-	bool bResolveGridCoordinates = true;
-
-	void HandleMouseLeft();
-	void HandleMouseRight();
-
+	void HandleGridHitResult(FHitResult HitResult);
 	FCoordinateLocations GetCoordinateLocations(FIntVector Coordinates);
+	void LevelUp();
+	void LevelDown();	
 
-	FOnGameTileHoverBegin OnGameTileHoverBegin;
-	FOnGameTileHoverEnd OnGameTileHoverEnd;
-	FOnGameTileMouseLeft OnGameTileMouseLeft;
-	FOnGameTileMouseRight OnGameTileMouseRight;
+	bool CoordinatesChanged = false;
+	bool CursorOnGrid = false;
+	FIntVector CurrentCoordinates = FIntVector(-999, -999, -999);
+	FIntVector PreviousCoordinates = FIntVector(-999, -999, -999);
 
 private:
+	void UpdateLevelVisibilities();
+	void SpawnCursor();
+	void UpdateCursorLocation(const FVector Location);
+	void ShowCursor();
+	void HideCursor();
+
+	FIntVector NullCoordinates = FIntVector(-999, -999, -999);
 	int32 CurrentLevel = 0;
-	int32 NumOfLevels;
-	int32 GridWidth;
-	int32 GridHeight;
 	float GridMeshWidth;
 	float GridMeshHeight;
-	float TileSize= 100;
+	float TileSize = 100;
 	float FloorHeight = 200;
-	
+
+
+	void InitialiseParametersFromGrid();
+	void CreateGridMaterialInstances();
+	void CreateGridMeshComponents();
+	UMaterialInstanceDynamic* CreateMaterialInstance();
+	UStaticMeshComponent* CreateMeshComponent();
+
 	ATBSGrid* Grid;
-	ATBSPlayerController* PlayerController;
 	UStaticMesh* GridMesh;
 	UMaterial* GridMaterial;
 	TSubclassOf<class ATBSGridCursor> GridCursorClass;
@@ -65,22 +66,5 @@ private:
 	USceneComponent* SceneComponent;
 	TArray<UStaticMeshComponent*> GridMeshes;
 	TArray<UMaterialInstanceDynamic*> GridMaterials;
-	FIntVector LastGameCoordinates = FIntVector(-999, -999, -999);
-
-	void InitialisePlayerController();
-	void InitialiseParametersFromGrid();
-	void CreateGridMaterialInstances();
-	void CreateGridMeshComponents();
-	UMaterialInstanceDynamic* CreateMaterialInstance();		
-	UStaticMeshComponent* CreateMeshComponent();
-	void UpdateLevelVisibilities();
-	void SpawnCursor();
-	void UpdateCursorLocation(const FVector Location);
-	void ShowCursor();
-	void HideCursor();
-
-	FIntVector NullVector = FIntVector(-999, -999, -999);
-	FIntVector HoverCoordinates = NullVector;
-	//FIntVector SelectCoordinates = NullVector;
 };
 

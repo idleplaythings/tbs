@@ -3,8 +3,12 @@
 #pragma once
 
 #include "GameFramework/PlayerController.h"
+#include "TBSClassLoader.h"
+#include "TBSUIContextStack.h"
 #include "TBSGrid.h"
 #include "TBSGridUI.h"
+#include "TBSGridPathFinder.h"
+#include "TBSGridPathRenderer.h"
 #include "TBSPlayerState.h"
 #include "TBSDefaultPawn.h"
 #include "TBSTypes.h"
@@ -17,44 +21,38 @@ class TBS_API ATBSPlayerController : public APlayerController
 
 public:
 	ATBSPlayerController(const FObjectInitializer& ObjectInitializer);
+
+	virtual void PlayerTick(float DeltaSeconds) override;
+
 	void EnableMouse();
 	void BeginPlay();
-	void SetupInputComponent();
-	void MoveLevelUp();
-	void MoveLevelDown();
-	void TurnCameraRight();
-	void TurnCameraLeft();
+
+	UPROPERTY(Replicated)
+	int32 PlayerNumber = 0;
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_HandleCommand(ATBSUnit* Unit, const TArray<FIntVector>& Movements);
+
+	UFUNCTION()
+	void OnClassesLoaded();
+
+	ATBSUnit* SelectedUnit;
+
+private:
+	void ViewLevelUp();
+	void ViewLevelDown();
+	void RotateCameraRight();
+	void RotateCameraLeft();
 	void ZoomCameraIn();
 	void ZoomCameraOut();
 	void TogglePerspectiveCamera();
 	void MoveCameraForward(float AxisValue);
 	void MoveCameraRight(float AxisValue);
-	void OnMouseLeft();
-	void OnMouseRight();
-	FHitResult GetGridHitResult();
-	//void Server_Possess_Implementation(ATBSUnit* Unit);
-	//bool Server_Possess_Validate(ATBSUnit* Unit);
-	//void Server_UnPossess_Implementation();
-	//bool Server_UnPossess_Validate();
+	void MouseLeft();
+	void MouseRight();
 
-	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_HandleCommand(ATBSUnit* Unit, const TArray<FIntVector>& Movements);
-
-	void InitLocalClasses();
-	bool InitDefaultPawn();
-	bool InitGrid();
-	bool InitGridUI();
-	bool InitPlayerState2();
-
-	ATBSGrid* Grid;
-	ATBSGridUI* GridUI;
-	//ATBSPlayerState* PlayerState;
-	ATBSPlayerState* PlayerState2;
-	ATBSDefaultPawn* DefaultPawn;
-	FLocalPlayerContext PlayerContext;
-	FTimerHandle InitTimer;
-
-	UPROPERTY(Replicated)
-	int32 PlayerNumber = 0;
+	TBSUIContextStack* UIContextStack;
+	ATBSClassLoader* ClassLoader;
+	bool ClassesLoaded = false;
 };
 

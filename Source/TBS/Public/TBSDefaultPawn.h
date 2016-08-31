@@ -19,10 +19,10 @@ public:
 	void BeginPlay() override;
 	void MoveCameraForward(float AxisValue);
 	void MoveCameraRight(float AxisValue);
-	void MoveLevelUp();
-	void MoveLevelDown();
-	void TurnCameraRight();
-	void TurnCameraLeft();
+	void ViewLevelUp();
+	void ViewLevelDown();
+	void RotateCameraRight();
+	void RotateCameraLeft();
 	void ZoomCameraIn();
 	void ZoomCameraOut();
 	void TogglePerspectiveCamera();
