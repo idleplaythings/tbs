@@ -53,7 +53,9 @@ public:
 	void AddUnit(ATBSUnit* Unit);
 	TArray<ATBSProp*>::TIterator GetPropsIterator();
 	TArray<ATBSUnit*>::TIterator GetUnitIterator();
-	ATBSUnit* SelectUnit(FIntVector GameCoords);
+
+	ATBSUnit* SelectUnit(FIntVector Coordinates);
+	ATBSProp* SelectProp(FIntVector Coordinates);
 
 	FOnActorNoLongerVisible OnActorNoLongerVisible;
 

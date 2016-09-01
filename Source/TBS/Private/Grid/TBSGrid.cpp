@@ -61,10 +61,8 @@ void ATBSGrid::AddUnit(ATBSUnit* Unit)
 	Units.Add(Unit);
 }
 
-ATBSUnit* ATBSGrid::SelectUnit(FIntVector GameCoords)
+ATBSUnit* ATBSGrid::SelectUnit(FIntVector Coordinates)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Looking for units, number of units %i"), Units.Num()));
-
 	for (auto &Unit : Units)
 	{
 		if (Unit == nullptr)
@@ -72,19 +70,31 @@ ATBSUnit* ATBSGrid::SelectUnit(FIntVector GameCoords)
 			continue;
 		}
 
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Unit coords (%i, %i, %i)"), Unit->GameCoordinates.X, Unit->GameCoordinates.Y, Unit->GameCoordinates.Z));
-
-		if (Unit->GameCoordinates == GameCoords)
+		if (Unit->GameCoordinates == Coordinates)
 		{ 
 			return Unit;
-			//InUnit = Unit;
-			//UnitFound = true;
-			break;
 		}
 	}
 
 	return nullptr;
-	//return UnitFound;
+}
+
+ATBSProp* ATBSGrid::SelectProp(FIntVector Coordinates)
+{
+	for (auto &Prop : Props)
+	{
+		if (Prop == nullptr)
+		{
+			continue;
+		}
+
+		if (Prop->GameCoordinates == Coordinates)
+		{
+			return Prop;
+		}
+	}
+
+	return nullptr;
 }
 
 TArray<FIntVector> ATBSGrid::GetNeighbours(FIntVector Coordinates)
@@ -138,7 +148,7 @@ void ATBSGrid::ReindexUnits_Implementation()
 {
 	if (HasAuthority())
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Server Reindex Units")));
+		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Server Reindex Units")));
 
 		TArray<ATBSUnit*> Player0Units = GetUnitsByPlayer(0);
 		TArray<ATBSUnit*> Player1Units = GetUnitsByPlayer(1);
@@ -149,7 +159,7 @@ void ATBSGrid::ReindexUnits_Implementation()
 			{
 				if (CanDrawLineOfFire(Unit0->GameCoordinates, Unit1->GameCoordinates))
 				{
-					GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Can draw line of fire (%i, %i, %i) -> (%i, %i, %i)"), Unit0->GameCoordinates.X, Unit0->GameCoordinates.Y, Unit0->GameCoordinates.Z, Unit1->GameCoordinates.X, Unit1->GameCoordinates.Y, Unit1->GameCoordinates.Z));
+					/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Can draw line of fire (%i, %i, %i) -> (%i, %i, %i)"), Unit0->GameCoordinates.X, Unit0->GameCoordinates.Y, Unit0->GameCoordinates.Z, Unit1->GameCoordinates.X, Unit1->GameCoordinates.Y, Unit1->GameCoordinates.Z));*/
 
 					Unit0->SeenByPlayers.Empty();
 					Unit0->SeenByPlayers.Add(1);
@@ -179,11 +189,8 @@ bool ATBSGrid::CanDrawLineOfFire(FIntVector Start, FIntVector End)
 {
 	for (auto& Coordinate : Trace(Start, End))
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Tracing (%i, %i, %i)"), Coordinate.X, Coordinate.Y, Coordinate.Z));
-
 		if (!IsAccessible(Coordinate))
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Is not accessible")));
 			return false;
 		}
 	}

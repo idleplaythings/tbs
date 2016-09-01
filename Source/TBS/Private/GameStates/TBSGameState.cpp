@@ -10,18 +10,28 @@
 
 void ATBSGameState::StartGameplay()
 {
-	InitGrid(FIntVector(10, 20, 3));
+	InitGrid(FIntVector(100, 100, 3));
 	InitGridUI();
 
 	if (HasAuthority())
 	{
 		InitFactoriesAndManagers();
 
-		// Create dummy map
-		Grid->AddProp(PropFactory->CreateWall(FIntVector(2, 8, 0), FRotator(0.0, 90.0, 0.0)));
-		Grid->AddProp(PropFactory->CreateWall(FIntVector(2, 7, 0), FRotator(0.0, 0.0, 0.0)));
-		Grid->AddProp(PropFactory->CreateWall(FIntVector(3, 7, 0), FRotator(0.0, 0.0, 0.0)));
-		Grid->AddProp(PropFactory->CreateWall(FIntVector(4, 7, 0), FRotator(0.0, 0.0, 0.0)));		
+		int PropsSpawned = 0;
+
+		while (PropsSpawned < 30)
+		{
+			FIntVector Coordinates = FIntVector(FMath::RandRange(42, 57), FMath::RandRange(42, 57), 0);
+			int32 Rotation = (float) FMath::RandRange(0, 3) * 90;
+
+			if (Grid->SelectProp(Coordinates))
+			{
+				continue;
+			}
+
+			Grid->AddProp(PropFactory->CreateWall(Coordinates, FRotator(0.0, Rotation, 0.0)));
+			PropsSpawned += 1;
+		}
 		PropManager->ResetProps();
 
 		Grid->OnActorNoLongerVisible.AddDynamic(this, &ATBSGameState::ForceCloseActorChannel);
@@ -105,10 +115,34 @@ void ATBSGameState::InitPlayerController(int32 PlayerNumber, APlayerController* 
 
 void ATBSGameState::SpawnUnits(int32 PlayerNumber)
 {
-	FIntVector StartCoordinates = PlayerNumber == 0 ? FIntVector(3, 3, 0) : FIntVector(3, 11, 0);
-	ATBSUnit* Unit = UnitFactory->CreateUnit(StartCoordinates, FRotator(0.0, 0.0, 0.0));
-	Unit->PlayerNumber = PlayerNumber;
+	int32 UnitsSpawned = 0;
+	int32 XOffset = 0;
 
-	Grid->AddUnit(Unit);
-	UnitManager->ResetUnit(Unit);
+	if (PlayerNumber > 0)
+	{
+		XOffset = 10;
+	}
+
+	while (UnitsSpawned < 3)
+	{
+		FIntVector Coordinates = FIntVector(FMath::RandRange(40 + XOffset, 45 + XOffset), FMath::RandRange(45, 55), 0);
+
+		if (Grid->SelectUnit(Coordinates))
+		{
+			continue;
+		}
+
+		if (Grid->SelectProp(Coordinates))
+		{
+			continue;
+		}
+
+		ATBSUnit* Unit = UnitFactory->CreateUnit(Coordinates, FRotator(0.0, 0.0, 0.0));
+		Unit->PlayerNumber = PlayerNumber;
+
+		Grid->AddUnit(Unit);
+		UnitManager->ResetUnit(Unit);
+
+		UnitsSpawned += 1;
+	}
 }
