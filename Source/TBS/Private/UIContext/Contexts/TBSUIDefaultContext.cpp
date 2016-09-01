@@ -17,7 +17,7 @@ void TBSUIDefaultContext::HandleEvent(TBSUIContextEvent* Event)
 		FIntVector Coordinates = ((TBSUIContextCoordinateEvent*)Event)->Coordinates;
 		ATBSUnit* Unit = ClassLoader->Grid->SelectUnit(Coordinates);
 
-		if (Unit)
+		if (Unit && Unit->PlayerNumber == ClassLoader->PlayerController->PlayerNumber)
 		{
 			ClassLoader->PlayerController->SelectedUnit = Unit;
 			ContextStack->PushContext(new TBSUIFriendlyUnitContext);
