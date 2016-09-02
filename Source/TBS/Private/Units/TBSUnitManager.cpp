@@ -76,7 +76,27 @@ bool ATBSUnitManager::ConsumeMovementCommand(MovementCommand &MovementCommand)
 void ATBSUnitManager::StartMovement()
 {
 	IsProcessingMovement = true;
+
+	if (CurrentMovement.Movement.X < CurrentMovement.Unit->GameCoordinates.X)
+	{
+		CurrentMovement.Unit->MoveWest();
+	}
+	else if (CurrentMovement.Movement.X > CurrentMovement.Unit->GameCoordinates.X)
+	{
+		CurrentMovement.Unit->MoveEast();
+	}
+
+	if (CurrentMovement.Movement.Y < CurrentMovement.Unit->GameCoordinates.Y)
+	{
+		CurrentMovement.Unit->MoveNorth();
+	}
+	else if (CurrentMovement.Movement.Y > CurrentMovement.Unit->GameCoordinates.Y)
+	{
+		CurrentMovement.Unit->MoveSouth();
+	}
+
 	CurrentMovement.Unit->GameCoordinates = CurrentMovement.Movement;
+
 	Grid->ReindexUnits();
 }
 

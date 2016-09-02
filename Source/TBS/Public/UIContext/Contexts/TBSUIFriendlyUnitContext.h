@@ -10,5 +10,7 @@
 class TBS_API TBSUIFriendlyUnitContext : public TBSUIContext
 {
 public:
+	void EnterContext();
+	void ExitContext();
 	void HandleEvent(TBSUIContextEvent* Event);
 };

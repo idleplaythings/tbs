@@ -23,6 +23,8 @@ public:
 
 	virtual bool IsNetRelevantFor(const AActor* RealViewer, const AActor* ViewTarget, const FVector& SrcLocation) const override;
 
+	void RecalculateCoordinates();
+
 	UPROPERTY(Replicated, BlueprintReadOnly, Category="Unit")
 	int32 PlayerNumber = 0;
 
@@ -48,7 +50,16 @@ public:
 	float MaxSpeed = 2;
 
 	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Unit")
+	FIntVector Dimensions;
+
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Unit")
 	FIntVector GameCoordinates;
 
-	void AddMovementCommand();
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Unit")
+	TArray<FIntVector> GameCoordinatesOccupied;
+
+	void MoveNorth();
+	void MoveEast();
+	void MoveSouth();
+	void MoveWest();
 };

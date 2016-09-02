@@ -18,6 +18,8 @@ public:
 
 	void Initialise(TBSUIContextStack* InContextStack, ATBSClassLoader* InClassLoader);
 
+	virtual void EnterContext();
+	virtual void ExitContext();
 	virtual void HandleEvent(TBSUIContextEvent* Event);
 
 protected:

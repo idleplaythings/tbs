@@ -192,8 +192,15 @@ void ATBSGridUI::HideCursor()
 FCoordinateLocations ATBSGridUI::GetCoordinateLocations(FIntVector Coordinates)
 {
 	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Asking for coordinate locations (%i, %i, %i)"), Coordinates.X, Coordinates.Y, Coordinates.Z));
-	FVector Location = GetActorLocation() - FVector(GridMeshWidth/2, GridMeshHeight/2, Coordinates.Z * FloorHeight);
-	Location = Location + FVector((float)Coordinates.X * TileSize + TileSize/2, (float)Coordinates.Y * TileSize + TileSize/2, 0.0);
+	FVector Location = GetActorLocation() - FVector(GridMeshWidth/2, GridMeshHeight/2, 0.0);
+
+	Location = Location + FVector(
+		(float)Coordinates.X * TileSize + TileSize/2,
+		(float)Coordinates.Y * TileSize + TileSize/2,
+		(float)Coordinates.Z * FloorHeight
+	);
+
+	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Asking for coordinate locations (%f, %f, %f)"), Location.X, Location.Y, Location.Z));
 
 	FVector Up = FVector(0.0, TileSize / -2, 0.0);
 	FVector Right = FVector(TileSize / 2, 0.0, 0.0);
@@ -209,4 +216,39 @@ FCoordinateLocations ATBSGridUI::GetCoordinateLocations(FIntVector Coordinates)
 	Result.SW = Location - Up - Right;
 	Result.W = Location - Right;
 	return Result;
+}
+
+void ATBSGridUI::SelectCoordinates(TArray<FIntVector> Coordinates)
+{
+	SelectedCoordinates = Coordinates;
+	int32 Missing = Coordinates.Num() - SelectionCursors.Num();
+	int32 CoordinatesCount = Coordinates.Num();
+
+	for (int32 i = 0; i < Missing; i++)
+	{
+		SelectionCursors.Add(GetWorld()->SpawnActor<ATBSGridCursor>(GridCursorClass));
+	}
+
+	for (int32 i = 0; i < SelectionCursors.Num(); i++)
+	{
+		if (i > (CoordinatesCount - 1))
+		{
+			SelectionCursors[i]->SetActorHiddenInGame(true);
+			continue;
+		}
+		
+		FCoordinateLocations Locations = GetCoordinateLocations(Coordinates[i]);
+		SelectionCursors[i]->SetActorHiddenInGame(false);
+		SelectionCursors[i]->SetActorLocation(Locations.Center);
+	}
+}
+
+void ATBSGridUI::ClearSelection()
+{
+	SelectedCoordinates.Empty();
+
+	for (int32 i = 0; i < SelectionCursors.Num(); i++)
+	{
+		SelectionCursors[i]->SetActorHiddenInGame(true);
+	}
 }

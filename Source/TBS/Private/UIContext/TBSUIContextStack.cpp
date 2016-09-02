@@ -15,10 +15,12 @@ void TBSUIContextStack::PushContext(TBSUIContext* Context)
 {
 	Context->Initialise(this, ClassLoader);
 	UIContexts.push_back((TBSUIContext*) Context);
+	Context->EnterContext();
 }
 
 void TBSUIContextStack::PopContext()
 {
+	UIContexts.back()->ExitContext();
 	UIContexts.pop_back();
 }
 

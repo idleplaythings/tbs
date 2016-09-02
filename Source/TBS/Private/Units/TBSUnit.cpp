@@ -38,7 +38,9 @@ void ATBSUnit::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetime
 	DOREPLIFETIME(ATBSUnit, Acceleration);
 	DOREPLIFETIME(ATBSUnit, TurningSpeed);
 	DOREPLIFETIME(ATBSUnit, MaxSpeed);
+	DOREPLIFETIME(ATBSUnit, GameCoordinatesOccupied);
 	DOREPLIFETIME(ATBSUnit, GameCoordinates);
+	DOREPLIFETIME(ATBSUnit, Dimensions);
 }
 
 // Called when the game starts or when spawned
@@ -52,29 +54,78 @@ void ATBSUnit::BeginPlay()
 void ATBSUnit::Tick( float DeltaTime )
 {
 	Super::Tick( DeltaTime );
-
 }
 
-void ATBSUnit::AddMovementCommand()
+void ATBSUnit::RecalculateCoordinates()
 {
-	if (Role == ROLE_Authority)
+	TArray<FIntVector> NewCoordinates;
+
+	for (int32 Xoffset = 0; Xoffset < Dimensions.X; Xoffset++)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("ATBSUnit::AddMovementCommand ROLE_Authority")));
+		for (int32 Yoffset = 0; Yoffset < Dimensions.Y; Yoffset++)
+		{
+			for (int32 Zoffset = 0; Zoffset < Dimensions.Z; Zoffset++)
+			{
+				NewCoordinates.Add(FIntVector(
+					GameCoordinates.X + Xoffset,
+					GameCoordinates.Y + Yoffset,
+					GameCoordinates.Z + Zoffset
+				));
+			}
+		}
 	}
-	else if (Role == ROLE_AutonomousProxy)
+
+	GameCoordinatesOccupied = NewCoordinates;
+}
+
+void ATBSUnit::MoveNorth()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("North")));
+	TArray<FIntVector> NewCoordinates;
+
+	for (auto& Coordinates : GameCoordinatesOccupied)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("ATBSUnit::AddMovementCommand ROLE_AutonomousProxy")));
+		NewCoordinates.Add(FIntVector(Coordinates.X, Coordinates.Y - 1, Coordinates.Z));
 	}
-	else if (Role == ROLE_SimulatedProxy)
+
+	GameCoordinatesOccupied = NewCoordinates;
+}
+
+void ATBSUnit::MoveEast()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("East")));
+	TArray<FIntVector> NewCoordinates;
+
+	for (auto& Coordinates : GameCoordinatesOccupied)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("ATBSUnit::AddMovementCommand ROLE_SimulatedProxy")));
+		NewCoordinates.Add(FIntVector(Coordinates.X + 1, Coordinates.Y, Coordinates.Z));
 	}
-	else if (Role == ROLE_None)
+
+	GameCoordinatesOccupied = NewCoordinates;
+}
+
+void ATBSUnit::MoveSouth()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("South")));
+	TArray<FIntVector> NewCoordinates;
+
+	for (auto& Coordinates : GameCoordinatesOccupied)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("ATBSUnit::AddMovementCommand ROLE_None")));
+		NewCoordinates.Add(FIntVector(Coordinates.X, Coordinates.Y + 1, Coordinates.Z));
 	}
-	else
+
+	GameCoordinatesOccupied = NewCoordinates;
+}
+
+void ATBSUnit::MoveWest()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("West")));
+	TArray<FIntVector> NewCoordinates;
+
+	for (auto& Coordinates : GameCoordinatesOccupied)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("ATBSUnit::AddMovementCommand Other")));
+		NewCoordinates.Add(FIntVector(Coordinates.X - 1, Coordinates.Y, Coordinates.Z));
 	}
+
+	GameCoordinatesOccupied = NewCoordinates;
 }

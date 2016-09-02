@@ -17,6 +17,16 @@ void TBSUIContext::Initialise(TBSUIContextStack* InContextStack, ATBSClassLoader
 	ClassLoader = InClassLoader;
 }
 
+void TBSUIContext::EnterContext()
+{
+
+}
+
+void TBSUIContext::ExitContext()
+{
+
+}
+
 void TBSUIContext::HandleEvent(TBSUIContextEvent* Event)
 {
 

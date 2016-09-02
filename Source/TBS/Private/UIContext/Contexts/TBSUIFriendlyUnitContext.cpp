@@ -7,6 +7,25 @@
 #include "TBSPlayerController.h"
 #include "TBSUIFriendlyUnitContext.h"
 
+void TBSUIFriendlyUnitContext::EnterContext()
+{
+	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Unit's occupied coordinates")));
+	//FString Coordinates;
+
+	//for (auto& Coordinate : ClassLoader->PlayerController->SelectedUnit->GameCoordinatesOccupied)
+	//{
+	//	Coordinates.Append(FString::Printf(TEXT("(%i, %i, %i) "), Coordinate.X, Coordinate.Y, Coordinate.Z));
+	//}
+
+	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, Coordinates);
+
+	ClassLoader->GridUI->SelectCoordinates(ClassLoader->PlayerController->SelectedUnit->GameCoordinatesOccupied);
+}
+
+void TBSUIFriendlyUnitContext::ExitContext()
+{
+	ClassLoader->GridUI->ClearSelection();
+}
 
 void TBSUIFriendlyUnitContext::HandleEvent(TBSUIContextEvent* Event)
 {

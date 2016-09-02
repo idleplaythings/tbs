@@ -37,6 +37,9 @@ public:
 	FIntVector CurrentCoordinates = FIntVector(-999, -999, -999);
 	FIntVector PreviousCoordinates = FIntVector(-999, -999, -999);
 
+	void SelectCoordinates(TArray<FIntVector> Coordinates);
+	void ClearSelection();
+
 private:
 	void UpdateLevelVisibilities();
 	void SpawnCursor();
@@ -66,5 +69,8 @@ private:
 	USceneComponent* SceneComponent;
 	TArray<UStaticMeshComponent*> GridMeshes;
 	TArray<UMaterialInstanceDynamic*> GridMaterials;
+
+	TArray<ATBSGridCursor*> SelectionCursors;
+	TArray<FIntVector> SelectedCoordinates;
 };
 
