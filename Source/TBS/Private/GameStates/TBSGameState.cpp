@@ -145,4 +145,6 @@ void ATBSGameState::SpawnUnits(int32 PlayerNumber)
 
 		UnitsSpawned += 1;
 	}
+
+	Grid->ReindexUnits();
 }

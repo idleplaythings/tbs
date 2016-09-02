@@ -148,10 +148,12 @@ void ATBSGrid::ReindexUnits_Implementation()
 {
 	if (HasAuthority())
 	{
-		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Server Reindex Units")));
-
 		TArray<ATBSUnit*> Player0Units = GetUnitsByPlayer(0);
 		TArray<ATBSUnit*> Player1Units = GetUnitsByPlayer(1);
+
+		// Track visible units. A unit is visible if anyone on the opposing team sees it.
+		TArray<ATBSUnit*> Player0VisibleUnits;
+		TArray<ATBSUnit*> Player1VisibleUnits;
 
 		for (auto& Unit0 : Player0Units)
 		{
@@ -159,29 +161,50 @@ void ATBSGrid::ReindexUnits_Implementation()
 			{
 				if (CanDrawLineOfFire(Unit0->GameCoordinates, Unit1->GameCoordinates))
 				{
-					/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Can draw line of fire (%i, %i, %i) -> (%i, %i, %i)"), Unit0->GameCoordinates.X, Unit0->GameCoordinates.Y, Unit0->GameCoordinates.Z, Unit1->GameCoordinates.X, Unit1->GameCoordinates.Y, Unit1->GameCoordinates.Z));*/
-
-					Unit0->SeenByPlayers.Empty();
-					Unit0->SeenByPlayers.Add(1);
-					Unit0->NetPriority = 3;
-
-					Unit1->SeenByPlayers.Empty();
-					Unit1->SeenByPlayers.Add(0);
-				}
-				else
-				{
-					OnActorNoLongerVisible.Broadcast(0, Unit1);
-					OnActorNoLongerVisible.Broadcast(1, Unit0);
-					Unit0->SeenByPlayers.Empty();
-					Unit1->SeenByPlayers.Empty();
+					// Mutual line of fire
+					Player0VisibleUnits.AddUnique(Unit0);
+					Player1VisibleUnits.AddUnique(Unit1);
 				}
 			}
 		}
 
-	}
-	else
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Reindex Units")));
+		// Now Loop through each player's visible units and update visibilityh only once per reindex...
+
+		for (auto& Unit0 : Player0Units)
+		{
+			if (Player0VisibleUnits.Contains(Unit0))
+			{
+				Unit0->SeenByPlayers.AddUnique(1);
+			}
+			else
+			{
+				if (Unit0->SeenByPlayers.Contains(1))
+				{
+					Unit0->SeenByPlayers.Remove(1);
+					// Unit was visible, but now isn't. Close actor replication channel
+					// to hide it immediately (rather than after 5 seconds)
+					OnActorNoLongerVisible.Broadcast(1, Unit0);					
+				}
+			}
+		}
+
+		for (auto& Unit1 : Player1Units)
+		{
+			if (Player1VisibleUnits.Contains(Unit1))
+			{
+				Unit1->SeenByPlayers.AddUnique(0);
+			}
+			else
+			{
+				if (Unit1->SeenByPlayers.Contains(0))
+				{
+					Unit1->SeenByPlayers.Remove(0);
+					// Unit was visible, but now isn't. Close actor replication channel
+					// to hide it immediately (rather than after 5 seconds)
+					OnActorNoLongerVisible.Broadcast(0, Unit1);					
+				}
+			}
+		}
 	}	
 }
 
