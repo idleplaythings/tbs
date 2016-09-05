@@ -60,19 +60,28 @@ void ATBSUnit::RecalculateCoordinates()
 {
 	TArray<FIntVector> NewCoordinates;
 
-	for (int32 Xoffset = 0; Xoffset < Dimensions.X; Xoffset++)
+	if (Dimensions.X % 2 == 0)
 	{
-		for (int32 Yoffset = 0; Yoffset < Dimensions.Y; Yoffset++)
+		int32 StepsX = Dimensions.X / 2 - 1;
+		int32 OffsetX = StepsX * 10;
+		int32 StepsY = Dimensions.Y / 2 - 1;
+		int32 OffsetY = StepsY * 10;
+
+
+		for (int32 X = (GameCoordinates.X - 5) - OffsetX; X <= (GameCoordinates.X + 5) - OffsetX; X += 10)
 		{
-			for (int32 Zoffset = 0; Zoffset < Dimensions.Z; Zoffset++)
+			for (int32 Y = (GameCoordinates.Y - 5) - OffsetY; Y <= (GameCoordinates.Y + 5) - OffsetY; Y += 10)
 			{
-				NewCoordinates.Add(FIntVector(
-					GameCoordinates.X + Xoffset,
-					GameCoordinates.Y + Yoffset,
-					GameCoordinates.Z + Zoffset
-				));
+				for (int32 Z = GameCoordinates.Z; Z <= Dimensions.Z; Z++)
+				{
+					NewCoordinates.Add(FIntVector(X, Y, Z));
+				}
 			}
 		}
+	}
+	else
+	{
+
 	}
 
 	GameCoordinatesOccupied = NewCoordinates;
@@ -85,7 +94,7 @@ void ATBSUnit::MoveNorth()
 
 	for (auto& Coordinates : GameCoordinatesOccupied)
 	{
-		NewCoordinates.Add(FIntVector(Coordinates.X, Coordinates.Y - 1, Coordinates.Z));
+		NewCoordinates.Add(FIntVector(Coordinates.X, Coordinates.Y - 10, Coordinates.Z));
 	}
 
 	GameCoordinatesOccupied = NewCoordinates;
@@ -98,7 +107,7 @@ void ATBSUnit::MoveEast()
 
 	for (auto& Coordinates : GameCoordinatesOccupied)
 	{
-		NewCoordinates.Add(FIntVector(Coordinates.X + 1, Coordinates.Y, Coordinates.Z));
+		NewCoordinates.Add(FIntVector(Coordinates.X + 10, Coordinates.Y, Coordinates.Z));
 	}
 
 	GameCoordinatesOccupied = NewCoordinates;
@@ -111,7 +120,7 @@ void ATBSUnit::MoveSouth()
 
 	for (auto& Coordinates : GameCoordinatesOccupied)
 	{
-		NewCoordinates.Add(FIntVector(Coordinates.X, Coordinates.Y + 1, Coordinates.Z));
+		NewCoordinates.Add(FIntVector(Coordinates.X, Coordinates.Y + 10, Coordinates.Z));
 	}
 
 	GameCoordinatesOccupied = NewCoordinates;
@@ -124,7 +133,7 @@ void ATBSUnit::MoveWest()
 
 	for (auto& Coordinates : GameCoordinatesOccupied)
 	{
-		NewCoordinates.Add(FIntVector(Coordinates.X - 1, Coordinates.Y, Coordinates.Z));
+		NewCoordinates.Add(FIntVector(Coordinates.X - 10, Coordinates.Y, Coordinates.Z));
 	}
 
 	GameCoordinatesOccupied = NewCoordinates;

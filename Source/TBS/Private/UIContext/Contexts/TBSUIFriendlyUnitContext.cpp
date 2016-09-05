@@ -19,12 +19,16 @@ void TBSUIFriendlyUnitContext::EnterContext()
 
 	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, Coordinates);
 
-	ClassLoader->GridUI->SelectCoordinates(ClassLoader->PlayerController->SelectedUnit->GameCoordinatesOccupied);
+	ATBSUnit* Unit = ClassLoader->PlayerController->SelectedUnit;
+
+	ClassLoader->GridUI->SelectLocation(Unit->Dimensions, Unit->GameCoordinates);
+	ClassLoader->GridUI->SetCursorDimensions(ClassLoader->PlayerController->SelectedUnit->Dimensions);
 }
 
 void TBSUIFriendlyUnitContext::ExitContext()
 {
 	ClassLoader->GridUI->ClearSelection();
+	ClassLoader->GridUI->ResetCursorDimensions();
 }
 
 void TBSUIFriendlyUnitContext::HandleEvent(TBSUIContextEvent* Event)

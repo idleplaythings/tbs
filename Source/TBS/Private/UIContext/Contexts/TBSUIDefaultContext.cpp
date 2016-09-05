@@ -23,6 +23,31 @@ void TBSUIDefaultContext::HandleEvent(TBSUIContextEvent* Event)
 			ContextStack->PushContext(new TBSUIFriendlyUnitContext);
 		}		
 	}
+	else if (Event->Type == FName(TEXT("TileHoverBegin")))
+	{
+		FIntVector Coordinates = ((TBSUIContextCoordinateEvent*)Event)->Coordinates;
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Hover (%i, %i, %i)"), Coordinates.X, Coordinates.Y, Coordinates.Z));
+
+		ATBSUnit* Unit = ClassLoader->Grid->SelectUnit(Coordinates);
+
+		if (Unit && Unit->PlayerNumber == ClassLoader->PlayerController->PlayerNumber)
+		{
+			if (Unit == HoverUnit)
+			{
+				return;
+			}
+
+			HoverUnit = Unit;
+
+			ClassLoader->GridUI->ForceCursor(HoverUnit->Dimensions, HoverUnit->GameCoordinates);
+		}
+		else
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("No unit hover")));
+			HoverUnit = nullptr;
+			ClassLoader->GridUI->ReleaseCursor();
+		}
+	}
 	else if (Event->Type == FName(TEXT("TileRightClick")))
 	{
 

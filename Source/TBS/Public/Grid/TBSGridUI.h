@@ -37,13 +37,19 @@ public:
 	FIntVector CurrentCoordinates = FIntVector(-999, -999, -999);
 	FIntVector PreviousCoordinates = FIntVector(-999, -999, -999);
 
-	void SelectCoordinates(TArray<FIntVector> Coordinates);
+	void SelectLocation(FIntVector Dimensions, FIntVector Coordinates);
 	void ClearSelection();
+
+	void SetCursorDimensions(FIntVector InCursorDimensions);
+	void SetCursorCoordinates(FIntVector Coordinates);
+
+	void ForceCursor(FIntVector Dimensions, FIntVector Coordinates);
+	void ReleaseCursor();
+	void ResetCursorDimensions();
 
 private:
 	void UpdateLevelVisibilities();
-	void SpawnCursor();
-	void UpdateCursorLocation(const FVector Location);
+	void SpawnCursor();	
 	void ShowCursor();
 	void HideCursor();
 
@@ -51,10 +57,10 @@ private:
 	int32 CurrentLevel = 0;
 	float GridMeshWidth;
 	float GridMeshHeight;
-	float TileSize = 100;
+	float TileSize = 50;
 	float FloorHeight = 200;
 
-
+	
 	void InitialiseParametersFromGrid();
 	void CreateGridMaterialInstances();
 	void CreateGridMeshComponents();
@@ -70,7 +76,11 @@ private:
 	TArray<UStaticMeshComponent*> GridMeshes;
 	TArray<UMaterialInstanceDynamic*> GridMaterials;
 
-	TArray<ATBSGridCursor*> SelectionCursors;
+	ATBSGridCursor* SelectionCursor;
 	TArray<FIntVector> SelectedCoordinates;
+
+	FIntVector DefaultCursorDimensions = FIntVector(1, 1, 1);
+	FIntVector CursorDimensions = DefaultCursorDimensions;
+	bool CursorForced = true;
 };
 

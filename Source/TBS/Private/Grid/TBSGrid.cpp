@@ -70,6 +70,11 @@ ATBSUnit* ATBSGrid::SelectUnit(FIntVector Coordinates)
 			continue;
 		}
 
+		if (Unit->GameCoordinates == Coordinates)
+		{
+			return Unit;
+		}
+
 		for (auto& OccupiedGoordinates : Unit->GameCoordinatesOccupied)
 		{
 			if (OccupiedGoordinates == Coordinates)
@@ -104,9 +109,9 @@ TArray<FIntVector> ATBSGrid::GetNeighbours(FIntVector Coordinates)
 {
 	TArray<FIntVector> Neighbours;
 
-	for (int X = Coordinates.X - 1; X <= Coordinates.X + 1; X++)
+	for (int X = Coordinates.X - 10; X <= Coordinates.X + 10; X++)
 	{
-		for (int Y = Coordinates.Y - 1; Y <= Coordinates.Y + 1; Y++)
+		for (int Y = Coordinates.Y - 10; Y <= Coordinates.Y + 10; Y++)
 		{
 			//for (int Z = Coordinates.Z - 1; Z <= Coordinates.Z + 1; Z++)
 			//{

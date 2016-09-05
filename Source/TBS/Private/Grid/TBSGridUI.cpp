@@ -44,8 +44,8 @@ void ATBSGridUI::RenderGrid(ATBSGrid* InGrid)
 
 void ATBSGridUI::InitialiseParametersFromGrid()
 {
-	GridMeshWidth = (float)Grid->GridDimensions.X * TileSize;
-	GridMeshHeight = (float)Grid->GridDimensions.Y * TileSize;
+	GridMeshWidth = (float)(Grid->GridDimensions.X / 10) * TileSize;
+	GridMeshHeight = (float)(Grid->GridDimensions.Y / 10) * TileSize;
 }
 
 void ATBSGridUI::CreateGridMaterialInstances()
@@ -73,8 +73,8 @@ void ATBSGridUI::CreateGridMeshComponents()
 UMaterialInstanceDynamic* ATBSGridUI::CreateMaterialInstance()
 {
 	UMaterialInstanceDynamic* GridMaterialInstance = UMaterialInstanceDynamic::Create(GridMaterial, this);
-	GridMaterialInstance->SetScalarParameterValue(FName(TEXT("UTiling")), Grid->GridDimensions.X + 0.02);
-	GridMaterialInstance->SetScalarParameterValue(FName(TEXT("VTiling")), Grid->GridDimensions.Y + 0.02);
+	GridMaterialInstance->SetScalarParameterValue(FName(TEXT("UTiling")), (Grid->GridDimensions.X / 10) + 0.02);
+	GridMaterialInstance->SetScalarParameterValue(FName(TEXT("VTiling")), (Grid->GridDimensions.Y / 10) + 0.02);
 	GridMaterialInstance->SetScalarParameterValue(FName(TEXT("OpacityMultiplier")), 0.5);	
 	return GridMaterialInstance;
 }
@@ -120,17 +120,24 @@ void ATBSGridUI::HandleGridHitResult(FHitResult HitResult)
 	FVector LocalLocation = HitResult.Location - ActorLocation; // Offset by actor location in case actor not in origin
 
 	// Actor location is relative to it's center point; offset by half width/height to get positive local coordinates
-	FIntVector NewCoordinates = FIntVector(
-		(int32)((LocalLocation.X + GridMeshWidth / 2) / TileSize),
-		(int32)((LocalLocation.Y + GridMeshHeight / 2) / TileSize),
-		(int32)((LocalLocation.Z + 10) / FloorHeight)
-	);
+	FIntVector NewCoordinates;
 
-	FVector TileCenter = FVector(
-		((float)NewCoordinates.X * TileSize + TileSize / 2) + ActorLocation.X - GridMeshWidth / 2,
-		((float)NewCoordinates.Y * TileSize + TileSize / 2) + ActorLocation.Y - GridMeshHeight / 2,
-		(float)NewCoordinates.Z * FloorHeight
-	);
+	if (CursorDimensions.X % 2 == 0)
+	{
+		NewCoordinates = FIntVector(
+			(int32)((LocalLocation.X + GridMeshWidth / 2) / TileSize) * 10 + 5,
+			(int32)((LocalLocation.Y + GridMeshHeight / 2) / TileSize) * 10 + 5,
+			(int32)((LocalLocation.Z + 10) / FloorHeight)
+		);
+	}
+	else
+	{
+		NewCoordinates = FIntVector(
+			(int32)((LocalLocation.X + GridMeshWidth / 2) / TileSize) * 10,
+			(int32)((LocalLocation.Y + GridMeshHeight / 2) / TileSize) * 10,
+			(int32)((LocalLocation.Z + 10) / FloorHeight)
+		);
+	}
 
 	if (NewCoordinates != PreviousCoordinates)
 	{
@@ -139,14 +146,24 @@ void ATBSGridUI::HandleGridHitResult(FHitResult HitResult)
 		CurrentCoordinates = NewCoordinates;		
 	}
 
-	UpdateCursorLocation(TileCenter);
+	if (!CursorForced)
+	{
+		SetCursorCoordinates(NewCoordinates);
+	}	
 }
 
-void ATBSGridUI::UpdateCursorLocation(const FVector Location)
+void ATBSGridUI::SetCursorCoordinates(FIntVector Coordinates)
 {
 	if (GridCursor != nullptr)
 	{
-		GridCursor->SetActorLocation(Location);
+		FVector ActorLocation = GetActorLocation();
+		FVector TileCenter = FVector(
+			((float)Coordinates.X / 10 * TileSize + TileSize / 2) + ActorLocation.X - GridMeshWidth / 2,
+			((float)Coordinates.Y / 10 * TileSize + TileSize / 2) + ActorLocation.Y - GridMeshHeight / 2,
+			(float)Coordinates.Z * FloorHeight
+		);
+
+		GridCursor->SetActorLocation(TileCenter);
 	}
 }
 
@@ -195,9 +212,9 @@ FCoordinateLocations ATBSGridUI::GetCoordinateLocations(FIntVector Coordinates)
 	FVector Location = GetActorLocation() - FVector(GridMeshWidth/2, GridMeshHeight/2, 0.0);
 
 	Location = Location + FVector(
-		(float)Coordinates.X * TileSize + TileSize/2,
-		(float)Coordinates.Y * TileSize + TileSize/2,
-		(float)Coordinates.Z * FloorHeight
+		(float)Coordinates.X/10 * TileSize + TileSize/2,
+		(float)Coordinates.Y/10 * TileSize + TileSize/2,
+		(float)Coordinates.Z/10 * FloorHeight
 	);
 
 	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Asking for coordinate locations (%f, %f, %f)"), Location.X, Location.Y, Location.Z));
@@ -218,37 +235,73 @@ FCoordinateLocations ATBSGridUI::GetCoordinateLocations(FIntVector Coordinates)
 	return Result;
 }
 
-void ATBSGridUI::SelectCoordinates(TArray<FIntVector> Coordinates)
+void ATBSGridUI::SelectLocation(FIntVector Dimensions, FIntVector Coordinates)
 {
-	SelectedCoordinates = Coordinates;
-	int32 Missing = Coordinates.Num() - SelectionCursors.Num();
-	int32 CoordinatesCount = Coordinates.Num();
-
-	for (int32 i = 0; i < Missing; i++)
+	if (!SelectionCursor)
 	{
-		SelectionCursors.Add(GetWorld()->SpawnActor<ATBSGridCursor>(GridCursorClass));
+		SelectionCursor = GetWorld()->SpawnActor<ATBSGridCursor>(GridCursorClass);
 	}
 
-	for (int32 i = 0; i < SelectionCursors.Num(); i++)
-	{
-		if (i > (CoordinatesCount - 1))
-		{
-			SelectionCursors[i]->SetActorHiddenInGame(true);
-			continue;
-		}
-		
-		FCoordinateLocations Locations = GetCoordinateLocations(Coordinates[i]);
-		SelectionCursors[i]->SetActorHiddenInGame(false);
-		SelectionCursors[i]->SetActorLocation(Locations.Center);
-	}
+	SelectionCursor->SetActorHiddenInGame(false);
+	FVector ActorLocation = GetActorLocation();
+	FVector TileCenter = FVector(
+		((float)Coordinates.X / 10 * TileSize + TileSize / 2) + ActorLocation.X - GridMeshWidth / 2,
+		((float)Coordinates.Y / 10 * TileSize + TileSize / 2) + ActorLocation.Y - GridMeshHeight / 2,
+		(float)Coordinates.Z * FloorHeight
+	);
+
+	SelectionCursor->SetActorLocation(TileCenter);
+	SelectionCursor->SetActorScale3D(FVector(
+		(float)Dimensions.X * TileSize / 100,
+		(float)Dimensions.Y * TileSize / 100,
+		(float)Dimensions.Z * TileSize / 100)
+	);
 }
 
 void ATBSGridUI::ClearSelection()
 {
-	SelectedCoordinates.Empty();
+	SelectionCursor->SetActorHiddenInGame(true);
+}
 
-	for (int32 i = 0; i < SelectionCursors.Num(); i++)
+void ATBSGridUI::ResetCursorDimensions()
+{
+	CursorDimensions = DefaultCursorDimensions;
+}
+
+void ATBSGridUI::SetCursorDimensions(FIntVector InCursorDimensions)
+{
+	CursorDimensions = InCursorDimensions;
+	GridCursor->SetActorScale3D(FVector(
+		(float)CursorDimensions.X * TileSize / 100,
+		(float)CursorDimensions.Y * TileSize / 100,
+		(float)CursorDimensions.Z * TileSize / 100)
+	);
+}
+
+void ATBSGridUI::ForceCursor(FIntVector Dimensions, FIntVector Coordinates)
+{
+	CursorForced = true;
+
+	if (GridCursor != nullptr)
 	{
-		SelectionCursors[i]->SetActorHiddenInGame(true);
+		FVector ActorLocation = GetActorLocation();
+		FVector TileCenter = FVector(
+			((float)Coordinates.X / 10 * TileSize + TileSize / 2) + ActorLocation.X - GridMeshWidth / 2,
+			((float)Coordinates.Y / 10 * TileSize + TileSize / 2) + ActorLocation.Y - GridMeshHeight / 2,
+			(float)Coordinates.Z * FloorHeight
+		);
+
+		GridCursor->SetActorLocation(TileCenter);
+		GridCursor->SetActorScale3D(FVector(
+			(float)Dimensions.X * TileSize / 100,
+			(float)Dimensions.Y * TileSize / 100,
+			(float)Dimensions.Z * TileSize / 100)
+		);
 	}
+}
+
+void ATBSGridUI::ReleaseCursor()
+{
+	CursorForced = false;
+	SetCursorDimensions(CursorDimensions);
 }

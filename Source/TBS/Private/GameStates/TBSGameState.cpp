@@ -10,7 +10,7 @@
 
 void ATBSGameState::StartGameplay()
 {
-	InitGrid(FIntVector(100, 100, 3));
+	InitGrid(FIntVector(1000, 1000, 18));
 	InitGridUI();
 
 	if (HasAuthority())
@@ -21,7 +21,7 @@ void ATBSGameState::StartGameplay()
 
 		while (PropsSpawned < 30)
 		{
-			FIntVector Coordinates = FIntVector(FMath::RandRange(42, 57), FMath::RandRange(42, 57), 0);
+			FIntVector Coordinates = FIntVector(FMath::RandRange(320, 650), FMath::RandRange(320, 650), 0);
 			int32 Rotation = (float) FMath::RandRange(0, 3) * 90;
 
 			if (Grid->SelectProp(Coordinates))
@@ -120,12 +120,12 @@ void ATBSGameState::SpawnUnits(int32 PlayerNumber)
 
 	if (PlayerNumber > 0)
 	{
-		XOffset = 10;
+		XOffset = 20;
 	}
 
 	while (UnitsSpawned < 3)
 	{
-		FIntVector Coordinates = FIntVector(FMath::RandRange(40 + XOffset, 45 + XOffset), FMath::RandRange(45, 55), 0);
+		FIntVector Coordinates = FIntVector(FMath::RandRange(30 + XOffset, 45 + XOffset) * 10 + 5, FMath::RandRange(30, 60) * 10 + 5, 0);
 
 		if (Grid->SelectUnit(Coordinates))
 		{
