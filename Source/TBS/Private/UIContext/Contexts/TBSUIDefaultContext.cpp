@@ -19,6 +19,12 @@ void TBSUIDefaultContext::HandleEvent(TBSUIContextEvent* Event)
 
 		if (Unit && Unit->PlayerNumber == ClassLoader->PlayerController->PlayerNumber)
 		{
+			ClassLoader->GridUI->SelectionOffset = FIntVector(
+				Unit->GameCoordinates.X - Coordinates.X,
+				Unit->GameCoordinates.Y - Coordinates.Y,
+				0
+			);
+
 			ClassLoader->PlayerController->SelectedUnit = Unit;
 			ContextStack->PushContext(new TBSUIFriendlyUnitContext);
 		}		

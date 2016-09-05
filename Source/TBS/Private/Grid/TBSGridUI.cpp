@@ -125,8 +125,8 @@ void ATBSGridUI::HandleGridHitResult(FHitResult HitResult)
 	if (CursorDimensions.X % 2 == 0)
 	{
 		NewCoordinates = FIntVector(
-			(int32)((LocalLocation.X + GridMeshWidth / 2) / TileSize) * 10 + 5,
-			(int32)((LocalLocation.Y + GridMeshHeight / 2) / TileSize) * 10 + 5,
+			(int32)((LocalLocation.X + GridMeshWidth / 2) / TileSize) * 10 + SelectionOffset.X,
+			(int32)((LocalLocation.Y + GridMeshHeight / 2) / TileSize) * 10 + SelectionOffset.Y,
 			(int32)((LocalLocation.Z + 10) / FloorHeight)
 		);
 	}

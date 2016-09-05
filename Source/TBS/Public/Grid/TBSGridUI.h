@@ -47,6 +47,10 @@ public:
 	void ReleaseCursor();
 	void ResetCursorDimensions();
 
+	// When going from even to odd sized selections, offset to this direction
+	// This can be set manually to ensure the cursor is rendered in the correct position
+	FIntVector SelectionOffset = FIntVector(5, 5, 0);
+
 private:
 	void UpdateLevelVisibilities();
 	void SpawnCursor();	
@@ -81,6 +85,6 @@ private:
 
 	FIntVector DefaultCursorDimensions = FIntVector(1, 1, 1);
 	FIntVector CursorDimensions = DefaultCursorDimensions;
-	bool CursorForced = true;
+	bool CursorForced = true;	
 };
 
