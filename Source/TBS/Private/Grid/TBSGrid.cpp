@@ -70,9 +70,12 @@ ATBSUnit* ATBSGrid::SelectUnit(FIntVector Coordinates)
 			continue;
 		}
 
-		if (Unit->GameCoordinates == Coordinates)
-		{ 
-			return Unit;
+		for (auto& OccupiedGoordinates : Unit->GameCoordinatesOccupied)
+		{
+			if (OccupiedGoordinates == Coordinates)
+			{
+				return Unit;
+			}
 		}
 	}
 
