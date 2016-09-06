@@ -131,6 +131,16 @@ void ATBSPlayerController::MoveCameraRight(float AxisValue)
 	UIContextStack->HandleEvent(new TBSUIContextAxisEvent(FName(TEXT("MoveCameraRight")), AxisValue));
 }
 
+void ATBSPlayerController::MoveCameraForwardOffset(float AxisValue)
+{
+	UIContextStack->HandleEvent(new TBSUIContextAxisEvent(FName(TEXT("MoveCameraForwardOffset")), AxisValue));
+}
+
+void ATBSPlayerController::MoveCameraRightOffset(float AxisValue)
+{
+	UIContextStack->HandleEvent(new TBSUIContextAxisEvent(FName(TEXT("MoveCameraRightOffset")), AxisValue));
+}
+
 void ATBSPlayerController::MouseLeft()
 {
 	if (ClassLoader->GridUI->CursorOnGrid)

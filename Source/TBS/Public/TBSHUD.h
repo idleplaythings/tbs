@@ -3,9 +3,10 @@
 #pragma once
 
 #include "GameFramework/HUD.h"
-#include "TBSDefaultPawn.h"
 #include "TBSGridUI.h"
 #include "TBSHUD.generated.h"
+
+class ATBSPlayerController;
 
 struct HitBox
 {
@@ -30,8 +31,6 @@ public:
 	virtual void NotifyHitBoxBeginCursorOver(FName BoxName);
 	virtual void NotifyHitBoxEndCursorOver(FName BoxName);
 
-	ATBSDefaultPawn* Pawn;
-
 	static const FName ScrollHitBoxNW;
 	static const FName ScrollHitBoxN;
 	static const FName ScrollHitBoxNE;
@@ -49,6 +48,7 @@ private:
 	TArray<HitBox> HitBoxes;
 	int32 CanvasX;
 	int32 CanvasY;
+	ATBSPlayerController* PlayerController;
 
 	void CalculateScrollHitBoxSizesAndLocations();
 	void AddScrollHitBoxes();

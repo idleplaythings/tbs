@@ -102,4 +102,12 @@ void TBSUIDefaultContext::HandleEvent(TBSUIContextEvent* Event)
 	{
 		ClassLoader->DefaultPawn->TogglePerspectiveCamera();
 	}
+	else if (Event->Type == FName(TEXT("MoveCameraForwardOffset")))
+	{
+		ClassLoader->DefaultPawn->SetMoveForwardAxisOffset(((TBSUIContextAxisEvent*)Event)->AxisValue);
+	}
+	else if (Event->Type == FName(TEXT("MoveCameraRightOffset")))
+	{
+		ClassLoader->DefaultPawn->SetMoveRightAxisOffset(((TBSUIContextAxisEvent*)Event)->AxisValue);
+	}
 }

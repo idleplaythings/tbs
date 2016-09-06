@@ -40,7 +40,6 @@ public:
 	TArray<FIntVector> SelectedPath;
 	bool PathSelected = false;
 
-private:
 	void ViewLevelUp();
 	void ViewLevelDown();
 	void RotateCameraRight();
@@ -53,7 +52,10 @@ private:
 	void MouseLeft();
 	void MouseRight();
 	void Escape();
+	void MoveCameraForwardOffset(float AxisValue);
+	void MoveCameraRightOffset(float AxisValue);
 
+private:
 	TBSUIContextStack* UIContextStack;
 	ATBSClassLoader* ClassLoader;
 	bool ClassesLoaded = false;

@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "TBS.h"
+#include "TBSPlayerController.h"
 #include "TBSHUD.h"
 
 const FName ATBSHUD::ScrollHitBoxNW = FName("ScrollHitBoxNW");
@@ -19,7 +20,7 @@ ATBSHUD::ATBSHUD(const FObjectInitializer& ObjectInitializer) : Super(ObjectInit
 
 void ATBSHUD::BeginPlay()
 {
-	Pawn = Cast<ATBSDefaultPawn>(GetOwningPawn());
+	PlayerController = Cast<ATBSPlayerController>(GetOwningPlayerController());
 }
 
 void ATBSHUD::DrawHUD()
@@ -110,62 +111,50 @@ void ATBSHUD::NotifyHitBoxBeginCursorOver(FName BoxName)
 {
 	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString(TEXT("Begin: ")).Append(BoxName.ToString()));
 
-	if (Pawn == nullptr)
-	{
-		return;
-	}
-
 	if (BoxName.IsEqual(ATBSHUD::ScrollHitBoxNW))
 	{
-		Pawn->SetMoveForwardAxisOffset(1.0);
-		Pawn->SetMoveRightAxisOffset(-1.0);
+		PlayerController->MoveCameraForwardOffset(1.0);
+		PlayerController->MoveCameraRightOffset(-1.0);
 	}
 	else if (BoxName.IsEqual(ATBSHUD::ScrollHitBoxN))
 	{
-		Pawn->SetMoveForwardAxisOffset(1.0);
-		Pawn->SetMoveRightAxisOffset(0.0);
+		PlayerController->MoveCameraForwardOffset(1.0);
+		PlayerController->MoveCameraRightOffset(0.0);
 	}
 	else if (BoxName.IsEqual(ATBSHUD::ScrollHitBoxNE))
 	{
-		Pawn->SetMoveForwardAxisOffset(1.0);
-		Pawn->SetMoveRightAxisOffset(1.0);
+		PlayerController->MoveCameraForwardOffset(1.0);
+		PlayerController->MoveCameraRightOffset(1.0);
 	}
 	else if (BoxName.IsEqual(ATBSHUD::ScrollHitBoxE))
 	{
-		Pawn->SetMoveForwardAxisOffset(0.0);
-		Pawn->SetMoveRightAxisOffset(1.0);
+		PlayerController->MoveCameraForwardOffset(0.0);
+		PlayerController->MoveCameraRightOffset(1.0);
 	}
 	else if (BoxName.IsEqual(ATBSHUD::ScrollHitBoxSE))
 	{
-		Pawn->SetMoveForwardAxisOffset(-1.0);
-		Pawn->SetMoveRightAxisOffset(1.0);
+		PlayerController->MoveCameraForwardOffset(-1.0);
+		PlayerController->MoveCameraRightOffset(1.0);
 	}
 	else if (BoxName.IsEqual(ATBSHUD::ScrollHitBoxS))
 	{
-		Pawn->SetMoveForwardAxisOffset(-1.0);
-		Pawn->SetMoveRightAxisOffset(0.0);
+		PlayerController->MoveCameraForwardOffset(-1.0);
+		PlayerController->MoveCameraRightOffset(0.0);
 	}
 	else if (BoxName.IsEqual(ATBSHUD::ScrollHitBoxSW))
 	{
-		Pawn->SetMoveForwardAxisOffset(-1.0);
-		Pawn->SetMoveRightAxisOffset(-1.0);
+		PlayerController->MoveCameraForwardOffset(-1.0);
+		PlayerController->MoveCameraRightOffset(-1.0);
 	}
 	else if (BoxName.IsEqual(ATBSHUD::ScrollHitBoxW))
 	{
-		Pawn->SetMoveForwardAxisOffset(0.0);
-		Pawn->SetMoveRightAxisOffset(-1.0);
+		PlayerController->MoveCameraForwardOffset(0.0);
+		PlayerController->MoveCameraRightOffset(-1.0);
 	}
 }
 
 void ATBSHUD::NotifyHitBoxEndCursorOver(FName BoxName)
 {
-	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString(TEXT("End: ")).Append(BoxName.ToString()));
-
-	if (Pawn == nullptr)
-	{
-		return;
-	}
-
-	Pawn->SetMoveForwardAxisOffset(0.0);
-	Pawn->SetMoveRightAxisOffset(0.0);
+	PlayerController->MoveCameraForwardOffset(0.0);
+	PlayerController->MoveCameraRightOffset(0.0);
 }
