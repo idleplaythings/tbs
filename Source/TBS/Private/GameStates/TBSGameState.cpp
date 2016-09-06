@@ -21,7 +21,7 @@ void ATBSGameState::StartGameplay()
 
 		while (PropsSpawned < 30)
 		{
-			FIntVector Coordinates = FIntVector(FMath::RandRange(320, 650), FMath::RandRange(320, 650), 0);
+			FIntVector Coordinates = FIntVector(FMath::RandRange(32, 65)*10, FMath::RandRange(32, 65)*10, 0);
 			int32 Rotation = (float) FMath::RandRange(0, 3) * 90;
 
 			if (Grid->SelectProp(Coordinates))

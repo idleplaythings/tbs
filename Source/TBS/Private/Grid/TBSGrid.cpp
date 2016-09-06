@@ -109,9 +109,9 @@ TArray<FIntVector> ATBSGrid::GetNeighbours(FIntVector Coordinates)
 {
 	TArray<FIntVector> Neighbours;
 
-	for (int X = Coordinates.X - 10; X <= Coordinates.X + 10; X++)
+	for (int X = Coordinates.X - 10; X <= Coordinates.X + 10; X= X+10)
 	{
-		for (int Y = Coordinates.Y - 10; Y <= Coordinates.Y + 10; Y++)
+		for (int Y = Coordinates.Y - 10; Y <= Coordinates.Y + 10; Y= Y+10)
 		{
 			//for (int Z = Coordinates.Z - 1; Z <= Coordinates.Z + 1; Z++)
 			//{

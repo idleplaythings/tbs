@@ -26,4 +26,17 @@ public:
 
 private:
 	ATBSGrid* Grid;
+
+	float calculateMovementCost(PathStep Current, FIntVector NextNode);
+
+	float calculateMovementCostMultiplier(PathStep Current, FIntVector NextNode);
+
+	TArray<FIntVector> GetNeighbourNodes(FIntVector Coordinates, FIntVector Dimensions);
+
+	TArray<FIntVector> GetTilesUnderFootprint(FIntVector Coordinates, FIntVector Dimensions);
+
+	//Checks if current position has enough things to stand on
+	bool IsSupportedPosition(TArray<FIntVector> Tiles);
+
+	bool IsAccessablePosition(TArray<FIntVector> Tiles, FIntVector Dimensions);
 };
