@@ -111,6 +111,11 @@ void ATBSHUD::NotifyHitBoxBeginCursorOver(FName BoxName)
 {
 	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString(TEXT("Begin: ")).Append(BoxName.ToString()));
 
+	if (!PlayerController)
+	{
+		return;
+	}
+
 	if (BoxName.IsEqual(ATBSHUD::ScrollHitBoxNW))
 	{
 		PlayerController->MoveCameraForwardOffset(1.0);
@@ -155,6 +160,11 @@ void ATBSHUD::NotifyHitBoxBeginCursorOver(FName BoxName)
 
 void ATBSHUD::NotifyHitBoxEndCursorOver(FName BoxName)
 {
+	if (!PlayerController)
+	{
+		return;
+	}
+
 	PlayerController->MoveCameraForwardOffset(0.0);
 	PlayerController->MoveCameraRightOffset(0.0);
 }

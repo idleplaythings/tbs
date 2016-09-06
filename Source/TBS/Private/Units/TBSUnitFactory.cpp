@@ -37,7 +37,6 @@ ATBSUnit* ATBSUnitFactory::CreateUnit(FIntVector Coordinates, FRotator Rotation)
 	ATBSUnit* Unit = GetWorld()->SpawnActor<ATBSUnit>(UnitBPClass);
 	Unit->Dimensions = FIntVector(2, 2, 6);
 	Unit->GameCoordinates = Coordinates;
-	//Unit->GameCoordinatesOccupied = Coordinates;
 	Unit->RecalculateCoordinates();
 	Unit->SetActorRotation(Rotation);
 	return Unit;
