@@ -13,6 +13,32 @@ ATBSUnit::ATBSUnit()
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
 	bReplicateMovement = true;
+
+	SceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
+	RootComponent = SceneComponent;
+
+	SkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Skeleton"));
+	SkeletalMesh->AddRelativeRotation(FRotator(0.0, -90.0, 0.0));
+	SkeletalMesh->SetupAttachment(RootComponent);
+
+	static ConstructorHelpers::FObjectFinder<UAnimBlueprint> UnitAnimation(TEXT("AnimBlueprint'/Game/Animations/BP_UnitAnim.BP_UnitAnim'"));
+	if (UnitAnimation.Succeeded())
+	{
+		SkeletalMesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+		SkeletalMesh->SetAnimInstanceClass(UnitAnimation.Object->GeneratedClass);
+	}
+
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> UnitSkeleton(TEXT("SkeletalMesh'/Game/Characters/character1fbx.character1fbx'"));
+	if (UnitSkeleton.Succeeded())
+	{
+		SkeletalMesh->SetSkeletalMesh(UnitSkeleton.Object);
+	}
+
+	static ConstructorHelpers::FObjectFinder<UMaterial> UnitMaterial(TEXT("Material'/Game/Materials/M_UnitMaterial.M_UnitMaterial'"));
+	if (UnitMaterial.Succeeded())
+	{
+		Material = UnitMaterial.Object;
+	}
 }
 
 bool ATBSUnit::IsNetRelevantFor(const AActor * RealViewer, const AActor * ViewTarget, const FVector & SrcLocation) const
@@ -47,7 +73,21 @@ void ATBSUnit::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetime
 void ATBSUnit::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	if (Material)
+	{
+		DynamicMaterial = UMaterialInstanceDynamic::Create(Material, this);
+		SkeletalMesh->SetMaterial(0, DynamicMaterial);
+
+		if (PlayerNumber == 0)
+		{
+			DynamicMaterial->SetVectorParameterValue(FName(TEXT("TeamColor")), FLinearColor(0.915, 0.674, 0.0));
+		}
+		else
+		{
+			DynamicMaterial->SetVectorParameterValue(FName(TEXT("TeamColor")), FLinearColor(0.865, 0.0, 0.13));
+		}
+	}
 }
 
 // Called every frame

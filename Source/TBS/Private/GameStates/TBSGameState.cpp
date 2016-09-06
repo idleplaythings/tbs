@@ -137,7 +137,21 @@ void ATBSGameState::SpawnUnits(int32 PlayerNumber)
 			continue;
 		}
 
-		ATBSUnit* Unit = UnitFactory->CreateUnit(Coordinates, FRotator(0.0, 0.0, 0.0));
+		ATBSUnit* Unit;
+
+		if (UnitsSpawned == 0)
+		{
+			Unit = UnitFactory->CreateSmallUnit(Coordinates, FRotator(0.0, 0.0, 0.0));
+		}
+		else if (UnitsSpawned == 1)
+		{
+			Unit = UnitFactory->CreateLargeUnit(Coordinates, FRotator(0.0, 0.0, 0.0));
+		}
+		else
+		{
+			Unit = UnitFactory->CreateUnit(Coordinates, FRotator(0.0, 0.0, 0.0));
+		}
+		
 		Unit->PlayerNumber = PlayerNumber;
 
 		Grid->AddUnit(Unit);

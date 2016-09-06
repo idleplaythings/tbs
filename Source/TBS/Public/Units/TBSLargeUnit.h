@@ -4,16 +4,16 @@
 
 #include "GameFramework/Actor.h"
 #include "TBSUnit.h"
-#include "TBSUnitFactory.generated.h"
+#include "TBSLargeUnit.generated.h"
 
 UCLASS()
-class TBS_API ATBSUnitFactory : public AActor
+class TBS_API ATBSLargeUnit : public ATBSUnit
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	ATBSUnitFactory();
+	ATBSLargeUnit();
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -21,12 +21,6 @@ public:
 	// Called every frame
 	virtual void Tick( float DeltaSeconds ) override;
 
-	ATBSUnit* CreateUnit(FIntVector Coordinates, FRotator Rotation);
-	ATBSUnit* CreateSmallUnit(FIntVector Coordinates, FRotator Rotation);
-	ATBSUnit* CreateLargeUnit(FIntVector Coordinates, FRotator Rotation);
-
-private:
-	UClass* UnitBPClass;
-	UClass* SmallUnitBPClass;
-	UClass* LargeUnitBPClass;
+	FIntVector Dimensions = FIntVector(3, 3, 6);
+	
 };
