@@ -125,7 +125,16 @@ void ATBSGameState::SpawnUnits(int32 PlayerNumber)
 
 	while (UnitsSpawned < 3)
 	{
-		FIntVector Coordinates = FIntVector(FMath::RandRange(30 + XOffset, 45 + XOffset) * 10 + 5, FMath::RandRange(30, 60) * 10 + 5, 0);
+		FIntVector Coordinates;
+
+		if (UnitsSpawned == 0)
+		{
+			Coordinates = FIntVector(FMath::RandRange(30 + XOffset, 45 + XOffset) * 10 + 5, FMath::RandRange(30, 60) * 10 + 5, 0);
+		}
+		else
+		{
+			Coordinates = FIntVector(FMath::RandRange(30 + XOffset, 45 + XOffset) * 10, FMath::RandRange(30, 60) * 10, 0);
+		}
 
 		if (Grid->SelectUnit(Coordinates))
 		{
@@ -141,7 +150,7 @@ void ATBSGameState::SpawnUnits(int32 PlayerNumber)
 
 		if (UnitsSpawned == 0)
 		{
-			Unit = UnitFactory->CreateSmallUnit(Coordinates, FRotator(0.0, 0.0, 0.0));
+			Unit = UnitFactory->CreateUnit(Coordinates, FRotator(0.0, 0.0, 0.0));			
 		}
 		else if (UnitsSpawned == 1)
 		{
@@ -149,7 +158,7 @@ void ATBSGameState::SpawnUnits(int32 PlayerNumber)
 		}
 		else
 		{
-			Unit = UnitFactory->CreateUnit(Coordinates, FRotator(0.0, 0.0, 0.0));
+			Unit = UnitFactory->CreateSmallUnit(Coordinates, FRotator(0.0, 0.0, 0.0));
 		}
 		
 		Unit->PlayerNumber = PlayerNumber;

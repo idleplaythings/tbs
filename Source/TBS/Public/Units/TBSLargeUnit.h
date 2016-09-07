@@ -19,8 +19,5 @@ public:
 	virtual void BeginPlay() override;
 	
 	// Called every frame
-	virtual void Tick( float DeltaSeconds ) override;
-
-	FIntVector Dimensions = FIntVector(3, 3, 6);
-	
+	virtual void Tick( float DeltaSeconds ) override;	
 };

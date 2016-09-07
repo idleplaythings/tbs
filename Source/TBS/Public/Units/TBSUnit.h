@@ -50,7 +50,7 @@ public:
 	float MaxSpeed = 2;
 
 	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Unit")
-	FIntVector Dimensions = FIntVector(2, 2, 6);
+	FIntVector Dimensions = FIntVector(2, 2, 4);
 
 	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Unit")
 	FIntVector GameCoordinates;
@@ -76,4 +76,5 @@ public:
 	void MoveWest();
 
 private:
+	void ScaleUnitMesh();
 };

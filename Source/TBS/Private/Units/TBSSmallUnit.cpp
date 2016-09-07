@@ -10,6 +10,7 @@ ATBSSmallUnit::ATBSSmallUnit()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	Dimensions = FIntVector(1, 1, 3);
 }
 
 // Called when the game starts or when spawned

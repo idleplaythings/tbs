@@ -48,6 +48,8 @@ void ATBSUnitFactory::Tick( float DeltaTime )
 
 ATBSUnit* ATBSUnitFactory::CreateUnit(FIntVector Coordinates, FRotator Rotation)
 {
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Regular unit")));
+
 	ATBSUnit* Unit = GetWorld()->SpawnActor<ATBSUnit>(UnitBPClass);
 	Unit->GameCoordinates = Coordinates;
 	Unit->RecalculateCoordinates();
@@ -57,6 +59,8 @@ ATBSUnit* ATBSUnitFactory::CreateUnit(FIntVector Coordinates, FRotator Rotation)
 
 ATBSUnit* ATBSUnitFactory::CreateSmallUnit(FIntVector Coordinates, FRotator Rotation)
 {
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Small unit")));
+
 	ATBSUnit* Unit = GetWorld()->SpawnActor<ATBSUnit>(SmallUnitBPClass);
 	Unit->GameCoordinates = Coordinates;
 	Unit->RecalculateCoordinates();
@@ -66,6 +70,8 @@ ATBSUnit* ATBSUnitFactory::CreateSmallUnit(FIntVector Coordinates, FRotator Rota
 
 ATBSUnit* ATBSUnitFactory::CreateLargeUnit(FIntVector Coordinates, FRotator Rotation)
 {
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Large unit")));
+
 	ATBSUnit* Unit = GetWorld()->SpawnActor<ATBSUnit>(LargeUnitBPClass);
 	Unit->GameCoordinates = Coordinates;
 	Unit->RecalculateCoordinates();

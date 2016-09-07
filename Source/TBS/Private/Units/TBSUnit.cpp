@@ -73,6 +73,7 @@ void ATBSUnit::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetime
 void ATBSUnit::BeginPlay()
 {
 	Super::BeginPlay();
+	//RecalculateCoordinates();
 
 	if (Material)
 	{
@@ -81,13 +82,37 @@ void ATBSUnit::BeginPlay()
 
 		if (PlayerNumber == 0)
 		{
-			DynamicMaterial->SetVectorParameterValue(FName(TEXT("TeamColor")), FLinearColor(0.915, 0.674, 0.0));
+			if (Dimensions.X == 1)
+			{
+				DynamicMaterial->SetVectorParameterValue(FName(TEXT("TeamColor")), FLinearColor(0.9, 0.9, 0.4));
+			}
+			else if (Dimensions.X == 2)
+			{
+				DynamicMaterial->SetVectorParameterValue(FName(TEXT("TeamColor")), FLinearColor(0.9, 0.9, 0.2));
+			}
+			else
+			{
+				DynamicMaterial->SetVectorParameterValue(FName(TEXT("TeamColor")), FLinearColor(0.9, 0.9, 0.1));
+			}
 		}
 		else
 		{
-			DynamicMaterial->SetVectorParameterValue(FName(TEXT("TeamColor")), FLinearColor(0.865, 0.0, 0.13));
+			if (Dimensions.X == 1)
+			{
+				DynamicMaterial->SetVectorParameterValue(FName(TEXT("TeamColor")), FLinearColor(0.9, 0.4, 0.9));
+			}
+			else if (Dimensions.X == 2)
+			{
+				DynamicMaterial->SetVectorParameterValue(FName(TEXT("TeamColor")), FLinearColor(0.9, 0.2, 0.9));
+			}
+			else
+			{
+				DynamicMaterial->SetVectorParameterValue(FName(TEXT("TeamColor")), FLinearColor(0.9, 0.1, 0.9));
+			}
 		}
 	}
+
+	ScaleUnitMesh();
 }
 
 // Called every frame
@@ -98,30 +123,32 @@ void ATBSUnit::Tick( float DeltaTime )
 
 void ATBSUnit::RecalculateCoordinates()
 {
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Recalculating coordinates, dimensions (%i, %i, %i)"), Dimensions.X, Dimensions.Y, Dimensions.Z));
+
 	TArray<FIntVector> NewCoordinates;
 
-	if (Dimensions.X % 2 == 0)
+	int32 XStep = Dimensions.X % 2 == 0 ? -5 : 0;
+	int32 YStep = Dimensions.Y % 2 == 0 ? -5 : 0;
+
+	FIntVector Origin = FIntVector(
+		GameCoordinates.X + XStep - (FMath::CeilToInt((float)Dimensions.X / 2) * 10 - 10),
+		GameCoordinates.Y + YStep - (FMath::CeilToInt((float)Dimensions.Y / 2) * 10 - 10),
+		GameCoordinates.Z
+	);
+
+	for (int32 X = 0; X <= Dimensions.X * 10; X = X + 10)
 	{
-		int32 StepsX = Dimensions.X / 2 - 1;
-		int32 OffsetX = StepsX * 10;
-		int32 StepsY = Dimensions.Y / 2 - 1;
-		int32 OffsetY = StepsY * 10;
-
-
-		for (int32 X = (GameCoordinates.X - 5) - OffsetX; X <= (GameCoordinates.X + 5) - OffsetX; X += 10)
+		for (int32 Y = 0; Y <= Dimensions.Y * 10; Y = Y + 10)
 		{
-			for (int32 Y = (GameCoordinates.Y - 5) - OffsetY; Y <= (GameCoordinates.Y + 5) - OffsetY; Y += 10)
+			for (int32 Z = 0; Z <= Dimensions.Z * 10; Z = Z + 10)
 			{
-				for (int32 Z = GameCoordinates.Z; Z <= Dimensions.Z; Z++)
-				{
-					NewCoordinates.Add(FIntVector(X, Y, Z));
-				}
+				NewCoordinates.Add(FIntVector(
+					Origin.X + X,
+					Origin.Y + Y,
+					Origin.Z + Z
+				));
 			}
 		}
-	}
-	else
-	{
-
 	}
 
 	GameCoordinatesOccupied = NewCoordinates;
@@ -177,4 +204,10 @@ void ATBSUnit::MoveWest()
 	}
 
 	GameCoordinatesOccupied = NewCoordinates;
+}
+
+void ATBSUnit::ScaleUnitMesh()
+{
+	float Scale = (float) Dimensions.X / 2;
+	SkeletalMesh->SetRelativeScale3D(FVector(Scale, Scale, Scale));
 }
