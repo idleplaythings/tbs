@@ -30,6 +30,8 @@ public:
 	UPROPERTY(Replicated)
 	TArray<ATBSProp*> Props;
 
+	TMap<FIntVector, ATBSProp*> PropsIndex;
+
 	UPROPERTY(Replicated)
 	TArray<ATBSUnit*> Units;
 

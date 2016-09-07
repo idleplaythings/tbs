@@ -163,7 +163,7 @@ TArray<FIntVector> ATBSGridPathFinder::GetTilesUnderFootprint(FIntVector Coordin
 		}
 	}
 
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Tilenön12 (%i, %i, %i)"), Tiles[0].X, Tiles[0].Y, Tiles[0].Z));
+	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Tilenön12 (%i, %i, %i)"), Tiles[0].X, Tiles[0].Y, Tiles[0].Z));
 	return Tiles;
 }
 

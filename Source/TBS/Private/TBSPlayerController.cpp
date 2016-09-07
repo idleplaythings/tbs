@@ -38,7 +38,7 @@ void ATBSPlayerController::BeginPlay()
 		ClassLoader = GetWorld()->SpawnActor<ATBSClassLoader>(ATBSClassLoader::StaticClass());
 		ClassLoader->Initialise(this);
 		ClassLoader->OnClassesLoaded.AddDynamic(this, &ATBSPlayerController::OnClassesLoaded);
-	}		
+	}
 }
 
 void ATBSPlayerController::OnClassesLoaded()
@@ -62,6 +62,8 @@ void ATBSPlayerController::OnClassesLoaded()
 	InputComponent->BindAction("ActionEscape", IE_Pressed, this, &ATBSPlayerController::Escape);
 	InputComponent->BindAxis("AxisMoveCameraForward", this, &ATBSPlayerController::MoveCameraForward);
 	InputComponent->BindAxis("AxisMoveCameraRight", this, &ATBSPlayerController::MoveCameraRight);
+
+	ClassLoader->Grid->ReindexProps();
 }
 
 void ATBSPlayerController::PlayerTick(float DeltaTime)
