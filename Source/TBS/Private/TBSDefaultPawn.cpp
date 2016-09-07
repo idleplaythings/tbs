@@ -27,7 +27,7 @@ void ATBSDefaultPawn::BeginPlay()
 {
 	// This seems to work more reliably with the Editor than calling
 	// SetupAttachment in the constructor
-	CameraComponent->AttachTo(RootComponent);
+	CameraComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 
 	SetActorLocation(FVector(0.0, 0.0, 0.0));
 	SetActorRotation(FQuat(0.0, 0.0, 0.0, 0.0));
