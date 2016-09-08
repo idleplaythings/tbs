@@ -159,7 +159,10 @@ void ATBSGrid::ReindexProps_Implementation()
 
 	for (auto& Prop : Props)
 	{
-		PropsIndex.Add(Prop->GameCoordinates, Prop);
+		if (Prop)
+		{
+			PropsIndex.Add(Prop->GameCoordinates, Prop);
+		}		
 	}
 
 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Prop index length %i"), PropsIndex.Num()));

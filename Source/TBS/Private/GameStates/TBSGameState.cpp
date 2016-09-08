@@ -21,7 +21,7 @@ void ATBSGameState::StartGameplay()
 
 		while (PropsSpawned < 30)
 		{
-			FIntVector Coordinates = FIntVector(FMath::RandRange(32, 65)*10, FMath::RandRange(32, 65)*10, 0);
+			FIntVector Coordinates = FIntVector(FMath::RandRange(10, 90)*10, FMath::RandRange(10, 90)*10, 0);
 			int32 Rotation = (float) FMath::RandRange(0, 3) * 90;
 
 			if (Grid->SelectProp(Coordinates))
@@ -29,7 +29,9 @@ void ATBSGameState::StartGameplay()
 				continue;
 			}
 
-			Grid->AddProp(PropFactory->CreateWall(Coordinates, FRotator(0.0, Rotation, 0.0)));
+			//Grid->AddProp(PropFactory->CreateWall(Coordinates, FRotator(0.0, Rotation, 0.0)));
+			Grid->AddProp(PropFactory->CreateBlock(Coordinates, FIntVector(1, 1, 6), FRotator(0.0, Rotation, 0.0)));
+
 			PropsSpawned += 1;
 		}
 		PropManager->ResetProps();

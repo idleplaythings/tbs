@@ -70,12 +70,16 @@ bool ATBSGridPathFinder::FindPath(FIntVector Start, FIntVector End, TArray<FIntV
 			float MovementCost = calculateMovementCost(Current, Next);
 			NewCost = CostSoFar[Current.Coordinates] + MovementCost;
 			
-			if (!CostSoFar.Contains(Next) || NewCost < CostSoFar[Next])
+			// Limit path finding to some arbitrary cost now
+			if (NewCost < 35)
 			{
-				CostSoFar.Add(Next, NewCost);
-				float Priority = NewCost + (float)(FMath::Abs(End.X - Next.X) + FMath::Abs(End.Y - Next.Y));
-				Frontier.HeapPush(PathStep(Next, Priority), PathStepPredicate());
-				CameFrom.Add(Next, Current.Coordinates);
+				if (!CostSoFar.Contains(Next) || NewCost < CostSoFar[Next])
+				{
+					CostSoFar.Add(Next, NewCost);
+					float Priority = NewCost + (float)(FMath::Abs(End.X - Next.X) + FMath::Abs(End.Y - Next.Y));
+					Frontier.HeapPush(PathStep(Next, Priority), PathStepPredicate());
+					CameFrom.Add(Next, Current.Coordinates);
+				}
 			}
 		}
 	}
