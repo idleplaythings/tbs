@@ -19,7 +19,7 @@ void ATBSGameState::StartGameplay()
 
 		int PropsSpawned = 0;
 
-		while (PropsSpawned < 30)
+		while (PropsSpawned < 5)
 		{
 			FIntVector Coordinates = FIntVector(FMath::RandRange(10, 90)*10, FMath::RandRange(10, 90)*10, 0);
 			int32 Rotation = (float) FMath::RandRange(0, 3) * 90;
