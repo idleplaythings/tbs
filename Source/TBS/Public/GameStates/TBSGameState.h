@@ -27,7 +27,7 @@ public:
 	UPROPERTY(Replicated)
 	int32 NumberOfPlayers = 0;
 	int32 NumberOfPlayersReady = 0;
-	int32 NumberOfPlayersExpected = 2;
+	int32 NumberOfPlayersExpected = 1;
 
 	UFUNCTION()
 	void ForceCloseActorChannel(int32 TeamNumber, AActor* Actor);
