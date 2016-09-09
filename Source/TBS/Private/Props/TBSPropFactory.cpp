@@ -2,6 +2,7 @@
 
 #include "TBS.h"
 #include "TBSProp_Wall01.h"
+#include "TBSProp_Block.h"
 #include "TBSPropFactory.h"
 
 
@@ -27,19 +28,22 @@ void ATBSPropFactory::Tick( float DeltaTime )
 
 }
 
-ATBSProp* ATBSPropFactory::CreateWall(FIntVector Coordinates, FRotator Rotation)
+ATBSProp* ATBSPropFactory::CreateBlock(FIntVector Coordinates, FIntVector Dimensions, FRotator Rotation)
 {
-	//FProp Wall;
-	//Wall.PropClass = ATBSProp_Wall01::StaticClass();
-	//Wall.Coordinates = Coordinates;
-	//Wall.Slot = Slot;
-	//Wall.Rotation = Rotation;
-	//Wall.BlocksAccess = true;
-	//return Wall;
-
-	ATBSProp_Wall01* Wall = GetWorld()->SpawnActor<ATBSProp_Wall01>(ATBSProp_Wall01::StaticClass());
-	Wall->GameCoordinates = Coordinates;
-	Wall->BlocksAccess = true;
-	Wall->SetActorRotation(Rotation);
-	return Wall;
+	ATBSProp_Block* Block = GetWorld()->SpawnActor<ATBSProp_Block>(ATBSProp_Block::StaticClass());
+	Block->GameCoordinates = Coordinates;
+	Block->Dimensions = Dimensions;
+	Block->BlocksAccess = true;
+	Block->Rotation = Rotation;
+	Block->RecalculateCoordinates();
+	return Block;
 }
+
+//ATBSProp* ATBSPropFactory::CreateWall(FIntVector Coordinates, FRotator Rotation)
+//{
+//	ATBSProp_Wall01* Wall = GetWorld()->SpawnActor<ATBSProp_Wall01>(ATBSProp_Wall01::StaticClass());
+//	Wall->GameCoordinates = Coordinates;
+//	Wall->BlocksAccess = true;
+//	Wall->SetActorRotation(Rotation);
+//	return Wall;
+//}

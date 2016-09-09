@@ -21,7 +21,7 @@ void ATBSGameState::StartGameplay()
 
 		while (PropsSpawned < 30)
 		{
-			FIntVector Coordinates = FIntVector(FMath::RandRange(32, 65)*10, FMath::RandRange(32, 65)*10, 0);
+			FIntVector Coordinates = FIntVector(FMath::RandRange(10, 90)*10, FMath::RandRange(10, 90)*10, 0);
 			int32 Rotation = (float) FMath::RandRange(0, 3) * 90;
 
 			if (Grid->SelectProp(Coordinates))
@@ -29,7 +29,9 @@ void ATBSGameState::StartGameplay()
 				continue;
 			}
 
-			Grid->AddProp(PropFactory->CreateWall(Coordinates, FRotator(0.0, Rotation, 0.0)));
+			//Grid->AddProp(PropFactory->CreateWall(Coordinates, FRotator(0.0, Rotation, 0.0)));
+			Grid->AddProp(PropFactory->CreateBlock(Coordinates, FIntVector(1, 1, 6), FRotator(0.0, Rotation, 0.0)));
+
 			PropsSpawned += 1;
 		}
 		PropManager->ResetProps();
@@ -125,7 +127,16 @@ void ATBSGameState::SpawnUnits(int32 PlayerNumber)
 
 	while (UnitsSpawned < 3)
 	{
-		FIntVector Coordinates = FIntVector(FMath::RandRange(30 + XOffset, 45 + XOffset) * 10 + 5, FMath::RandRange(30, 60) * 10 + 5, 0);
+		FIntVector Coordinates;
+
+		if (UnitsSpawned == 0)
+		{
+			Coordinates = FIntVector(FMath::RandRange(30 + XOffset, 45 + XOffset) * 10 + 5, FMath::RandRange(30, 60) * 10 + 5, 0);
+		}
+		else
+		{
+			Coordinates = FIntVector(FMath::RandRange(30 + XOffset, 45 + XOffset) * 10, FMath::RandRange(30, 60) * 10, 0);
+		}
 
 		if (Grid->SelectUnit(Coordinates))
 		{
@@ -137,7 +148,21 @@ void ATBSGameState::SpawnUnits(int32 PlayerNumber)
 			continue;
 		}
 
-		ATBSUnit* Unit = UnitFactory->CreateUnit(Coordinates, FRotator(0.0, 0.0, 0.0));
+		ATBSUnit* Unit;
+
+		if (UnitsSpawned == 0)
+		{
+			Unit = UnitFactory->CreateUnit(Coordinates, FRotator(0.0, 0.0, 0.0));			
+		}
+		else if (UnitsSpawned == 1)
+		{
+			Unit = UnitFactory->CreateLargeUnit(Coordinates, FRotator(0.0, 0.0, 0.0));
+		}
+		else
+		{
+			Unit = UnitFactory->CreateSmallUnit(Coordinates, FRotator(0.0, 0.0, 0.0));
+		}
+		
 		Unit->PlayerNumber = PlayerNumber;
 
 		Grid->AddUnit(Unit);

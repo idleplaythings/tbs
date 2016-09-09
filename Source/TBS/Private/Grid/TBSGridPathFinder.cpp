@@ -70,12 +70,16 @@ bool ATBSGridPathFinder::FindPath(FIntVector Start, FIntVector End, TArray<FIntV
 			float MovementCost = calculateMovementCost(Current, Next);
 			NewCost = CostSoFar[Current.Coordinates] + MovementCost;
 			
-			if (!CostSoFar.Contains(Next) || NewCost < CostSoFar[Next])
+			// Limit path finding to some arbitrary cost now
+			if (NewCost < 35)
 			{
-				CostSoFar.Add(Next, NewCost);
-				float Priority = NewCost + (float)(FMath::Abs(End.X - Next.X) + FMath::Abs(End.Y - Next.Y));
-				Frontier.HeapPush(PathStep(Next, Priority), PathStepPredicate());
-				CameFrom.Add(Next, Current.Coordinates);
+				if (!CostSoFar.Contains(Next) || NewCost < CostSoFar[Next])
+				{
+					CostSoFar.Add(Next, NewCost);
+					float Priority = NewCost + (float)(FMath::Abs(End.X - Next.X) + FMath::Abs(End.Y - Next.Y));
+					Frontier.HeapPush(PathStep(Next, Priority), PathStepPredicate());
+					CameFrom.Add(Next, Current.Coordinates);
+				}
 			}
 		}
 	}
@@ -151,9 +155,9 @@ TArray<FIntVector> ATBSGridPathFinder::GetTilesUnderFootprint(FIntVector Coordin
 		Coordinates.Z
 	);
 
-	for (int32 X = 0; X <= Dimensions.X; X = X+10)
+	for (int32 X = 0; X <= Dimensions.X * 10; X = X+10)
 	{
-		for (int32 Y = 0; Y <= Dimensions.Y; Y = Y+10)
+		for (int32 Y = 0; Y <= Dimensions.Y * 10; Y = Y+10)
 		{
 			Tiles.Add(FIntVector(
 				Origin.X + X,
@@ -163,7 +167,7 @@ TArray<FIntVector> ATBSGridPathFinder::GetTilesUnderFootprint(FIntVector Coordin
 		}
 	}
 
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Tilenön12 (%i, %i, %i)"), Tiles[0].X, Tiles[0].Y, Tiles[0].Z));
+	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Tilenön12 (%i, %i, %i)"), Tiles[0].X, Tiles[0].Y, Tiles[0].Z));
 	return Tiles;
 }
 

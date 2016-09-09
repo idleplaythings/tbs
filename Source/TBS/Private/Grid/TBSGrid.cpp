@@ -52,7 +52,7 @@ TArray<ATBSUnit*>::TIterator ATBSGrid::GetUnitIterator()
 
 void ATBSGrid::AddProp(ATBSProp* Prop)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Adding a prop")));
+	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Adding a prop")));
 	Props.Add(Prop);
 }
 
@@ -130,18 +130,22 @@ TArray<FIntVector> ATBSGrid::GetNeighbours(FIntVector Coordinates)
 
 bool ATBSGrid::IsAccessible(FIntVector Coordinates)
 {
-	ATBSProp** MatchingProp = Props.FindByPredicate([Coordinates](const ATBSProp* Prop) {
-		if (Prop->GameCoordinates == Coordinates)
-		{
-			return true;
-		}
+	ATBSProp** FoundProp = PropsIndex.Find(Coordinates);
 
-		return false;
-	});
+	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Looking at coordinates (%i, %i, %i)"), Coordinates.X, Coordinates.Y, Coordinates.Z));
 
-	if (MatchingProp && (*MatchingProp)->BlocksAccess)
+	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Prop index length %i"), PropsIndex.Num()));
+	
+	if (FoundProp)
 	{
-		return false;
+		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Prop found from index")));
+
+		if ((*FoundProp)->BlocksAccess)
+		{
+			//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Prop is blocking")));
+
+			return false;
+		}
 	}
 
 	return true;
@@ -149,7 +153,19 @@ bool ATBSGrid::IsAccessible(FIntVector Coordinates)
 
 void ATBSGrid::ReindexProps_Implementation()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Reindex Props")));
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Reindexing Props. Prop array length %i"), Props.Num()));
+
+	PropsIndex.Empty();
+
+	for (auto& Prop : Props)
+	{
+		if (Prop)
+		{
+			PropsIndex.Add(Prop->GameCoordinates, Prop);
+		}		
+	}
+
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Prop index length %i"), PropsIndex.Num()));
 }
 
 void ATBSGrid::ReindexUnits_Implementation()

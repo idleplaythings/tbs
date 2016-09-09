@@ -26,14 +26,17 @@ void TBSUIContextStack::PopContext()
 
 void TBSUIContextStack::HandleEvent(TBSUIContextEvent* Event)
 {
-	// The contexts may mutate the context vector, so operate on a copy
-	std::vector<TBSUIContext*> CopyOfContexts = UIContexts;
-
-	for (std::vector<TBSUIContext*>::reverse_iterator It = CopyOfContexts.rbegin(); It != CopyOfContexts.rend(); ++It)
+	if (UIContexts.size() > 0)
 	{
-		if (*It)
+		// The contexts may mutate the context vector, so operate on a copy
+		std::vector<TBSUIContext*> CopyOfContexts = UIContexts;
+
+		for (std::vector<TBSUIContext*>::reverse_iterator It = CopyOfContexts.rbegin(); It != CopyOfContexts.rend(); ++It)
 		{
-			(*It)->HandleEvent(Event);
-		}		
+			if (*It)
+			{
+				(*It)->HandleEvent(Event);
+			}
+		}
 	}
 }

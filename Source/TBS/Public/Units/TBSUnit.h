@@ -50,7 +50,7 @@ public:
 	float MaxSpeed = 2;
 
 	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Unit")
-	FIntVector Dimensions;
+	FIntVector Dimensions = FIntVector(2, 2, 4);
 
 	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Unit")
 	FIntVector GameCoordinates;
@@ -58,8 +58,23 @@ public:
 	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Unit")
 	TArray<FIntVector> GameCoordinatesOccupied;
 
+	UPROPERTY(BlueprintReadWrite)
+	USceneComponent* SceneComponent;
+
+	UPROPERTY(BlueprintReadWrite)
+	USkeletalMeshComponent* SkeletalMesh;
+
+	UPROPERTY(BlueprintReadWrite)
+	UMaterial* Material;
+
+	UPROPERTY(BlueprintReadWrite)
+	UMaterialInstanceDynamic* DynamicMaterial;
+
 	void MoveNorth();
 	void MoveEast();
 	void MoveSouth();
 	void MoveWest();
+
+private:
+	void ScaleUnitMesh();
 };

@@ -39,13 +39,18 @@ void TBSUIFriendlyUnitContext::HandleEvent(TBSUIContextEvent* Event)
 		{
 			ClassLoader->PlayerController->PathSelected = true;
 
-			ClassLoader->GridPathFinder->FindPath(
+			if (ClassLoader->GridPathFinder->FindPath(
 				ClassLoader->PlayerController->SelectedUnit->GameCoordinates,
 				((TBSUIContextCoordinateEvent*)Event)->Coordinates,
 				ClassLoader->PlayerController->SelectedPath
-			);
-
-			ClassLoader->GridPathRenderer->RenderPath(ClassLoader->PlayerController->SelectedPath);
+			))
+			{
+				ClassLoader->GridPathRenderer->RenderPath(ClassLoader->PlayerController->SelectedPath);
+			}			
+			else
+			{
+				ClassLoader->GridPathRenderer->ClearPath();
+			}
 		}
 	}
 	else if (Event->Type == FName(TEXT("TileHoverEnd")))

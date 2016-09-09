@@ -16,6 +16,20 @@ ATBSUnitFactory::ATBSUnitFactory()
 	{
 		UnitBPClass = (UClass*)UnitBP.Object->GeneratedClass;
 	}	
+
+	static ConstructorHelpers::FObjectFinder<UBlueprint> SmallUnitBP(TEXT("Blueprint'/Game/Blueprints/Units/BP_TBSSmallUnit.BP_TBSSmallUnit'"));
+
+	if (UnitBP.Object)
+	{
+		SmallUnitBPClass = (UClass*)SmallUnitBP.Object->GeneratedClass;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UBlueprint> LargeUnitBP(TEXT("Blueprint'/Game/Blueprints/Units/BP_TBSLargeUnit.BP_TBSLargeUnit'"));
+
+	if (UnitBP.Object)
+	{
+		LargeUnitBPClass = (UClass*)LargeUnitBP.Object->GeneratedClass;
+	}
 }
 
 // Called when the game starts or when spawned
@@ -34,8 +48,31 @@ void ATBSUnitFactory::Tick( float DeltaTime )
 
 ATBSUnit* ATBSUnitFactory::CreateUnit(FIntVector Coordinates, FRotator Rotation)
 {
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Regular unit")));
+
 	ATBSUnit* Unit = GetWorld()->SpawnActor<ATBSUnit>(UnitBPClass);
-	Unit->Dimensions = FIntVector(2, 2, 6);
+	Unit->GameCoordinates = Coordinates;
+	Unit->RecalculateCoordinates();
+	Unit->SetActorRotation(Rotation);
+	return Unit;
+}
+
+ATBSUnit* ATBSUnitFactory::CreateSmallUnit(FIntVector Coordinates, FRotator Rotation)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Small unit")));
+
+	ATBSUnit* Unit = GetWorld()->SpawnActor<ATBSUnit>(SmallUnitBPClass);
+	Unit->GameCoordinates = Coordinates;
+	Unit->RecalculateCoordinates();
+	Unit->SetActorRotation(Rotation);
+	return Unit;
+}
+
+ATBSUnit* ATBSUnitFactory::CreateLargeUnit(FIntVector Coordinates, FRotator Rotation)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Large unit")));
+
+	ATBSUnit* Unit = GetWorld()->SpawnActor<ATBSUnit>(LargeUnitBPClass);
 	Unit->GameCoordinates = Coordinates;
 	Unit->RecalculateCoordinates();
 	Unit->SetActorRotation(Rotation);

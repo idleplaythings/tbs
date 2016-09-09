@@ -20,12 +20,22 @@ public:
 	// Called every frame
 	virtual void Tick( float DeltaSeconds ) override;
 
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Prop")
+	FIntVector Dimensions = FIntVector(1, 1, 1);
+
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Prop")
 	FIntVector GameCoordinates;
 
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Prop")
+	TArray<FIntVector> GameCoordinatesOccupied;
+
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Prop")
 	FRotator Rotation;
 
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Prop")
 	bool BlocksAccess;
+
+	void RecalculateCoordinates();
+
+	virtual void ATBSProp::ScalePropMesh();
 };

@@ -22,7 +22,11 @@ public:
 	virtual void Tick( float DeltaSeconds ) override;
 
 	ATBSUnit* CreateUnit(FIntVector Coordinates, FRotator Rotation);
+	ATBSUnit* CreateSmallUnit(FIntVector Coordinates, FRotator Rotation);
+	ATBSUnit* CreateLargeUnit(FIntVector Coordinates, FRotator Rotation);
 
 private:
 	UClass* UnitBPClass;
+	UClass* SmallUnitBPClass;
+	UClass* LargeUnitBPClass;
 };

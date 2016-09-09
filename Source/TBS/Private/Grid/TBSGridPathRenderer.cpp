@@ -75,7 +75,7 @@ UStaticMeshComponent* ATBSGridPathRenderer::CreatePathComponent()
 	UStaticMeshComponent* PathComponent = NewObject<UStaticMeshComponent>(this);
 	PathComponent->SetStaticMesh(PathComponentMesh);
 	PathComponent->SetMaterial(0, PathComponentMaterial);
-	PathComponent->AttachTo(RootComponent);
+	PathComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 	PathComponent->SetRelativeScale3D(FVector(0.3, 0.3, 0.01));
 	FinishAndRegisterComponent(PathComponent);
 	return PathComponent;

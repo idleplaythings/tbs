@@ -85,7 +85,7 @@ UStaticMeshComponent* ATBSGridUI::CreateMeshComponent()
 	MeshComponent->SetStaticMesh(GridMesh);
 	MeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	MeshComponent->SetCollisionProfileName(FName(TEXT("GridCollisionProfile")));
-	MeshComponent->AttachTo(RootComponent);	
+	MeshComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 	FinishAndRegisterComponent(MeshComponent);
 	return MeshComponent;
 }
