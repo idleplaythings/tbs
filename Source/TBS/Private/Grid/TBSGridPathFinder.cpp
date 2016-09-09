@@ -185,11 +185,15 @@ Units height must fit in current position, and no tile can already blocked by un
 */
 bool ATBSGridPathFinder::IsAccessablePosition(TArray<FIntVector> Tiles, FIntVector Dimensions)
 {
+	FIntVector Location = FIntVector(0, 0, 0);
 	for (auto& Tile : Tiles)
 	{
 		for (int32 Z = 0; Z <= Dimensions.Z; Z++)
 		{
-			FIntVector Location = FIntVector(Tile.X, Tile.Y, Tile.Z + Z);
+			Location.X = Tile.X;
+			Location.Y = Tile.Y;
+			Location.Z = Tile.Z + Z;
+
 			if (! Grid->IsAccessible(Location))
 			{
 				return false;
