@@ -11,6 +11,8 @@ class ATBSPlayerController;
 class ATBSDefaultPawn;
 class ATBSGrid;
 class ATBSGridUI;
+class ATBSPropFactory;
+class ATBSPropManager;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnClassesLoaded);
 
@@ -37,6 +39,8 @@ public:
 	ATBSGridUI* GridUI;
 	ATBSGridPathFinder* GridPathFinder;
 	ATBSGridPathRenderer* GridPathRenderer;
+	ATBSPropFactory* PropFactory;
+	ATBSPropManager* PropManager;
 
 	FOnClassesLoaded OnClassesLoaded;
 

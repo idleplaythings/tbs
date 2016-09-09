@@ -43,7 +43,7 @@ void ATBSPlayerController::BeginPlay()
 
 void ATBSPlayerController::OnClassesLoaded()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("ATBSPlayerController::ClassesLoaded")));
+	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("ATBSPlayerController::ClassesLoaded")));
 
 	ClassesLoaded = true;
 
@@ -63,7 +63,8 @@ void ATBSPlayerController::OnClassesLoaded()
 	InputComponent->BindAxis("AxisMoveCameraForward", this, &ATBSPlayerController::MoveCameraForward);
 	InputComponent->BindAxis("AxisMoveCameraRight", this, &ATBSPlayerController::MoveCameraRight);
 
-	ClassLoader->Grid->ReindexProps();
+	//ClassLoader->Grid->ReindexProps();
+	Server_ClientReady();
 }
 
 void ATBSPlayerController::PlayerTick(float DeltaTime)
@@ -199,4 +200,34 @@ bool ATBSPlayerController::Server_HandleCommand_Validate(ATBSUnit* Unit, const T
 	}
 
 	return true;
+}
+
+void ATBSPlayerController::Server_ClientReady_Implementation()
+{
+	OnClientReady.Broadcast();
+}
+
+bool ATBSPlayerController::Server_ClientReady_Validate()
+{
+	return true;
+}
+
+void ATBSPlayerController::Client_CreateProps_Implementation(TArray<FProp> const& PropArray)
+{
+	if (Role < ROLE_Authority)
+	{
+		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Received props %i"), PropArray.Num()));
+
+		for (auto& Prop : PropArray)
+		{
+			int32 Rotation = (float) FMath::RandRange(0, 3) * 90;
+			ATBSProp* PropActor = ClassLoader->PropFactory->CreateBlock(Prop.Coordinates, FIntVector(1, 1, 6), FRotator(0.0, Rotation, 0.0));
+			ClassLoader->Grid->AddProp(PropActor);
+			ClassLoader->PropManager->ResetProp(PropActor);
+		}		
+
+		PropsReceived += PropArray.Num();
+
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Total props received %i"), PropsReceived));
+	}		
 }

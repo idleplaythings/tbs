@@ -36,11 +36,11 @@ void ATBSClassLoader::Initialise(ATBSPlayerController* InPlayerController)
 
 void ATBSClassLoader::TryLoadClasses()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("ATBSPlayerController::LoadLocalClasses")));
+	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("ATBSPlayerController::LoadLocalClasses")));
 
-	if (DefaultPawn && Grid && GridUI && GridPathFinder && GridPathRenderer)
+	if (DefaultPawn && Grid && GridUI && GridPathFinder && GridPathRenderer && PropFactory && PropManager)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("All local classes Initialised")));
+		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("All local classes Initialised")));
 
 		GetWorldTimerManager().ClearTimer(InitTimer);
 		OnClassesLoaded.Broadcast();
@@ -54,7 +54,7 @@ void ATBSClassLoader::TryLoadClasses()
 
 	if (!Grid)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("No grid")));
+		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("No grid")));
 
 		for (TActorIterator<ATBSGrid> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 		{
@@ -64,7 +64,7 @@ void ATBSClassLoader::TryLoadClasses()
 
 	if (Grid && !GridUI)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("No grid ui")));
+		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("No grid ui")));
 
 		GridUI = GetWorld()->SpawnActor<ATBSGridUI>(ATBSGridUI::StaticClass());
 		GridUI->RenderGrid(Grid);
@@ -77,5 +77,9 @@ void ATBSClassLoader::TryLoadClasses()
 
 		GridPathRenderer = GetWorld()->SpawnActor<ATBSGridPathRenderer>(ATBSGridPathRenderer::StaticClass());
 		GridPathRenderer->Initialise(Grid, GridUI);
+
+		PropFactory = GetWorld()->SpawnActor<ATBSPropFactory>(ATBSPropFactory::StaticClass());
+		PropManager = GetWorld()->SpawnActor<ATBSPropManager>(ATBSPropManager::StaticClass());
+		PropManager->Initialise(Grid, GridUI);
 	}
 }

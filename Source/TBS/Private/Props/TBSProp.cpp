@@ -9,9 +9,17 @@
 ATBSProp::ATBSProp()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-	bReplicates = true;
-	bAlwaysRelevant = true;
+	PrimaryActorTick.bCanEverTick = false;
+	bReplicates = false;
+
+	bAlwaysRelevant = false;
+	bCanBeDamaged = false;
+	bCollideWhenPlacing = false;
+	bEditable = false;
+	bLockLocation = true;
+	bReplicateMovement = false;
+
+	SetActorEnableCollision(false);
 }
 
 // Called when the game starts or when spawned
@@ -27,17 +35,6 @@ void ATBSProp::Tick( float DeltaTime )
 {
 	Super::Tick( DeltaTime );
 
-}
-
-void ATBSProp::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME(ATBSProp, BlocksAccess);
-	DOREPLIFETIME(ATBSProp, Rotation);
-	DOREPLIFETIME(ATBSProp, GameCoordinates);
-	DOREPLIFETIME(ATBSProp, GameCoordinatesOccupied);
-	DOREPLIFETIME(ATBSProp, Dimensions);
 }
 
 void ATBSProp::ScalePropMesh()

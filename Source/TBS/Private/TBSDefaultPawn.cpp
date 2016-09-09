@@ -7,7 +7,7 @@
 
 ATBSDefaultPawn::ATBSDefaultPawn()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	// Clear unnecessary components
 	GetCollisionComponent()->DestroyComponent();

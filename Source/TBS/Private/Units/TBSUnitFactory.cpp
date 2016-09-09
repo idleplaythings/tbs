@@ -8,7 +8,7 @@
 ATBSUnitFactory::ATBSUnitFactory()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	static ConstructorHelpers::FObjectFinder<UBlueprint> UnitBP(TEXT("Blueprint'/Game/Blueprints/Units/BP_TBSUnit.BP_TBSUnit'"));
 
@@ -48,7 +48,7 @@ void ATBSUnitFactory::Tick( float DeltaTime )
 
 ATBSUnit* ATBSUnitFactory::CreateUnit(FIntVector Coordinates, FRotator Rotation)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Regular unit")));
+	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Regular unit")));
 
 	ATBSUnit* Unit = GetWorld()->SpawnActor<ATBSUnit>(UnitBPClass);
 	Unit->GameCoordinates = Coordinates;
@@ -59,7 +59,7 @@ ATBSUnit* ATBSUnitFactory::CreateUnit(FIntVector Coordinates, FRotator Rotation)
 
 ATBSUnit* ATBSUnitFactory::CreateSmallUnit(FIntVector Coordinates, FRotator Rotation)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Small unit")));
+	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Small unit")));
 
 	ATBSUnit* Unit = GetWorld()->SpawnActor<ATBSUnit>(SmallUnitBPClass);
 	Unit->GameCoordinates = Coordinates;
@@ -70,7 +70,7 @@ ATBSUnit* ATBSUnitFactory::CreateSmallUnit(FIntVector Coordinates, FRotator Rota
 
 ATBSUnit* ATBSUnitFactory::CreateLargeUnit(FIntVector Coordinates, FRotator Rotation)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Large unit")));
+	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Large unit")));
 
 	ATBSUnit* Unit = GetWorld()->SpawnActor<ATBSUnit>(LargeUnitBPClass);
 	Unit->GameCoordinates = Coordinates;

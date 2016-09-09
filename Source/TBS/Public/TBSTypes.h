@@ -38,6 +38,26 @@ struct FCoordinateLocations
 	FVector W;
 };
 
+USTRUCT()
+struct FProp
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY()
+	int32 Id;
+
+	UPROPERTY()
+	FIntVector Coordinates;
+};
+
+FORCEINLINE FArchive& operator<<(FArchive &Ar, FProp& Prop)
+{
+	Ar << Prop.Id;
+	Ar << Prop.Coordinates;
+
+	return Ar;
+}
+
 // From: https://answers.unrealengine.com/questions/180188/analogue-of-priority-queue.html
 struct PathStep
 {

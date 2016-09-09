@@ -5,6 +5,7 @@
 #include "GameFramework/Actor.h"
 #include "TBSProp.h"
 #include "TBSUnit.h"
+#include <map>
 #include "TBSGrid.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnActorNoLongerVisible, int32, TeamNumber, AActor*, Actor);
@@ -29,8 +30,9 @@ public:
 
 	UPROPERTY(Replicated)
 	TArray<ATBSProp*> Props;
-
 	TMap<FIntVector, ATBSProp*> PropsIndex;
+
+	std::map<const FIntVector, ATBSProp*> PropMap;
 
 	UPROPERTY(Replicated)
 	TArray<ATBSUnit*> Units;

@@ -9,7 +9,7 @@
 ATBSGridUI::ATBSGridUI()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> Mesh(TEXT("StaticMesh'/Game/Meshes/1x1mPlane.1x1mPlane'"));
 	GridMesh = Mesh.Object;

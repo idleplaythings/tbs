@@ -17,24 +17,24 @@ void ATBSGameState::StartGameplay()
 	{
 		InitFactoriesAndManagers();
 
-		int PropsSpawned = 0;
+		//int PropsSpawned = 0;
 
-		while (PropsSpawned < 5)
-		{
-			FIntVector Coordinates = FIntVector(FMath::RandRange(10, 90)*10, FMath::RandRange(10, 90)*10, 0);
-			int32 Rotation = (float) FMath::RandRange(0, 3) * 90;
+		//while (PropsSpawned < 20)
+		//{
+		//	FIntVector Coordinates = FIntVector(FMath::RandRange(10, 90)*10, FMath::RandRange(10, 90)*10, 0);
+		//	int32 Rotation = (float) FMath::RandRange(0, 3) * 90;
 
-			if (Grid->SelectProp(Coordinates))
-			{
-				continue;
-			}
+		//	if (Grid->SelectProp(Coordinates))
+		//	{
+		//		continue;
+		//	}
 
-			//Grid->AddProp(PropFactory->CreateWall(Coordinates, FRotator(0.0, Rotation, 0.0)));
-			Grid->AddProp(PropFactory->CreateBlock(Coordinates, FIntVector(1, 1, 6), FRotator(0.0, Rotation, 0.0)));
+		//	//Grid->AddProp(PropFactory->CreateWall(Coordinates, FRotator(0.0, Rotation, 0.0)));
+		//	Grid->AddProp(PropFactory->CreateBlock(Coordinates, FIntVector(1, 1, 6), FRotator(0.0, Rotation, 0.0)));
 
-			PropsSpawned += 1;
-		}
-		PropManager->ResetProps();
+		//	PropsSpawned += 1;
+		//}
+		//PropManager->ResetProps();
 
 		Grid->OnActorNoLongerVisible.AddDynamic(this, &ATBSGameState::ForceCloseActorChannel);
 	}
@@ -112,7 +112,68 @@ void ATBSGameState::InitPlayerController(int32 PlayerNumber, APlayerController* 
 {
 	ATBSPlayerController* Controller = Cast<ATBSPlayerController>(PlayerController);
 	Controller->PlayerNumber = PlayerNumber;
-	PlayerControllers.Add(PlayerNumber, Controller);
+	Controller->OnClientReady.AddDynamic(this, &ATBSGameState::ClientReady);
+
+	PlayerControllers.Add(PlayerNumber, Controller);	
+}
+
+void ATBSGameState::ClientReady()
+{
+	NumberOfPlayersReady += 1;
+
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Clients ready %i/%i"), NumberOfPlayersReady, NumberOfPlayersExpected));
+
+	if (NumberOfPlayersReady == NumberOfPlayersExpected)
+	{
+		AllClientsReady();
+	}
+}
+
+void ATBSGameState::AllClientsReady()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("All clients ready")));
+
+	for (int32 i = 0; i < PropsToSend; i++)
+	{
+		FIntVector Coordinates = FIntVector(FMath::RandRange(10, 90) * 10, FMath::RandRange(10, 90) * 10, 0);
+		int32 Rotation = (float)FMath::RandRange(0, 3) * 90;
+		PropFactory->CreateBlock(Coordinates, FIntVector(1, 1, 6), FRotator(0.0, Rotation, 0.0));
+	}
+
+	GetWorldTimerManager().SetTimer(SendTimer, this, &ATBSGameState::SendProps, Delay, true);
+}
+
+void ATBSGameState::SendProps()
+{
+	int32 PropsLeft = PropsToSend - PropsSent;
+
+	if (PropsLeft <= 0)
+	{
+		GetWorldTimerManager().ClearTimer(SendTimer);
+		return;
+	}
+
+	int32 SendSize = PropsLeft >= BatchSize ? BatchSize : PropsLeft;
+
+	TArray<FProp> PropArray;
+
+	for (int32 i = 0; i < SendSize; i++)
+	{
+		FProp Prop;
+		Prop.Id = 1;
+		Prop.Coordinates = FIntVector(FMath::RandRange(0, Grid->GridDimensions.X), FMath::RandRange(0, Grid->GridDimensions.Y), 0);
+
+		PropArray.Add(Prop);
+	}
+
+	//Grid->UpdateProps(PropArray);
+
+	for (auto& It : PlayerControllers)
+	{
+		(*It.Value).Client_CreateProps(PropArray);
+	}
+
+	PropsSent += SendSize;
 }
 
 void ATBSGameState::SpawnUnits(int32 PlayerNumber)

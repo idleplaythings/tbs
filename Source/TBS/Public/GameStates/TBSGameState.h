@@ -25,13 +25,18 @@ public:
 	void AddPlayer(APlayerController* PlayerController);
 
 	UPROPERTY(Replicated)
-	int32 NumberOfPlayers;
+	int32 NumberOfPlayers = 0;
+	int32 NumberOfPlayersReady = 0;
+	int32 NumberOfPlayersExpected = 2;
 
 	UFUNCTION()
 	void ForceCloseActorChannel(int32 TeamNumber, AActor* Actor);
 
 	// TODO: Player controller still depends on this
 	ATBSUnitManager* UnitManager;
+
+	UFUNCTION()
+	void ClientReady();
 
 private:
 	void InitGrid(FIntVector Dimensions);
@@ -40,10 +45,21 @@ private:
 	void InitPlayerController(int32 PlayerNumber, APlayerController* PlayerController);
 	void SpawnUnits(int32 PlayerNumber);
 
+	void AllClientsReady();
+
 	ATBSPropManager* PropManager;
 	ATBSPropFactory* PropFactory;
 	ATBSUnitFactory* UnitFactory;
 	ATBSGrid* Grid;
 	ATBSGridUI* GridUI;
 	TMap<int32, ATBSPlayerController*> PlayerControllers;
+
+
+	FTimerHandle SendTimer;
+	int32 PropsToSend = 10000;
+	int32 PropsSent = 0;
+	int32 BatchSize = 2048;
+	float Delay = 0.5;
+
+	void SendProps();
 };

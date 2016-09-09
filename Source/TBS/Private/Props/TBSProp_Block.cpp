@@ -8,7 +8,7 @@
 ATBSProp_Block::ATBSProp_Block()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 	
 	SceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	RootComponent = SceneComponent;
@@ -18,6 +18,7 @@ ATBSProp_Block::ATBSProp_Block()
 	if (Mesh.Succeeded())
 	{
 		BlockMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Block"));
+		BlockMesh->SetSimulatePhysics(false);
 		BlockMesh->SetStaticMesh(Mesh.Object);
 		//BlockMesh->AddRelativeRotation(FQuat(FVector(1.0, 0.0, 0.0), PI / 2));
 		//BlockMesh->AddRelativeLocation(FVector(0.0, 0.0, 50.0));

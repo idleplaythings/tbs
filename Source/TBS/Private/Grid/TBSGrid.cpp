@@ -18,7 +18,7 @@ void ATBSGrid::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetime
 {
 	DOREPLIFETIME(ATBSGrid, GridDimensions);
 	DOREPLIFETIME(ATBSGrid, Units);
-	DOREPLIFETIME(ATBSGrid, Props);
+	//DOREPLIFETIME(ATBSGrid, Props);
 }
 
 // Called when the game starts or when spawned

@@ -123,7 +123,7 @@ void ATBSUnit::Tick( float DeltaTime )
 
 void ATBSUnit::RecalculateCoordinates()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Recalculating coordinates, dimensions (%i, %i, %i)"), Dimensions.X, Dimensions.Y, Dimensions.Z));
+	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Recalculating coordinates, dimensions (%i, %i, %i)"), Dimensions.X, Dimensions.Y, Dimensions.Z));
 
 	TArray<FIntVector> NewCoordinates;
 
@@ -156,7 +156,7 @@ void ATBSUnit::RecalculateCoordinates()
 
 void ATBSUnit::MoveNorth()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("North")));
+	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("North")));
 	TArray<FIntVector> NewCoordinates;
 
 	for (auto& Coordinates : GameCoordinatesOccupied)
@@ -169,7 +169,7 @@ void ATBSUnit::MoveNorth()
 
 void ATBSUnit::MoveEast()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("East")));
+	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("East")));
 	TArray<FIntVector> NewCoordinates;
 
 	for (auto& Coordinates : GameCoordinatesOccupied)
@@ -182,7 +182,7 @@ void ATBSUnit::MoveEast()
 
 void ATBSUnit::MoveSouth()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("South")));
+	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("South")));
 	TArray<FIntVector> NewCoordinates;
 
 	for (auto& Coordinates : GameCoordinatesOccupied)
@@ -195,7 +195,7 @@ void ATBSUnit::MoveSouth()
 
 void ATBSUnit::MoveWest()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("West")));
+	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("West")));
 	TArray<FIntVector> NewCoordinates;
 
 	for (auto& Coordinates : GameCoordinatesOccupied)
