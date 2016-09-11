@@ -3,6 +3,8 @@
 #include "TBS.h"
 #include "Algo/Reverse.h"
 #include "TBSGridPathFinder.h"
+#include "TBSGridPathFindingHelper.h"
+#include "TBSGridPathWorker.h"
 
 // Sets default values
 ATBSGridPathFinder::ATBSGridPathFinder()
@@ -29,181 +31,35 @@ void ATBSGridPathFinder::Tick( float DeltaTime )
 void ATBSGridPathFinder::Initialise(ATBSGrid* InGrid)
 {
 	Grid = InGrid;
+	InvalidateCache();
 }
 
-bool ATBSGridPathFinder::FindPath(FIntVector Start, FIntVector End, TArray<FIntVector> &OutPath)
+bool ATBSGridPathFinder::FindPath(FIntVector Start, FIntVector End, TArray<FIntVector> &OutPath, FIntVector Dimensions)
 {
-	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Find path (%i, %i, %i) -> (%i, %i, %i)"), Start.X, Start.Y, Start.Z, End.X, End.Y, End.Z));
-
-	if (Grid == nullptr)
+	if (HasCache())
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Null grid")));
-		return false;
+		return TBSGridPathFindingHelper::FindCachedPath(End, CachedPaths, OutPath);
 	}
-
-	TArray<PathStep> Frontier;
-	Frontier.HeapPush(PathStep(Start, 0.0), PathStepPredicate());
-
-	TMap<FIntVector, FIntVector> CameFrom;
-	CameFrom.Add(Start, FIntVector(-999, -999, -999));
-
-	TMap<FIntVector, float> CostSoFar;
-	CostSoFar.Add(Start, 0.0);
-
-	bool FoundEnd = false;
-
-	while (Frontier.Num() > 0)
-	{
-		PathStep Current;
-		Frontier.HeapPop(Current, PathStepPredicate());
-
-		if (Current.Coordinates == End)
-		{
-			FoundEnd = true;
-			break;
-		}
-
-		for (auto& Next : GetNeighbourNodes(Current.Coordinates, FIntVector(2,2,4)))
-		{		
-			float NewCost;
-
-			float MovementCost = calculateMovementCost(Current, Next);
-			NewCost = CostSoFar[Current.Coordinates] + MovementCost;
-			
-			// Limit path finding to some arbitrary cost now
-			if (NewCost < 35)
-			{
-				if (!CostSoFar.Contains(Next) || NewCost < CostSoFar[Next])
-				{
-					CostSoFar.Add(Next, NewCost);
-					float Priority = NewCost + (float)(FMath::Abs(End.X - Next.X) + FMath::Abs(End.Y - Next.Y));
-					Frontier.HeapPush(PathStep(Next, Priority), PathStepPredicate());
-					CameFrom.Add(Next, Current.Coordinates);
-				}
-			}
-		}
-	}
-
-	if (!FoundEnd)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("No end found")));
-		return false;
-	}
-
-	FIntVector Current = End;
-	TArray<FIntVector> Path;		
-
-	do
-	{
-		Path.Add(Current);
-		Current = CameFrom[Current];
-	} while (Current != FIntVector(-999, -999, -999));
-
-	Algo::Reverse(Path);
-
-	OutPath = Path;
-
-	return true;
-}
-
-float ATBSGridPathFinder::calculateMovementCost(PathStep Current, FIntVector NextNode)
-{
-	float multiplier = calculateMovementCostMultiplier(Current, NextNode);
-	// Tile by tile movement cost here
-	return multiplier;
-}
-
-float ATBSGridPathFinder::calculateMovementCostMultiplier(PathStep Current, FIntVector NextNode)
-{
-	// Diagonal movement
-	if (Current.Coordinates.X != NextNode.X && Current.Coordinates.Y != NextNode.Y)
-	{
-		return 1.42f;
-	}
-	// Straight movement
 	else
 	{
-		return + 1.0f;
+		return TBSGridPathFindingHelper::FindUncachedPath(Grid, Start, End, OutPath, Dimensions);
 	}
-
 }
 
-TArray<FIntVector> ATBSGridPathFinder::GetNeighbourNodes(FIntVector Coordinates, FIntVector Dimensions)
+void ATBSGridPathFinder::BuildCache(FIntVector Start, FIntVector Dimensions)
 {
-	TArray<FIntVector> Nodes =  Grid->GetNeighbours(Coordinates);
-
-	//Find vertical alternatives later
-
-	Nodes = Nodes.FilterByPredicate([&](const FIntVector& Node) {
-		TArray<FIntVector> Tiles = GetTilesUnderFootprint(Node, Dimensions);
-		return IsSupportedPosition(Tiles) && IsAccessablePosition(Tiles, Dimensions);
-	});
-
-	return Nodes;
+	TBSGridPathWorker::Shutdown();
+	TBSGridPathWorker::JoyInit(CachedPaths, Start, Dimensions, Grid);
 }
 
-TArray<FIntVector> ATBSGridPathFinder::GetTilesUnderFootprint(FIntVector Coordinates, FIntVector Dimensions)
+void ATBSGridPathFinder::InvalidateCache()
 {
-	TArray<FIntVector> Tiles;
-
-	int32 XStep = Dimensions.X % 2 == 0 ? -5 : 0;
-	int32 YStep = Dimensions.Y % 2 == 0 ? -5 : 0;
-
-	FIntVector Origin = FIntVector(
-		Coordinates.X + XStep - (FMath::CeilToInt((float) Dimensions.X / 2)*10 - 10),
-		Coordinates.Y + YStep - (FMath::CeilToInt((float) Dimensions.Y / 2)*10 - 10),
-		Coordinates.Z
-	);
-
-	for (int32 X = 0; X <= Dimensions.X * 10; X = X+10)
-	{
-		for (int32 Y = 0; Y <= Dimensions.Y * 10; Y = Y+10)
-		{
-			Tiles.Add(FIntVector(
-				Origin.X + X,
-				Origin.Y + Y,
-				Coordinates.Z
-			));
-		}
-	}
-
-	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Tilenön12 (%i, %i, %i)"), Tiles[0].X, Tiles[0].Y, Tiles[0].Z));
-	return Tiles;
+	TBSGridPathWorker::Shutdown();
+	CachedPaths.Empty();
 }
 
-/*
-If unit is able to vault/climb, it is enough that one tile is walkable
-Otherwise height difference of max 2 tiles is allowed withing unit footprint
-*/
-bool ATBSGridPathFinder::IsSupportedPosition(TArray<FIntVector> Tiles)
+bool ATBSGridPathFinder::HasCache()
 {
-	for (auto& Tile : Tiles) 
-	{
-		//is walkable?
-	}
-	return true;
-}
-
-/*
-Units height must fit in current position, and no tile can already blocked by unwalkable prop
-*/
-bool ATBSGridPathFinder::IsAccessablePosition(TArray<FIntVector> Tiles, FIntVector Dimensions)
-{
-	FIntVector Location = FIntVector(0, 0, 0);
-	for (auto& Tile : Tiles)
-	{
-		for (int32 Z = 0; Z <= Dimensions.Z; Z++)
-		{
-			Location.X = Tile.X;
-			Location.Y = Tile.Y;
-			Location.Z = Tile.Z + Z;
-
-			if (! Grid->IsAccessible(Location))
-			{
-				return false;
-			}
-		}
-		
-	}
-	return true;
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("elements in cached path %i"), CachedPaths.Num()));
+	return CachedPaths.Num() > 0 && TBSGridPathWorker::IsThreadFinished();
 }

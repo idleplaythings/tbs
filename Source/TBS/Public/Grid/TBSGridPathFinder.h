@@ -22,21 +22,17 @@ public:
 	virtual void Tick( float DeltaSeconds ) override;
 
 	void Initialise(ATBSGrid* InGrid);	
-	bool FindPath(FIntVector Start, FIntVector End, TArray<FIntVector> &OutPath);
+
+	bool FindPath(FIntVector Start, FIntVector End, TArray<FIntVector> &OutPath, FIntVector Dimensions);
+
+	void BuildCache(FIntVector Start, FIntVector Dimensions);
+
+	void InvalidateCache();
 
 private:
+
 	ATBSGrid* Grid;
+	TMap<FIntVector, FIntVector> CachedPaths;
 
-	float calculateMovementCost(PathStep Current, FIntVector NextNode);
-
-	float calculateMovementCostMultiplier(PathStep Current, FIntVector NextNode);
-
-	TArray<FIntVector> GetNeighbourNodes(FIntVector Coordinates, FIntVector Dimensions);
-
-	TArray<FIntVector> GetTilesUnderFootprint(FIntVector Coordinates, FIntVector Dimensions);
-
-	//Checks if current position has enough things to stand on
-	bool IsSupportedPosition(TArray<FIntVector> Tiles);
-
-	bool IsAccessablePosition(TArray<FIntVector> Tiles, FIntVector Dimensions);
+	bool HasCache();
 };

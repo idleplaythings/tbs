@@ -46,7 +46,7 @@ void TBSUIDefaultContext::HandleEvent(TBSUIContextEvent* Event)
 
 			HoverUnit = Unit;
 
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Unit dimensions (%i, %i, %i)"), HoverUnit->Dimensions.X, HoverUnit->Dimensions.Y, HoverUnit->Dimensions.Z));
+			//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Unit dimensions (%i, %i, %i)"), HoverUnit->Dimensions.X, HoverUnit->Dimensions.Y, HoverUnit->Dimensions.Z));
 
 			ClassLoader->GridUI->ForceCursor(HoverUnit->Dimensions, HoverUnit->GameCoordinates);
 		}

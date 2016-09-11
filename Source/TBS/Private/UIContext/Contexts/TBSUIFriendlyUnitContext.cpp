@@ -23,12 +23,14 @@ void TBSUIFriendlyUnitContext::EnterContext()
 
 	ClassLoader->GridUI->SelectLocation(Unit->Dimensions, Unit->GameCoordinates);
 	ClassLoader->GridUI->SetCursorDimensions(ClassLoader->PlayerController->SelectedUnit->Dimensions);
+	ClassLoader->GridPathFinder->BuildCache(Unit->GameCoordinates, Unit->Dimensions);
 }
 
 void TBSUIFriendlyUnitContext::ExitContext()
 {
 	ClassLoader->GridUI->ClearSelection();
 	ClassLoader->GridUI->ResetCursorDimensions();
+	ClassLoader->GridPathFinder->InvalidateCache();
 }
 
 void TBSUIFriendlyUnitContext::HandleEvent(TBSUIContextEvent* Event)
@@ -42,7 +44,8 @@ void TBSUIFriendlyUnitContext::HandleEvent(TBSUIContextEvent* Event)
 			if (ClassLoader->GridPathFinder->FindPath(
 				ClassLoader->PlayerController->SelectedUnit->GameCoordinates,
 				((TBSUIContextCoordinateEvent*)Event)->Coordinates,
-				ClassLoader->PlayerController->SelectedPath
+				ClassLoader->PlayerController->SelectedPath,
+				ClassLoader->PlayerController->SelectedUnit->Dimensions
 			))
 			{
 				ClassLoader->GridPathRenderer->RenderPath(ClassLoader->PlayerController->SelectedPath);
