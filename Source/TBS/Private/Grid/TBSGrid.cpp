@@ -56,9 +56,27 @@ void ATBSGrid::AddProp(ATBSProp* Prop)
 	Props.Add(Prop);
 }
 
+void ATBSGrid::AddProp(FProp Prop)
+{
+	if (Prop.Id == 0)
+	{
+		Prop.Id = NextPropId++;
+	}
+
+	PropMap.Add(Prop.Coordinates, Prop);
+	
+	//PropMapIterator = PropMap.insert(PropMapIterator, std::pair<FIntVector, FProp>(Prop.Coordinates, Prop));
+	//PropMap.insert(std::pair<const FIntVector, FProp>(Prop.Coordinates, Prop));
+}
+
 void ATBSGrid::AddUnit(ATBSUnit* Unit)
 {
 	Units.Add(Unit);
+}
+
+int32 ATBSGrid::PropCount()
+{
+	return PropMap.Num();
 }
 
 ATBSUnit* ATBSGrid::SelectUnit(FIntVector Coordinates)

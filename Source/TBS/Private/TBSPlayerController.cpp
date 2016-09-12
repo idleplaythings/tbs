@@ -8,12 +8,23 @@
 #include "TBSUIDefaultContext.h"
 #include "TBSUIContextAxisEvent.h"
 #include "TBSUIContextCoordinateEvent.h"
+#include "Server.h"
+#include <string>
 #include "TBSPlayerController.h"
 
 ATBSPlayerController::ATBSPlayerController(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	EnableMouse();
 }
+
+ATBSPlayerController::~ATBSPlayerController()
+{
+	if (TCPClient)
+	{
+		TCPClient->Stop();
+	}
+}
+
 
 void ATBSPlayerController::EnableMouse()
 {
@@ -60,11 +71,21 @@ void ATBSPlayerController::OnClassesLoaded()
 	InputComponent->BindAction("ActionMouseLeft", IE_Pressed, this, &ATBSPlayerController::MouseLeft);
 	InputComponent->BindAction("ActionMouseRight", IE_Pressed, this, &ATBSPlayerController::MouseRight);
 	InputComponent->BindAction("ActionEscape", IE_Pressed, this, &ATBSPlayerController::Escape);
+	InputComponent->BindAction("ActionDebugMessage", IE_Pressed, this, &ATBSPlayerController::SendDebugMessage);
 	InputComponent->BindAxis("AxisMoveCameraForward", this, &ATBSPlayerController::MoveCameraForward);
 	InputComponent->BindAxis("AxisMoveCameraRight", this, &ATBSPlayerController::MoveCameraRight);
 
 	//ClassLoader->Grid->ReindexProps();
 	Server_ClientReady();
+
+	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Controller ready, server address %s"), *GetServerNetworkAddress()));
+
+	//ISocketSubsystem* SocketSubsystem = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM);
+	//TSharedRef<FInternetAddr> Address = SocketSubsystem->CreateInternetAddr();
+
+	TCPClient = new TBSTCPClient();
+	TCPClient->Connect(FString("192.168.0.107"), 10011);
+
 }
 
 void ATBSPlayerController::PlayerTick(float DeltaTime)
@@ -175,6 +196,23 @@ void ATBSPlayerController::Escape()
 	UIContextStack->HandleEvent(new TBSUIContextEvent(FName(TEXT("Escape"))));
 }
 
+void ATBSPlayerController::SendDebugMessage()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Sending debug message")));
+
+	std::string Message = "";
+
+	for (int32 i = 0; i < FMath::RandRange(1, 3); i++)
+	{		
+		Message.append("0123456789");
+	}
+
+	TCPClient->Send(Message.c_str());
+	TCPClient->Send(Message.c_str());
+	TCPClient->Send(Message.c_str());
+}
+
+
 void ATBSPlayerController::Server_HandleCommand_Implementation(ATBSUnit* Unit, const TArray<FIntVector>& Movements)
 {
 	if (!HasAuthority())
@@ -212,22 +250,23 @@ bool ATBSPlayerController::Server_ClientReady_Validate()
 	return true;
 }
 
-void ATBSPlayerController::Client_CreateProps_Implementation(TArray<FProp> const& PropArray)
-{
-	if (Role < ROLE_Authority)
-	{
-		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Received props %i"), PropArray.Num()));
-
-		for (auto& Prop : PropArray)
-		{
-			int32 Rotation = (float) FMath::RandRange(0, 3) * 90;
-			ATBSProp* PropActor = ClassLoader->PropFactory->CreateBlock(Prop.Coordinates, FIntVector(1, 1, 6), FRotator(0.0, Rotation, 0.0));
-			ClassLoader->Grid->AddProp(PropActor);
-			ClassLoader->PropManager->ResetProp(PropActor);
-		}		
-
-		PropsReceived += PropArray.Num();
-
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Total props received %i"), PropsReceived));
-	}		
-}
+//void ATBSPlayerController::Client_CreateProps_Implementation(TArray<FProp> const& PropArray)
+//{
+//	if (Role < ROLE_Authority)
+//	{
+//		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Received props %i"), PropArray.Num()));
+//
+//		for (auto& Prop : PropArray)
+//		{
+//			ClassLoader->Grid->AddProp(Prop);
+//			//int32 Rotation = (float) FMath::RandRange(0, 3) * 90;
+//			//ATBSProp* PropActor = ClassLoader->PropFactory->CreateBlock(Prop.Coordinates, FIntVector(1, 1, 6), FRotator(0.0, Rotation, 0.0));
+//			//ClassLoader->Grid->AddProp(PropActor);
+//			//ClassLoader->PropManager->ResetProp(PropActor);
+//		}		
+//
+//		PropsReceived += PropArray.Num();
+//
+//		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Total props received %i"), PropsReceived));
+//	}		
+//}

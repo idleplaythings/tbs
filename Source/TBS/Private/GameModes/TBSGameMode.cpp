@@ -28,5 +28,7 @@ void ATBSGameMode::PostLogin(APlayerController* PlayerController)
 {
 	Super::PostLogin(PlayerController);
 
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Client joined, address %s"), *PlayerController->GetPlayerNetworkAddress()));
+
 	GetGameState<ATBSGameState>()->AddPlayer(PlayerController);
 }

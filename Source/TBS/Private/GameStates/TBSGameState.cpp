@@ -8,9 +8,23 @@
 #include "Engine/ActorChannel.h"
 #include "TBSGameState.h"
 
+ATBSGameState::ATBSGameState()
+{
+	PrimaryActorTick.bCanEverTick = true;
+}
+
+ATBSGameState::~ATBSGameState()
+{
+	if (TCPServer)
+	{
+		TCPServer->Stop();
+		delete TCPServer;
+	}
+}
+
 void ATBSGameState::StartGameplay()
 {
-	InitGrid(FIntVector(1000, 1000, 18));
+	InitGrid(FIntVector(3000, 3000, 18));
 	InitGridUI();
 
 	if (HasAuthority())
@@ -36,8 +50,45 @@ void ATBSGameState::StartGameplay()
 		//}
 		//PropManager->ResetProps();
 
+		//ISocketSubsystem* SocketSubsystem = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM);
+		//bool CanBind = false;
+		//TSharedRef<FInternetAddr> Address = SocketSubsystem->GetLocalHostAddr(*GLog, CanBind);
+		//Address->SetPort(10003);
+
+		//FString AddressStr = Address->ToString(true);
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Starting listener on address %s"), *AddressStr));
+
+		TCPServer = new TBSTCPServer();
+		TCPServer->Listen(FString("192.168.0.107"), 10011);
+		//TCPServer->OnNetworkMessage.AddDynamic(this, &ATBSGameState::OnTCPMessage);
+
 		Grid->OnActorNoLongerVisible.AddDynamic(this, &ATBSGameState::ForceCloseActorChannel);
 	}
+}
+
+void ATBSGameState::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (HasAuthority())
+	{
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Tick")));
+
+		if (!TCPServer->NetworkMessageQueue.IsEmpty())
+		{
+			FString Message;
+			if (TCPServer->NetworkMessageQueue.Dequeue(Message))
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Message %s"), *Message));
+			}
+		}
+	}	
+}
+
+
+void ATBSGameState::OnMessage(FString Message)
+{
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT(ATBSGameState::OnTCPMessage: %s"), *Message));
 }
 
 void ATBSGameState::AddPlayer(APlayerController* PlayerController)
@@ -133,47 +184,75 @@ void ATBSGameState::AllClientsReady()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("All clients ready")));
 
-	for (int32 i = 0; i < PropsToSend; i++)
+	while (Grid->PropCount() < PropsToSend)
 	{
-		FIntVector Coordinates = FIntVector(FMath::RandRange(10, 90) * 10, FMath::RandRange(10, 90) * 10, 0);
-		int32 Rotation = (float)FMath::RandRange(0, 3) * 90;
-		PropFactory->CreateBlock(Coordinates, FIntVector(1, 1, 6), FRotator(0.0, Rotation, 0.0));
+		FIntVector Coordinates = FIntVector(
+			FMath::RandRange(0, Grid->GridDimensions.X),
+			FMath::RandRange(0, Grid->GridDimensions.Y),
+			0
+		);
+
+		if (!Grid->IsAccessible(Coordinates))
+		{
+			continue;
+		}
+
+		FProp Prop;
+		Prop.Coordinates = Coordinates;
+		Prop.Rotation = (float)FMath::RandRange(0, 3) * 90;
+
+		Grid->AddProp(Prop);
 	}
 
-	GetWorldTimerManager().SetTimer(SendTimer, this, &ATBSGameState::SendProps, Delay, true);
+	//GetWorldTimerManager().SetTimer(SendTimer, this, &ATBSGameState::SendProps, Delay, true);
 }
 
 void ATBSGameState::SendProps()
 {
-	int32 PropsLeft = PropsToSend - PropsSent;
+	//int32 PropsLeft = PropsToSend - PropsSent;
 
-	if (PropsLeft <= 0)
-	{
-		GetWorldTimerManager().ClearTimer(SendTimer);
-		return;
-	}
+	//if (PropsLeft <= 0)
+	//{
+	//	GetWorldTimerManager().ClearTimer(SendTimer);
+	//	return;
+	//}
 
-	int32 SendSize = PropsLeft >= BatchSize ? BatchSize : PropsLeft;
+	//int32 SendSize = PropsLeft >= BatchSize ? BatchSize : PropsLeft;
 
-	TArray<FProp> PropArray;
+	//TArray<FProp> PropArray;
 
-	for (int32 i = 0; i < SendSize; i++)
-	{
-		FProp Prop;
-		Prop.Id = 1;
-		Prop.Coordinates = FIntVector(FMath::RandRange(0, Grid->GridDimensions.X), FMath::RandRange(0, Grid->GridDimensions.Y), 0);
+	//auto It = Grid->PropMap.CreateConstIterator();
+	//It.
+	//It += PropsSent;
 
-		PropArray.Add(Prop);
-	}
+	//for (auto It = FruitMap.CreateConstIterator(); It; ++It)
+	//{
+	//	FPlatformMisc::LocalPrint(
+	//		*FString::Printf(
+	//			TEXT("(%d, \"%s\")\n"),
+	//			It.Key(),   // same as It->Key
+	//			*It.Value() // same as *It->Value
+	//		)
+	//	);
+	//}
+
+	//for (int32 i = 0; i < SendSize; i++)
+	//{
+	//	FProp Prop;
+	//	Prop.Id = 1;
+	//	Prop.Coordinates = FIntVector(FMath::RandRange(0, Grid->GridDimensions.X / 10) * 10, FMath::RandRange(0, Grid->GridDimensions.Y / 10) * 10, 0);
+
+	//	PropArray.Add(Prop);
+	//}
 
 	//Grid->UpdateProps(PropArray);
 
-	for (auto& It : PlayerControllers)
-	{
-		(*It.Value).Client_CreateProps(PropArray);
-	}
+	//for (auto& It : PlayerControllers)
+	//{
+	//	(*It.Value).Client_CreateProps(PropArray);
+	//}
 
-	PropsSent += SendSize;
+	//PropsSent += SendSize;
 }
 
 void ATBSGameState::SpawnUnits(int32 PlayerNumber)
@@ -181,9 +260,13 @@ void ATBSGameState::SpawnUnits(int32 PlayerNumber)
 	int32 UnitsSpawned = 0;
 	int32 XOffset = 0;
 
-	if (PlayerNumber > 0)
+	int32 Area = 10;
+	int32 HalfX = Grid->GridDimensions.X / 10 / 2;
+	int32 HalfY = Grid->GridDimensions.Y / 10 / 2;
+
+	if (PlayerNumber == 0)
 	{
-		XOffset = 20;
+		XOffset = -10;
 	}
 
 	while (UnitsSpawned < 3)
@@ -192,11 +275,19 @@ void ATBSGameState::SpawnUnits(int32 PlayerNumber)
 
 		if (UnitsSpawned == 0)
 		{
-			Coordinates = FIntVector(FMath::RandRange(30 + XOffset, 45 + XOffset) * 10 + 5, FMath::RandRange(30, 60) * 10 + 5, 0);
+			Coordinates = FIntVector(
+				FMath::RandRange(HalfX - Area + XOffset, HalfX + Area + XOffset) * 10 + 5,
+				FMath::RandRange(HalfY - Area, HalfX + Area) * 10 + 5,
+				0
+			);
 		}
 		else
 		{
-			Coordinates = FIntVector(FMath::RandRange(30 + XOffset, 45 + XOffset) * 10, FMath::RandRange(30, 60) * 10, 0);
+			Coordinates = FIntVector(
+				FMath::RandRange(HalfX - Area + XOffset, HalfX + Area + XOffset) * 10,
+				FMath::RandRange(HalfY - Area, HalfX + Area) * 10,
+				0
+			);
 		}
 
 		if (Grid->SelectUnit(Coordinates))

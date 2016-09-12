@@ -47,6 +47,9 @@ struct FProp
 	int32 Id;
 
 	UPROPERTY()
+	int32 Rotation;
+
+	UPROPERTY()
 	FIntVector Coordinates;
 };
 

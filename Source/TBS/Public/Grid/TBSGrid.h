@@ -5,7 +5,8 @@
 #include "GameFramework/Actor.h"
 #include "TBSProp.h"
 #include "TBSUnit.h"
-#include <map>
+//#include <string>
+//#include <unordered_map>
 #include "TBSGrid.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnActorNoLongerVisible, int32, TeamNumber, AActor*, Actor);
@@ -32,7 +33,14 @@ public:
 	TArray<ATBSProp*> Props;
 	TMap<FIntVector, ATBSProp*> PropsIndex;
 
-	std::map<const FIntVector, ATBSProp*> PropMap;
+	//std::multimap<const FIntVector, FProp>::iterator PropMapIterator;
+	//std::unordered_multimap<const FIntVector, FProp> PropMap;
+
+	TMap<FIntVector, FProp> PropMap;
+
+	int32 PropCount();
+
+	int32 NextPropId = 1;
 
 	UPROPERTY(Replicated)
 	TArray<ATBSUnit*> Units;
@@ -54,6 +62,7 @@ public:
 	bool IsAccessible(FIntVector Coordinates);
 
 	void AddProp(ATBSProp* Prop);
+	void AddProp(FProp Prop);
 	void AddUnit(ATBSUnit* Unit);
 	TArray<ATBSProp*>::TIterator GetPropsIterator();
 	TArray<ATBSUnit*>::TIterator GetUnitIterator();

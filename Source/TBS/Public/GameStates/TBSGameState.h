@@ -10,6 +10,7 @@
 #include "TBSGridPathFinder.h"
 #include "TBSGridPathRenderer.h"
 #include "TBSPlayerController.h"
+#include "TBSTCPServer.h"
 #include "TBSGameState.generated.h"
 
 /**
@@ -21,6 +22,12 @@ class TBS_API ATBSGameState : public AGameState
 	GENERATED_BODY()
 	
 public:
+	ATBSGameState();
+	~ATBSGameState();
+
+	// Called every frame
+	virtual void Tick(float DeltaSeconds) override;
+
 	void StartGameplay();
 	void AddPlayer(APlayerController* PlayerController);
 
@@ -31,12 +38,18 @@ public:
 
 	UFUNCTION()
 	void ForceCloseActorChannel(int32 TeamNumber, AActor* Actor);
+	
+	void OnMessage(FString);
 
 	// TODO: Player controller still depends on this
 	ATBSUnitManager* UnitManager;
 
 	UFUNCTION()
 	void ClientReady();
+
+	TBSTCPServer* TCPServer;
+
+	TQueue<FString> NetworkMessageQueue;
 
 private:
 	void InitGrid(FIntVector Dimensions);

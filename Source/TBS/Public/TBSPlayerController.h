@@ -12,6 +12,7 @@
 #include "TBSPlayerState.h"
 #include "TBSDefaultPawn.h"
 #include "TBSTypes.h"
+#include "TBSTCPClient.h"
 #include "TBSPlayerController.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnClientReady);
@@ -23,6 +24,7 @@ class TBS_API ATBSPlayerController : public APlayerController
 
 public:
 	ATBSPlayerController(const FObjectInitializer& ObjectInitializer);
+	~ATBSPlayerController();
 
 	virtual void PlayerTick(float DeltaSeconds) override;
 
@@ -38,8 +40,8 @@ public:
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_HandleCommand(ATBSUnit* Unit, const TArray<FIntVector>& Movements);
 
-	UFUNCTION(Client, Reliable)
-	void Client_CreateProps(TArray<FProp> const& PropArray);
+	//UFUNCTION(Client, Reliable)
+	//void Client_CreateProps(TArray<FProp> const& PropArray);
 
 	UFUNCTION()
 	void OnClassesLoaded();
@@ -60,10 +62,12 @@ public:
 	void MouseLeft();
 	void MouseRight();
 	void Escape();
+	void SendDebugMessage();
 	void MoveCameraForwardOffset(float AxisValue);
 	void MoveCameraRightOffset(float AxisValue);
 
 	FOnClientReady OnClientReady;
+	TBSTCPClient* TCPClient;
 
 private:
 	TBSUIContextStack* UIContextStack;
