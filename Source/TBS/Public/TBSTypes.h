@@ -50,6 +50,9 @@ struct FProp
 	int32 Rotation;
 
 	UPROPERTY()
+	bool BlocksAccess;
+
+	UPROPERTY()
 	FIntVector Coordinates;
 };
 
@@ -84,6 +87,34 @@ struct PathStepPredicate
 	bool operator()(const PathStep& A, const PathStep& B) const
 	{
 		return A.Priority < B.Priority;
+	}
+};
+
+struct NetworkMessage
+{
+	uint32 ConnectionId;
+	uint32 Length;
+	char* Data;
+
+	NetworkMessage()
+	{
+		ConnectionId = 0;
+		Length = 0;
+		Data = nullptr;
+	}
+
+	NetworkMessage(uint32 InLength, char* InData)
+	{
+		ConnectionId = 0;
+		Length = InLength;
+		Data = InData;
+	}
+
+	NetworkMessage(uint32 InConnectionId, uint32 InLength, char* InData)
+	{
+		ConnectionId = InConnectionId;
+		Length = InLength;
+		Data = InData;
 	}
 };
 

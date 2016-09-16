@@ -68,11 +68,14 @@ private:
 	TMap<int32, ATBSPlayerController*> PlayerControllers;
 
 
-	FTimerHandle SendTimer;
-	int32 PropsToSend = 10000;
-	int32 PropsSent = 0;
-	int32 BatchSize = 2048;
-	float Delay = 0.5;
+	//FTimerHandle SendTimer;
+	int32 PropsToSend = 5000;
+	//int32 PropsSent = 0;
+	//int32 BatchSize = 2048;
+	//float Delay = 0.5;
+	char* PropsData = nullptr;
+	uint32 PropsDataLength;
+	//char* PropsBuffer = new char();
 
-	void SendProps();
+	//void SendProps();
 };

@@ -43,6 +43,9 @@ public:
 	//UFUNCTION(Client, Reliable)
 	//void Client_CreateProps(TArray<FProp> const& PropArray);
 
+	UFUNCTION(Client, Reliable)
+	void Client_OpenSideChannelConnection();
+
 	UFUNCTION()
 	void OnClassesLoaded();
 
@@ -75,5 +78,10 @@ private:
 	bool ClassesLoaded = false;
 
 	int32 PropsReceived = 0;
+
+	void TrySideChannelConnection();
+	FTimerHandle SideChannelConnectionTimer;
+	float SideChannelConnectionTimeout = 0.5;
+	uint32 SideChannelConnectionAttempts = 10;
 };
 

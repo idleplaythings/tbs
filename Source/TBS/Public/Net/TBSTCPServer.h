@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Networking.h"
+#include "TBSTCP.h"
 #include "TcpListener.h"
 
 /**
@@ -17,22 +18,13 @@ public:
 	virtual uint32 Run() override;
 
 	bool Listen(FString IP, int32 Port);
+	bool Send(uint32 ConnectionId, const char* Message, uint32 Length);
+
 private:
-	bool OnConnection(class FSocket* ClientSocket, const FIPv4Endpoint& ClientEndpoint);
-	bool RecvMessage(FSocket *Socket, uint32 DataSize, char* Message);
+	bool OnConnection(class FSocket* ClientSocket, const FIPv4Endpoint& ClientEndpoint);	
 
-	void ReadDataIntoMessageBuffer(char* Data, uint32 Length);
-	bool InitMessageBuffer(char* Dataa, uint32 Length);
-
+	uint32 NextConnectionId = 1;
 	TQueue<FSocket*> PendingClientSockets;
-	TArray<FSocket*> ClientSockets;
+	TMap<uint32, FSocket*> ClientSockets;
 	FTcpListener* SocketListener;
-
-	char* MessageBuffer = nullptr;
-	char* PartialBuffer = nullptr;
-
-	uint32 DataOffset = 0;
-	uint32 PartialLength = 0;
-	uint32 PayloadLength = 0;
-	uint32 BytesRead = 0;
 };

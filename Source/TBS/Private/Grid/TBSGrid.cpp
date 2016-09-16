@@ -50,12 +50,6 @@ TArray<ATBSUnit*>::TIterator ATBSGrid::GetUnitIterator()
 	return Units.CreateIterator();
 }
 
-void ATBSGrid::AddProp(ATBSProp* Prop)
-{
-	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Adding a prop")));
-	Props.Add(Prop);
-}
-
 void ATBSGrid::AddProp(FProp Prop)
 {
 	if (Prop.Id == 0)
@@ -64,9 +58,6 @@ void ATBSGrid::AddProp(FProp Prop)
 	}
 
 	PropMap.Add(Prop.Coordinates, Prop);
-	
-	//PropMapIterator = PropMap.insert(PropMapIterator, std::pair<FIntVector, FProp>(Prop.Coordinates, Prop));
-	//PropMap.insert(std::pair<const FIntVector, FProp>(Prop.Coordinates, Prop));
 }
 
 void ATBSGrid::AddUnit(ATBSUnit* Unit)
@@ -148,17 +139,19 @@ TArray<FIntVector> ATBSGrid::GetNeighbours(FIntVector Coordinates)
 
 bool ATBSGrid::IsAccessible(FIntVector Coordinates)
 {
-	ATBSProp** FoundProp = PropsIndex.Find(Coordinates);
+	FProp* Prop = PropMap.Find(Coordinates);
+
+	//ATBSProp** FoundProp = PropsIndex.Find(Coordinates);
 
 	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Looking at coordinates (%i, %i, %i)"), Coordinates.X, Coordinates.Y, Coordinates.Z));
 
 	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Prop index length %i"), PropsIndex.Num()));
 	
-	if (FoundProp)
+	if (Prop)
 	{
 		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Prop found from index")));
 
-		if ((*FoundProp)->BlocksAccess)
+		if (Prop->BlocksAccess)
 		{
 			//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Prop is blocking")));
 

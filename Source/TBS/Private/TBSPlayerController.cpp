@@ -82,10 +82,35 @@ void ATBSPlayerController::OnClassesLoaded()
 
 	//ISocketSubsystem* SocketSubsystem = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM);
 	//TSharedRef<FInternetAddr> Address = SocketSubsystem->CreateInternetAddr();
+}
+
+void ATBSPlayerController::Client_OpenSideChannelConnection_Implementation()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Init side channel connection")));
 
 	TCPClient = new TBSTCPClient();
-	TCPClient->Connect(FString("192.168.0.107"), 10011);
+	GetWorldTimerManager().SetTimer(
+		SideChannelConnectionTimer,
+		this,
+		&ATBSPlayerController::TrySideChannelConnection,
+		SideChannelConnectionTimeout,
+		true
+	);
+}
 
+void ATBSPlayerController::TrySideChannelConnection()
+{
+	if (TCPClient->Connect(FString("192.168.0.107"), 10011))
+	{
+		GetWorldTimerManager().ClearTimer(SideChannelConnectionTimer);
+		std::string Message = "Client says Hello!";
+		TCPClient->Send(Message.c_str(), Message.length());
+	}
+
+	if (SideChannelConnectionAttempts-- < 1)
+	{
+		GetWorldTimerManager().ClearTimer(SideChannelConnectionTimer);
+	}
 }
 
 void ATBSPlayerController::PlayerTick(float DeltaTime)
@@ -105,6 +130,35 @@ void ATBSPlayerController::PlayerTick(float DeltaTime)
 			if (ClassLoader->GridUI->CursorOnGrid)
 			{
 				UIContextStack->HandleEvent(new TBSUIContextCoordinateEvent(FName(TEXT("TileHoverBegin")), ClassLoader->GridUI->CurrentCoordinates));
+			}
+		}
+
+		if (TCPClient)
+		{
+			if (!TCPClient->NetworkMessageQueue.IsEmpty())
+			{
+				NetworkMessage Message;
+				if (TCPClient->NetworkMessageQueue.Dequeue(Message))
+				{
+					//char* Temp = new char[Message.Length + 1];
+					//memcpy(Temp, Message.Data, Message.Length);
+					//Temp[Message.Length] = '\0';
+
+					GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Message of length %i"), Message.Length));
+
+					for (uint32 i = 0; i < Message.Length; i = i + sizeof(FProp))
+					{
+						FProp Prop;
+						memcpy(&Prop, Message.Data + i, sizeof(FProp));
+
+						//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Prop received (%i, %i, %i)"), Prop.Coordinates.X, Prop.Coordinates.Y, Prop.Coordinates.Z));
+
+						ClassLoader->Grid->AddProp(Prop);
+						int32 Rotation = (float)FMath::RandRange(0, 3) * 90;
+						ATBSProp* PropActor = ClassLoader->PropFactory->CreateBlock(Prop.Coordinates, FIntVector(1, 1, 6), FRotator(0.0, Rotation, 0.0));
+						ClassLoader->PropManager->ResetProp(PropActor);
+					}
+				}
 			}
 		}
 	}
@@ -207,9 +261,9 @@ void ATBSPlayerController::SendDebugMessage()
 		Message.append("0123456789");
 	}
 
-	TCPClient->Send(Message.c_str());
-	TCPClient->Send(Message.c_str());
-	TCPClient->Send(Message.c_str());
+	TCPClient->Send(Message.c_str(), Message.length());
+	TCPClient->Send(Message.c_str(), Message.length());
+	TCPClient->Send(Message.c_str(), Message.length());
 }
 
 

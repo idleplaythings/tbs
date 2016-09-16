@@ -20,6 +20,12 @@ ATBSGameState::~ATBSGameState()
 		TCPServer->Stop();
 		delete TCPServer;
 	}
+
+	FMemory::Free(PropsData);
+	PropsData = nullptr;
+
+	//delete PropsBuffer;
+	//PropsBuffer = nullptr;
 }
 
 void ATBSGameState::StartGameplay()
@@ -58,10 +64,6 @@ void ATBSGameState::StartGameplay()
 		//FString AddressStr = Address->ToString(true);
 		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Starting listener on address %s"), *AddressStr));
 
-		TCPServer = new TBSTCPServer();
-		TCPServer->Listen(FString("192.168.0.107"), 10011);
-		//TCPServer->OnNetworkMessage.AddDynamic(this, &ATBSGameState::OnTCPMessage);
-
 		Grid->OnActorNoLongerVisible.AddDynamic(this, &ATBSGameState::ForceCloseActorChannel);
 	}
 }
@@ -74,12 +76,23 @@ void ATBSGameState::Tick(float DeltaTime)
 	{
 		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Tick")));
 
-		if (!TCPServer->NetworkMessageQueue.IsEmpty())
+		if (TCPServer)
 		{
-			FString Message;
-			if (TCPServer->NetworkMessageQueue.Dequeue(Message))
+			if (!TCPServer->NetworkMessageQueue.IsEmpty())
 			{
-				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Message %s"), *Message));
+				NetworkMessage Message;
+				if (TCPServer->NetworkMessageQueue.Dequeue(Message))
+				{
+					char* Temp = new char[Message.Length + 1];
+					memcpy(Temp, Message.Data, Message.Length);
+					Temp[Message.Length] = '\0';
+
+					GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Server received: %s"), ANSI_TO_TCHAR(Temp)));
+
+					//std::string Response = "Server says ohai!";
+					//TCPServer->Send(Message.ConnectionId, Response.c_str(), Response.length());
+					TCPServer->Send(Message.ConnectionId, PropsData, PropsDataLength);
+				}
 			}
 		}
 	}	
@@ -184,11 +197,16 @@ void ATBSGameState::AllClientsReady()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("All clients ready")));
 
+	TCPServer = new TBSTCPServer();
+	TCPServer->Listen(FString("192.168.0.107"), 10011);
+
+	PropsData = (char*)FMemory::Malloc(sizeof(FProp) * PropsToSend);
+
 	while (Grid->PropCount() < PropsToSend)
 	{
 		FIntVector Coordinates = FIntVector(
-			FMath::RandRange(0, Grid->GridDimensions.X),
-			FMath::RandRange(0, Grid->GridDimensions.Y),
+			FMath::RandRange(0, Grid->GridDimensions.X / 10) * 10,
+			FMath::RandRange(0, Grid->GridDimensions.Y / 10) * 10,
 			0
 		);
 
@@ -200,15 +218,29 @@ void ATBSGameState::AllClientsReady()
 		FProp Prop;
 		Prop.Coordinates = Coordinates;
 		Prop.Rotation = (float)FMath::RandRange(0, 3) * 90;
+		Prop.BlocksAccess = true;
+
+		char* PropsBuffer = reinterpret_cast<char*>(&Prop);		
+		memcpy(PropsData + PropsDataLength, PropsBuffer, sizeof(FProp));
+		PropsDataLength += sizeof(FProp);
+		
+		delete PropsBuffer;
+		PropsBuffer = nullptr;
 
 		Grid->AddProp(Prop);
 	}
 
-	//GetWorldTimerManager().SetTimer(SendTimer, this, &ATBSGameState::SendProps, Delay, true);
+	for (auto& It : PlayerControllers)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Open side channel")));
+		(*It.Value).Client_OpenSideChannelConnection();
+	}
+
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Side channel done")));
 }
 
-void ATBSGameState::SendProps()
-{
+//void ATBSGameState::SendProps()
+//{
 	//int32 PropsLeft = PropsToSend - PropsSent;
 
 	//if (PropsLeft <= 0)
@@ -253,7 +285,7 @@ void ATBSGameState::SendProps()
 	//}
 
 	//PropsSent += SendSize;
-}
+//}
 
 void ATBSGameState::SpawnUnits(int32 PlayerNumber)
 {

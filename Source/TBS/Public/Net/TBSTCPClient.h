@@ -17,14 +17,9 @@ public:
 	virtual uint32 Run() override;
 
 	bool Connect(FString IP, int32 Port);
-	bool Send(const char* Message);
+	bool Send(const char* Message, uint32 Length);
 
-private:
-	bool SendMessage(FSocket* Socket, const char* Message, int32 Length);
-	//bool ReceiveMessage(FSocket* Socket, char* Message);
-	//bool RecvMessage(FSocket *Socket, uint32 DataSize, FString& Message);
-
+private:	
 	FSocket* Socket;
-
 	bool Connected = false;
 };
