@@ -200,9 +200,9 @@ void ATBSGameState::AllClientsReady()
 	TCPServer = new TBSTCPServer();
 	TCPServer->Listen(FString("192.168.0.107"), 10011);
 
-	PropsData = (char*)FMemory::Malloc(sizeof(FProp) * PropsToSend);
+	PropsData = (char*)FMemory::Malloc(sizeof(FProp) * PropsToGenerate);
 
-	while (Grid->PropCount() < PropsToSend)
+	while (Grid->PropCount() < PropsToGenerate / 6)
 	{
 		FIntVector Coordinates = FIntVector(
 			FMath::RandRange(0, Grid->GridDimensions.X / 10) * 10,
@@ -215,19 +215,24 @@ void ATBSGameState::AllClientsReady()
 			continue;
 		}
 
-		FProp Prop;
-		Prop.Coordinates = Coordinates;
-		Prop.Rotation = (float)FMath::RandRange(0, 3) * 90;
-		Prop.BlocksAccess = true;
+		for (int i = 0; i < 6; i++)
+		{
+			Coordinates.Z = i;
 
-		char* PropsBuffer = reinterpret_cast<char*>(&Prop);		
-		memcpy(PropsData + PropsDataLength, PropsBuffer, sizeof(FProp));
-		PropsDataLength += sizeof(FProp);
-		
-		delete PropsBuffer;
-		PropsBuffer = nullptr;
+			FProp Prop;
+			Prop.Coordinates = Coordinates;
+			Prop.Rotation = (float)FMath::RandRange(0, 3) * 90;
+			Prop.BlocksAccess = true;
 
-		Grid->AddProp(Prop);
+			char* PropsBuffer = reinterpret_cast<char*>(&Prop);
+			memcpy(PropsData + PropsDataLength, PropsBuffer, sizeof(FProp));
+			PropsDataLength += sizeof(FProp);
+
+			delete PropsBuffer;
+			PropsBuffer = nullptr;
+
+			Grid->AddProp(Prop);
+		}
 	}
 
 	for (auto& It : PlayerControllers)

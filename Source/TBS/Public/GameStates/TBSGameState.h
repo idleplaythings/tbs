@@ -69,7 +69,7 @@ private:
 
 
 	//FTimerHandle SendTimer;
-	int32 PropsToSend = 5000;
+	int32 PropsToGenerate = 32000 * 6;
 	//int32 PropsSent = 0;
 	//int32 BatchSize = 2048;
 	//float Delay = 0.5;
