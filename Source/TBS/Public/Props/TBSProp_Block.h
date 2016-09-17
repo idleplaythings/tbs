@@ -23,6 +23,8 @@ public:
 
 	USceneComponent* SceneComponent;
 	UStaticMeshComponent* BlockMesh;
+	UInstancedStaticMeshComponent *ISMComponent;
 	
 	void ScalePropMesh() override;
+	void SpawnInstance(const FTransform& InstanceTransform);
 };

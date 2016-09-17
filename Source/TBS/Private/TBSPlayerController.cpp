@@ -155,8 +155,31 @@ void ATBSPlayerController::PlayerTick(float DeltaTime)
 
 						ClassLoader->Grid->AddProp(Prop);
 						int32 Rotation = (float)FMath::RandRange(0, 3) * 90;
-						ATBSProp* PropActor = ClassLoader->PropFactory->CreateBlock(Prop.Coordinates, FIntVector(1, 1, 6), FRotator(0.0, Rotation, 0.0));
-						ClassLoader->PropManager->ResetProp(PropActor);
+
+						if (!Block)
+						{
+							Block = GetWorld()->SpawnActor<ATBSProp_Block>(ATBSProp_Block::StaticClass());
+							Block->GameCoordinates = Prop.Coordinates;
+							Block->Dimensions = FIntVector(1, 1, 1);
+							Block->BlocksAccess = true;
+							Block->Rotation = FRotator(0.0, Rotation, 0.0);
+							Block->RecalculateCoordinates();
+						}
+						
+						FCoordinateLocations Locations = ClassLoader->GridUI->GetCoordinateLocations(Prop.Coordinates);
+						//Prop->SetActorLocation(Locations.Center);
+						FTransform InstanceTransform(
+							FRotator(0.0, Rotation, 0.0),
+							Locations.Center,
+							FVector((float)1 / 2, (float)1 / 2, (float)1 / 2)
+						);
+						//InstanceTransform.Translation = Locations.Center;
+						//InstanceTransform.Scale3D = FVector((float)1 / 2, (float)1 / 2, (float)1 / 2);
+						Block->SpawnInstance(InstanceTransform);
+
+
+						//ATBSProp* PropActor = ClassLoader->PropFactory->CreateBlock(Prop.Coordinates, FIntVector(1, 1, 6), FRotator(0.0, Rotation, 0.0));
+						//ClassLoader->PropManager->ResetProp(PropActor);
 					}
 				}
 			}

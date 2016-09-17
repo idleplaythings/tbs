@@ -13,6 +13,7 @@
 #include "TBSDefaultPawn.h"
 #include "TBSTypes.h"
 #include "TBSTCPClient.h"
+#include "TBSProp_Block.h"
 #include "TBSPlayerController.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnClientReady);
@@ -83,5 +84,8 @@ private:
 	FTimerHandle SideChannelConnectionTimer;
 	float SideChannelConnectionTimeout = 0.5;
 	uint32 SideChannelConnectionAttempts = 10;
+
+
+	ATBSProp_Block* Block;
 };
 

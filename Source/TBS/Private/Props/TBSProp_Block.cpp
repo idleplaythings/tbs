@@ -17,13 +17,16 @@ ATBSProp_Block::ATBSProp_Block()
 
 	if (Mesh.Succeeded())
 	{
-		BlockMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Block"));
-		BlockMesh->SetSimulatePhysics(false);
-		BlockMesh->SetStaticMesh(Mesh.Object);
-		//BlockMesh->AddRelativeRotation(FQuat(FVector(1.0, 0.0, 0.0), PI / 2));
-		//BlockMesh->AddRelativeLocation(FVector(0.0, 0.0, 50.0));
-		BlockMesh->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
-	}
+		//BlockMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Block"));
+		//BlockMesh->SetSimulatePhysics(false);
+		//BlockMesh->SetStaticMesh(Mesh.Object);
+		//BlockMesh->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
+
+		ISMComponent = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("ISMC"));
+		ISMComponent->SetStaticMesh(Mesh.Object);
+		ISMComponent->SetFlags(RF_Transactional);
+		AddInstanceComponent(ISMComponent);
+	}	
 }
 
 // Called when the game starts or when spawned
@@ -47,3 +50,12 @@ void ATBSProp_Block::ScalePropMesh()
 		BlockMesh->SetRelativeScale3D(FVector((float)Dimensions.X / 2, (float)Dimensions.Y / 2, (float)Dimensions.Z / 2));
 	}	
 }
+
+void ATBSProp_Block::SpawnInstance(const FTransform& InstanceTransform)
+{
+	if (ISMComponent)
+	{
+		ISMComponent->AddInstance(InstanceTransform);
+	}
+}
+

@@ -21,5 +21,5 @@ public:
 	virtual void Tick( float DeltaSeconds ) override;
 
 	ATBSProp* CreateBlock(FIntVector Coordinates, FIntVector Dimensions, FRotator Rotation);
-	ATBSProp* CreateWall(FIntVector Coordinates, FRotator Rotation);
+	//ATBSProp* CreateWall(FIntVector Coordinates, FRotator Rotation);
 };
