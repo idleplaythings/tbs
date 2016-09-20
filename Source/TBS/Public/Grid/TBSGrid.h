@@ -63,6 +63,7 @@ public:
 
 	void AddProp(ATBSProp* Prop);
 	void AddProp(FProp Prop);
+	void RemovePropsAt(FIntVector Coordinates);
 	void AddUnit(ATBSUnit* Unit);
 	TArray<ATBSProp*>::TIterator GetPropsIterator();
 	TArray<ATBSUnit*>::TIterator GetUnitIterator();

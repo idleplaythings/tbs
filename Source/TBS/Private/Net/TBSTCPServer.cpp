@@ -118,3 +118,24 @@ bool TBSTCPServer::Send(uint32 ConnectionId, const char* Payload, uint32 Length)
 	return false;
 }
 
+bool TBSTCPServer::SendAll(const char* Payload, uint32 Length)
+{
+	bool Result = true;
+
+	for (auto& It : ClientSockets)
+	{
+		FSocket *Socket = It.Value;
+
+		if (Socket)
+		{
+			if (!SendMessage(Socket, Payload, Length))
+			{
+				Result = false;
+			}
+		}
+	}
+
+	return Result;
+}
+
+

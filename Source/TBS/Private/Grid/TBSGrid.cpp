@@ -60,6 +60,11 @@ void ATBSGrid::AddProp(FProp Prop)
 	PropMap.Add(Prop.Coordinates, Prop);
 }
 
+void ATBSGrid::RemovePropsAt(FIntVector Coordinates)
+{
+	PropMap.Remove(Coordinates);
+}
+
 void ATBSGrid::AddUnit(ATBSUnit* Unit)
 {
 	Units.Add(Unit);

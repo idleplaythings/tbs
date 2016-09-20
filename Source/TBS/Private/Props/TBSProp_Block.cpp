@@ -51,11 +51,43 @@ void ATBSProp_Block::ScalePropMesh()
 	}	
 }
 
-void ATBSProp_Block::SpawnInstance(const FTransform& InstanceTransform)
+void ATBSProp_Block::SpawnInstance(FIntVector Coordinates, const FTransform& InstanceTransform)
 {
 	if (ISMComponent)
 	{
-		ISMComponent->AddInstance(InstanceTransform);
+		int32 InstanceIndex = ISMComponent->AddInstanceWorldSpace(InstanceTransform);
+		InstanceMap.Add(Coordinates, InstanceIndex);
+
+		if (Debug)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Added index %i"), InstanceIndex));
+		}
+	}
+}
+
+void ATBSProp_Block::RemoveInstance(FIntVector Coordinates)
+{
+	if (ISMComponent)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Looking for instance index (%i, %i, %i)"), Coordinates.X, Coordinates.Y, Coordinates.Z));
+		int32* InstanceIndex = InstanceMap.Find(Coordinates);
+
+		if (InstanceIndex)
+		{				
+			if (ISMComponent->RemoveInstance(*InstanceIndex))
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Removed index %i"), *InstanceIndex));
+				InstanceMap.Remove(Coordinates);
+
+				for (auto& It : InstanceMap)
+				{
+					if (It.Value > *InstanceIndex)
+					{
+						InstanceMap[It.Key] = It.Value - 1;
+					}
+				}
+			}			
+		}
 	}
 }
 

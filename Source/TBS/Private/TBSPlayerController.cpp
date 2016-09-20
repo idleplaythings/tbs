@@ -71,7 +71,12 @@ void ATBSPlayerController::OnClassesLoaded()
 	InputComponent->BindAction("ActionMouseLeft", IE_Pressed, this, &ATBSPlayerController::MouseLeft);
 	InputComponent->BindAction("ActionMouseRight", IE_Pressed, this, &ATBSPlayerController::MouseRight);
 	InputComponent->BindAction("ActionEscape", IE_Pressed, this, &ATBSPlayerController::Escape);
+
+	// Testing stuff
 	InputComponent->BindAction("ActionDebugMessage", IE_Pressed, this, &ATBSPlayerController::SendDebugMessage);
+	InputComponent->BindAction("ActionNewProp", IE_Pressed, this, &ATBSPlayerController::NewProp);
+	InputComponent->BindAction("ActionBomb", IE_Pressed, this, &ATBSPlayerController::Bomb);
+
 	InputComponent->BindAxis("AxisMoveCameraForward", this, &ATBSPlayerController::MoveCameraForward);
 	InputComponent->BindAxis("AxisMoveCameraRight", this, &ATBSPlayerController::MoveCameraRight);
 
@@ -146,41 +151,115 @@ void ATBSPlayerController::PlayerTick(float DeltaTime)
 
 					GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Message of length %i"), Message.Length));
 
-					for (uint32 i = 0; i < Message.Length; i = i + sizeof(FProp))
+					char* MessagePtr = Message.Data;
+
+					while (MessagePtr < Message.Data + Message.Length)
 					{
-						FProp Prop;
-						memcpy(&Prop, Message.Data + i, sizeof(FProp));
-
-						//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Prop received (%i, %i, %i)"), Prop.Coordinates.X, Prop.Coordinates.Y, Prop.Coordinates.Z));
-
-						ClassLoader->Grid->AddProp(Prop);
-						int32 Rotation = (float)FMath::RandRange(0, 3) * 90;
-
-						if (!Block)
+						if (*(char*)MessagePtr == 0x01)
 						{
-							Block = GetWorld()->SpawnActor<ATBSProp_Block>(ATBSProp_Block::StaticClass());
-							Block->GameCoordinates = Prop.Coordinates;
-							Block->Dimensions = FIntVector(1, 1, 1);
-							Block->BlocksAccess = true;
-							Block->Rotation = FRotator(0.0, Rotation, 0.0);
-							Block->RecalculateCoordinates();
+							FProp Prop;
+							memcpy(&Prop, MessagePtr + 1, sizeof(FProp));
+
+							ClassLoader->Grid->AddProp(Prop);
+							int32 Rotation = (float)FMath::RandRange(0, 3) * 90;
+
+							FIntVector BlockCell = FIntVector(
+								FMath::FloorToInt(Prop.Coordinates.X / 300),
+								FMath::FloorToInt(Prop.Coordinates.Y / 300),
+								0
+							);
+
+							ATBSProp_Block** BlockPtr = BlockMap.Find(BlockCell);
+
+							if (!BlockPtr)
+							{
+								Block = GetWorld()->SpawnActor<ATBSProp_Block>(ATBSProp_Block::StaticClass());
+								Block->GameCoordinates = Prop.Coordinates;
+								Block->Dimensions = FIntVector(1, 1, 1);
+								Block->BlocksAccess = true;
+								Block->Rotation = FRotator(0.0, Rotation, 0.0);
+								Block->RecalculateCoordinates();
+								BlockMap.Add(BlockCell, Block);
+							}
+							else
+							{
+								Block = *BlockPtr;
+							}
+
+							FCoordinateLocations Locations = ClassLoader->GridUI->GetCoordinateLocations(Prop.Coordinates);
+							FTransform InstanceTransform(
+								FRotator(0.0, Rotation, 0.0),
+								Locations.Center,
+								FVector((float)1 / 2, (float)1 / 2, (float)1 / 2)
+							);
+
+							Block->SpawnInstance(Prop.Coordinates, InstanceTransform);
+
+							MessagePtr += 1 + sizeof(FProp);
+
+							continue;
+						}	
+
+						if (*(char*)MessagePtr == 0x02)
+						{
+							FIntVector Coordinates;
+							memcpy(&Coordinates, MessagePtr + 1, sizeof(FIntVector));
+
+							//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Received remove props at (%i, %i, %i)"), Coordinates.X, Coordinates.Y, Coordinates.Z));
+
+							ClassLoader->Grid->RemovePropsAt(Coordinates);
+							
+							FIntVector BlockCell = FIntVector(
+								FMath::FloorToInt(Coordinates.X / 300),
+								FMath::FloorToInt(Coordinates.Y / 300),
+								0
+							);
+
+							Block = *BlockMap.Find(BlockCell);
+
+							Block->RemoveInstance(Coordinates);
+
+							MessagePtr += 1 + sizeof(FIntVector);
+
+							continue;
 						}
-						
-						FCoordinateLocations Locations = ClassLoader->GridUI->GetCoordinateLocations(Prop.Coordinates);
-						//Prop->SetActorLocation(Locations.Center);
-						FTransform InstanceTransform(
-							FRotator(0.0, Rotation, 0.0),
-							Locations.Center,
-							FVector((float)1 / 2, (float)1 / 2, (float)1 / 2)
-						);
-						//InstanceTransform.Translation = Locations.Center;
-						//InstanceTransform.Scale3D = FVector((float)1 / 2, (float)1 / 2, (float)1 / 2);
-						Block->SpawnInstance(InstanceTransform);
-
-
-						//ATBSProp* PropActor = ClassLoader->PropFactory->CreateBlock(Prop.Coordinates, FIntVector(1, 1, 6), FRotator(0.0, Rotation, 0.0));
-						//ClassLoader->PropManager->ResetProp(PropActor);
 					}
+
+					//for (uint32 i = 0; i < Message.Length; i = i + sizeof(FProp))
+					//{
+					//	FProp Prop;
+					//	memcpy(&Prop, Message.Data + i, sizeof(FProp));
+
+					//	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Prop received (%i, %i, %i)"), Prop.Coordinates.X, Prop.Coordinates.Y, Prop.Coordinates.Z));
+
+					//	ClassLoader->Grid->AddProp(Prop);
+					//	int32 Rotation = (float)FMath::RandRange(0, 3) * 90;
+
+					//	if (!Block)
+					//	{
+					//		Block = GetWorld()->SpawnActor<ATBSProp_Block>(ATBSProp_Block::StaticClass());
+					//		Block->GameCoordinates = Prop.Coordinates;
+					//		Block->Dimensions = FIntVector(1, 1, 1);
+					//		Block->BlocksAccess = true;
+					//		Block->Rotation = FRotator(0.0, Rotation, 0.0);
+					//		Block->RecalculateCoordinates();
+					//	}
+					//	
+					//	FCoordinateLocations Locations = ClassLoader->GridUI->GetCoordinateLocations(Prop.Coordinates);
+					//	//Prop->SetActorLocation(Locations.Center);
+					//	FTransform InstanceTransform(
+					//		FRotator(0.0, Rotation, 0.0),
+					//		Locations.Center,
+					//		FVector((float)1 / 2, (float)1 / 2, (float)1 / 2)
+					//	);
+					//	//InstanceTransform.Translation = Locations.Center;
+					//	//InstanceTransform.Scale3D = FVector((float)1 / 2, (float)1 / 2, (float)1 / 2);
+					//	Block->SpawnInstance(InstanceTransform);
+
+
+					//	//ATBSProp* PropActor = ClassLoader->PropFactory->CreateBlock(Prop.Coordinates, FIntVector(1, 1, 6), FRotator(0.0, Rotation, 0.0));
+					//	//ClassLoader->PropManager->ResetProp(PropActor);
+					//}
 				}
 			}
 		}
@@ -273,6 +352,21 @@ void ATBSPlayerController::Escape()
 	UIContextStack->HandleEvent(new TBSUIContextEvent(FName(TEXT("Escape"))));
 }
 
+void ATBSPlayerController::NewProp()
+{
+	if (Block)
+	{
+		Block->Debug = true;
+	}
+
+	Server_CommandNewProp(ClassLoader->GridUI->CurrentCoordinates);
+}
+
+void ATBSPlayerController::Bomb()
+{
+	Server_CommandBomb(ClassLoader->GridUI->CurrentCoordinates);
+}
+
 void ATBSPlayerController::SendDebugMessage()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Sending debug message")));
@@ -290,7 +384,7 @@ void ATBSPlayerController::SendDebugMessage()
 }
 
 
-void ATBSPlayerController::Server_HandleCommand_Implementation(ATBSUnit* Unit, const TArray<FIntVector>& Movements)
+void ATBSPlayerController::Server_CommandMoveUnit_Implementation(ATBSUnit* Unit, const TArray<FIntVector>& Movements)
 {
 	if (!HasAuthority())
 	{
@@ -306,7 +400,7 @@ void ATBSPlayerController::Server_HandleCommand_Implementation(ATBSUnit* Unit, c
 	}	
 }
 
-bool ATBSPlayerController::Server_HandleCommand_Validate(ATBSUnit* Unit, const TArray<FIntVector>& Movements)
+bool ATBSPlayerController::Server_CommandMoveUnit_Validate(ATBSUnit* Unit, const TArray<FIntVector>& Movements)
 {
 	if (PlayerNumber != Unit->PlayerNumber)
 	{
@@ -314,6 +408,34 @@ bool ATBSPlayerController::Server_HandleCommand_Validate(ATBSUnit* Unit, const T
 		return false;
 	}
 
+	return true;
+}
+
+void ATBSPlayerController::Server_CommandBomb_Implementation(FIntVector Coordinates)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Bomb at (%i, %i, %i)"), Coordinates.X, Coordinates.Y, Coordinates.Z));
+	
+	ATBSGameMode* GameMode = GetWorld()->GetAuthGameMode<ATBSGameMode>();
+	ATBSGameState* GameState = Cast<ATBSGameState>(GameMode->GameState);
+	GameState->Bomb(Coordinates);
+}
+
+bool ATBSPlayerController::Server_CommandBomb_Validate(FIntVector Coordinates)
+{
+	return true;
+}
+
+void ATBSPlayerController::Server_CommandNewProp_Implementation(FIntVector Coordinates)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("New prop (%i, %i, %i)"), Coordinates.X, Coordinates.Y, Coordinates.Z));
+
+	ATBSGameMode* GameMode = GetWorld()->GetAuthGameMode<ATBSGameMode>();
+	ATBSGameState* GameState = Cast<ATBSGameState>(GameMode->GameState);
+	GameState->SpawnNewProps(Coordinates);
+}
+
+bool ATBSPlayerController::Server_CommandNewProp_Validate(FIntVector Coordinates)
+{
 	return true;
 }
 

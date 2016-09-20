@@ -26,5 +26,10 @@ public:
 	UInstancedStaticMeshComponent *ISMComponent;
 	
 	void ScalePropMesh() override;
-	void SpawnInstance(const FTransform& InstanceTransform);
+	void SpawnInstance(FIntVector Coordinates, const FTransform& InstanceTransform);
+	void RemoveInstance(FIntVector Coordinates);
+
+	TMap<FIntVector, int32> InstanceMap;
+
+	bool Debug = false;
 };

@@ -51,6 +51,9 @@ public:
 
 	TQueue<FString> NetworkMessageQueue;
 
+	void SpawnNewProps(FIntVector Coordinates);
+	void Bomb(FIntVector Coordinates);
+
 private:
 	void InitGrid(FIntVector Dimensions);
 	void InitGridUI();
@@ -59,6 +62,7 @@ private:
 	void SpawnUnits(int32 PlayerNumber);
 
 	void AllClientsReady();
+	FIntVector FindFreeCoordinates();
 
 	ATBSPropManager* PropManager;
 	ATBSPropFactory* PropFactory;
@@ -70,7 +74,7 @@ private:
 
 	//FTimerHandle SendTimer;
 	//int32 PropsToGenerate = 166666 * 6; // Miljoona propsia :o
-	int32 PropsToGenerate = 5000 * 6; // Miljoona propsia :o
+	int32 PropsToGenerate = 30000 * 6;
 	//int32 PropsSent = 0;
 	//int32 BatchSize = 2048;
 	//float Delay = 0.5;
@@ -79,4 +83,6 @@ private:
 	//char* PropsBuffer = new char();
 
 	//void SendProps();
+
+	UClass* ExplosionClass;
 };

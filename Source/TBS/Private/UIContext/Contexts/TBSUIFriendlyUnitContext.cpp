@@ -62,7 +62,7 @@ void TBSUIFriendlyUnitContext::HandleEvent(TBSUIContextEvent* Event)
 	}
 	else if (Event->Type == FName(TEXT("TileClick")))
 	{
-		ClassLoader->PlayerController->Server_HandleCommand(
+		ClassLoader->PlayerController->Server_CommandMoveUnit(
 			ClassLoader->PlayerController->SelectedUnit,
 			ClassLoader->PlayerController->SelectedPath
 		);

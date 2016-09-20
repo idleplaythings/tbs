@@ -39,7 +39,13 @@ public:
 	void Server_ClientReady();
 
 	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_HandleCommand(ATBSUnit* Unit, const TArray<FIntVector>& Movements);
+	void Server_CommandMoveUnit(ATBSUnit* Unit, const TArray<FIntVector>& Movements);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_CommandBomb(FIntVector Coordinates);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_CommandNewProp(FIntVector Coordinates);
 
 	//UFUNCTION(Client, Reliable)
 	//void Client_CreateProps(TArray<FProp> const& PropArray);
@@ -67,6 +73,8 @@ public:
 	void MouseRight();
 	void Escape();
 	void SendDebugMessage();
+	void NewProp();
+	void Bomb();
 	void MoveCameraForwardOffset(float AxisValue);
 	void MoveCameraRightOffset(float AxisValue);
 
@@ -86,6 +94,7 @@ private:
 	uint32 SideChannelConnectionAttempts = 10;
 
 
+	TMap<FIntVector, ATBSProp_Block*> BlockMap;
 	ATBSProp_Block* Block;
 };
 
