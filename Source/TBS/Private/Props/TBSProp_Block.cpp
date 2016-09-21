@@ -69,25 +69,31 @@ void ATBSProp_Block::RemoveInstance(FIntVector Coordinates)
 {
 	if (ISMComponent)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Looking for instance index (%i, %i, %i)"), Coordinates.X, Coordinates.Y, Coordinates.Z));
+		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Looking for instance index (%i, %i, %i)"), Coordinates.X, Coordinates.Y, Coordinates.Z));
 		int32* InstanceIndex = InstanceMap.Find(Coordinates);
 
 		if (InstanceIndex)
 		{				
-			if (ISMComponent->RemoveInstance(*InstanceIndex))
-			{
-				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Removed index %i"), *InstanceIndex));
-				InstanceMap.Remove(Coordinates);
+			ISMComponent->UpdateInstanceTransform(*InstanceIndex, FTransform(FVector(10000.0, 10000.0, 10000.0)), true, true);
+			RemovedIndexes.Add(*InstanceIndex);
+			//if (ISMComponent->RemoveInstance(*InstanceIndex))
+			//{
+			//	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Removed index %i"), *InstanceIndex));
+			//	InstanceMap.Remove(Coordinates);
 
-				for (auto& It : InstanceMap)
-				{
-					if (It.Value > *InstanceIndex)
-					{
-						InstanceMap[It.Key] = It.Value - 1;
-					}
-				}
-			}			
+			//	for (auto& It : InstanceMap)
+			//	{
+			//		if (It.Value > *InstanceIndex)
+			//		{
+			//			InstanceMap[It.Key] = It.Value - 1;
+			//		}
+			//	}
+			//}			
 		}
 	}
 }
 
+void ATBSProp_Block::PurgeRemoved()
+{
+
+}

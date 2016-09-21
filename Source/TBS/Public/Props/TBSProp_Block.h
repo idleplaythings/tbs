@@ -28,8 +28,10 @@ public:
 	void ScalePropMesh() override;
 	void SpawnInstance(FIntVector Coordinates, const FTransform& InstanceTransform);
 	void RemoveInstance(FIntVector Coordinates);
+	void PurgeRemoved();
 
 	TMap<FIntVector, int32> InstanceMap;
+	TArray<int32> RemovedIndexes;
 
 	bool Debug = false;
 };

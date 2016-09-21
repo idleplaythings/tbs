@@ -250,8 +250,36 @@ void ATBSGrid::ReindexUnits_Implementation()
 
 bool ATBSGrid::CanDrawLineOfFire(FIntVector Start, FIntVector End)
 {
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Tracing (%i, %i, %i) -> (%i, %i, %i)"), Start.X, Start.Y, Start.Z, End.X, End.Y, End.Z));
+
 	for (auto& Coordinate : Trace(Start, End))
 	{
+		//if (Coordinate.X % 10 == 5)
+		//{
+		//	FIntVector Left = Coordinate;
+		//	Left.X -= 5;
+		//	FIntVector Right = Coordinate;
+		//	Right.X += 5;
+
+		//	if (!IsAccessible(Left) || !IsAccessible(Right))
+		//	{
+		//		return false;
+		//	}
+		//}
+
+		//if (Coordinate.Y % 10 == 5)
+		//{
+		//	FIntVector Top = Coordinate;
+		//	Top.Y -= 5;
+		//	FIntVector Bottom = Coordinate;
+		//	Bottom.Y += 5;
+
+		//	if (!IsAccessible(Top) || !IsAccessible(Bottom))
+		//	{
+		//		return false;
+		//	}
+		//}
+
 		if (!IsAccessible(Coordinate))
 		{
 			return false;
@@ -286,7 +314,41 @@ TArray<FIntVector> ATBSGrid::Trace(FIntVector Start, FIntVector End)
 	x1 = y1 = z1 = dm / 2; /* error offset */
 
 	for (;;) {  /* loop */
-		Trace.Add(FIntVector(x0, y0, z0));
+		int32 TempX, TempY;
+
+		int32 ModX = x0 % 10;
+		int32 ModY = y0 % 10;
+
+		if (ModX == 0 || ModX == 5)
+		{
+			TempX = x0;
+		}
+		else if (ModX < 5)
+		{
+			TempX = x0 - ModX;
+		}
+		else
+		{
+			TempX = x0 + 1 + ModX;
+		}
+
+		if (ModY == 0 || ModY == 5)
+		{
+			TempY = y0;
+		}
+		else if (ModY < 5)
+		{
+			TempY = y0 - ModY;
+		}
+		else
+		{
+			TempY = y0 + 1 + ModY;
+		}
+
+		//Trace.Add(FIntVector(x0, y0, z0));
+		Trace.Add(FIntVector(TempX, TempY, z0));
+
+		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Tracing (%i, %i, %i)"), x0, y0, z0));
 		if (i-- == 0) break;
 		x1 -= dx; if (x1 < 0) { x1 += dm; x0 += sx; }
 		y1 -= dy; if (y1 < 0) { y1 += dm; y0 += sy; }

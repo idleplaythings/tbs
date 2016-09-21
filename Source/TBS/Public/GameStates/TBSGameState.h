@@ -73,8 +73,8 @@ private:
 
 
 	//FTimerHandle SendTimer;
-	//int32 PropsToGenerate = 166666 * 6; // Miljoona propsia :o
-	int32 PropsToGenerate = 30000 * 6;
+	int32 PropsToGenerate = 166666 * 6; // Miljoona propsia :o
+	//int32 PropsToGenerate = 30000 * 6;
 	//int32 PropsSent = 0;
 	//int32 BatchSize = 2048;
 	//float Delay = 0.5;

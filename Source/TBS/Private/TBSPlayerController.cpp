@@ -215,9 +215,12 @@ void ATBSPlayerController::PlayerTick(float DeltaTime)
 								0
 							);
 
-							Block = *BlockMap.Find(BlockCell);
+							ATBSProp_Block** BlockPtr = BlockMap.Find(BlockCell);
 
-							Block->RemoveInstance(Coordinates);
+							if (BlockPtr)
+							{
+								(*BlockPtr)->RemoveInstance(Coordinates);
+							}							
 
 							MessagePtr += 1 + sizeof(FIntVector);
 

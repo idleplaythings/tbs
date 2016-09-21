@@ -289,6 +289,7 @@ void ATBSGameState::SpawnNewProps(FIntVector Coordinates)
 	}
 
 	TCPServer->SendAll(PropsData, PropsDataLength);
+	Grid->ReindexUnits();
 }
 
 void ATBSGameState::Bomb(FIntVector Coordinates)
@@ -328,6 +329,8 @@ void ATBSGameState::Bomb(FIntVector Coordinates)
 
 	AActor* Explosion = GetWorld()->SpawnActor<AActor>(ExplosionClass);
 	Explosion->SetActorLocation(GridUI->GetCoordinateLocations(Coordinates).Center);
+
+	Grid->ReindexUnits();
 	
 
 	//FIntVector Coordinates = FindFreeCoordinates();
@@ -407,7 +410,7 @@ void ATBSGameState::SpawnUnits(int32 PlayerNumber)
 		XOffset = -10;
 	}
 
-	while (UnitsSpawned < 3)
+	while (UnitsSpawned < 1)
 	{
 		FIntVector Coordinates;
 
