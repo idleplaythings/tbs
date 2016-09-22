@@ -22,8 +22,7 @@ ATBSGridPathRenderer::ATBSGridPathRenderer()
 // Called when the game starts or when spawned
 void ATBSGridPathRenderer::BeginPlay()
 {
-	Super::BeginPlay();
-	
+	Super::BeginPlay();	
 }
 
 // Called every frame
@@ -41,8 +40,6 @@ void ATBSGridPathRenderer::Initialise(ATBSGrid* InGrid, ATBSGridUI* InGridUI)
 
 void ATBSGridPathRenderer::RenderPath(TArray<FIntVector> InPath)
 {
-	//return; 
-
 	if (RenderedPath.Num() < InPath.Num())
 	{
 		int ComponentsToAdd = InPath.Num() - RenderedPath.Num();
@@ -62,8 +59,6 @@ void ATBSGridPathRenderer::RenderPath(TArray<FIntVector> InPath)
 
 void ATBSGridPathRenderer::ClearPath()
 {
-	//return;
-
 	for (auto& PathComponent : RenderedPath)
 	{
 		PathComponent->SetVisibility(false);
@@ -79,5 +74,4 @@ UStaticMeshComponent* ATBSGridPathRenderer::CreatePathComponent()
 	PathComponent->SetRelativeScale3D(FVector(0.3, 0.3, 0.01));
 	FinishAndRegisterComponent(PathComponent);
 	return PathComponent;
-
 }

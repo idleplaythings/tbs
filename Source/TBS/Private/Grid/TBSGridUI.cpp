@@ -29,7 +29,6 @@ void ATBSGridUI::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//InitialisePlayerController();
 	SpawnCursor();
 }
 
@@ -65,7 +64,6 @@ void ATBSGridUI::CreateGridMeshComponents()
 		GridMeshComponent->AddRelativeLocation(FVector(0.0, 0.0, (float)i * FloorHeight));
 		GridMeshComponent->SetRelativeScale3D(FVector(GridMeshWidth, GridMeshHeight, 0.01));
 		GridMeshComponent->SetMaterial(0, GridMaterials[i]);		
-		//GridMeshComponent->SetIsReplicated(true);
 		GridMeshes.Push(GridMeshComponent);
 	}
 }

@@ -47,9 +47,6 @@ public:
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_CommandNewProp(FIntVector Coordinates);
 
-	//UFUNCTION(Client, Reliable)
-	//void Client_CreateProps(TArray<FProp> const& PropArray);
-
 	UFUNCTION(Client, Reliable)
 	void Client_OpenSideChannelConnection();
 

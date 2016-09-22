@@ -71,16 +71,14 @@ void ATBSPlayerController::OnClassesLoaded()
 	InputComponent->BindAction("ActionMouseLeft", IE_Pressed, this, &ATBSPlayerController::MouseLeft);
 	InputComponent->BindAction("ActionMouseRight", IE_Pressed, this, &ATBSPlayerController::MouseRight);
 	InputComponent->BindAction("ActionEscape", IE_Pressed, this, &ATBSPlayerController::Escape);
+	InputComponent->BindAxis("AxisMoveCameraForward", this, &ATBSPlayerController::MoveCameraForward);
+	InputComponent->BindAxis("AxisMoveCameraRight", this, &ATBSPlayerController::MoveCameraRight);
 
 	// Testing stuff
 	InputComponent->BindAction("ActionDebugMessage", IE_Pressed, this, &ATBSPlayerController::SendDebugMessage);
 	InputComponent->BindAction("ActionNewProp", IE_Pressed, this, &ATBSPlayerController::NewProp);
 	InputComponent->BindAction("ActionBomb", IE_Pressed, this, &ATBSPlayerController::Bomb);
 
-	InputComponent->BindAxis("AxisMoveCameraForward", this, &ATBSPlayerController::MoveCameraForward);
-	InputComponent->BindAxis("AxisMoveCameraRight", this, &ATBSPlayerController::MoveCameraRight);
-
-	//ClassLoader->Grid->ReindexProps();
 	Server_ClientReady();
 
 	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Controller ready, server address %s"), *GetServerNetworkAddress()));
@@ -145,10 +143,6 @@ void ATBSPlayerController::PlayerTick(float DeltaTime)
 				NetworkMessage Message;
 				if (TCPClient->NetworkMessageQueue.Dequeue(Message))
 				{
-					//char* Temp = new char[Message.Length + 1];
-					//memcpy(Temp, Message.Data, Message.Length);
-					//Temp[Message.Length] = '\0';
-
 					GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Message of length %i"), Message.Length));
 
 					uint8_t* MessagePtr = Message.Data;
@@ -227,42 +221,6 @@ void ATBSPlayerController::PlayerTick(float DeltaTime)
 							continue;
 						}
 					}
-
-					//for (uint32 i = 0; i < Message.Length; i = i + sizeof(FProp))
-					//{
-					//	FProp Prop;
-					//	memcpy(&Prop, Message.Data + i, sizeof(FProp));
-
-					//	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Prop received (%i, %i, %i)"), Prop.Coordinates.X, Prop.Coordinates.Y, Prop.Coordinates.Z));
-
-					//	ClassLoader->Grid->AddProp(Prop);
-					//	int32 Rotation = (float)FMath::RandRange(0, 3) * 90;
-
-					//	if (!Block)
-					//	{
-					//		Block = GetWorld()->SpawnActor<ATBSProp_Block>(ATBSProp_Block::StaticClass());
-					//		Block->GameCoordinates = Prop.Coordinates;
-					//		Block->Dimensions = FIntVector(1, 1, 1);
-					//		Block->BlocksAccess = true;
-					//		Block->Rotation = FRotator(0.0, Rotation, 0.0);
-					//		Block->RecalculateCoordinates();
-					//	}
-					//	
-					//	FCoordinateLocations Locations = ClassLoader->GridUI->GetCoordinateLocations(Prop.Coordinates);
-					//	//Prop->SetActorLocation(Locations.Center);
-					//	FTransform InstanceTransform(
-					//		FRotator(0.0, Rotation, 0.0),
-					//		Locations.Center,
-					//		FVector((float)1 / 2, (float)1 / 2, (float)1 / 2)
-					//	);
-					//	//InstanceTransform.Translation = Locations.Center;
-					//	//InstanceTransform.Scale3D = FVector((float)1 / 2, (float)1 / 2, (float)1 / 2);
-					//	Block->SpawnInstance(InstanceTransform);
-
-
-					//	//ATBSProp* PropActor = ClassLoader->PropFactory->CreateBlock(Prop.Coordinates, FIntVector(1, 1, 6), FRotator(0.0, Rotation, 0.0));
-					//	//ClassLoader->PropManager->ResetProp(PropActor);
-					//}
 				}
 			}
 		}
@@ -451,24 +409,3 @@ bool ATBSPlayerController::Server_ClientReady_Validate()
 {
 	return true;
 }
-
-//void ATBSPlayerController::Client_CreateProps_Implementation(TArray<FProp> const& PropArray)
-//{
-//	if (Role < ROLE_Authority)
-//	{
-//		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Received props %i"), PropArray.Num()));
-//
-//		for (auto& Prop : PropArray)
-//		{
-//			ClassLoader->Grid->AddProp(Prop);
-//			//int32 Rotation = (float) FMath::RandRange(0, 3) * 90;
-//			//ATBSProp* PropActor = ClassLoader->PropFactory->CreateBlock(Prop.Coordinates, FIntVector(1, 1, 6), FRotator(0.0, Rotation, 0.0));
-//			//ClassLoader->Grid->AddProp(PropActor);
-//			//ClassLoader->PropManager->ResetProp(PropActor);
-//		}		
-//
-//		PropsReceived += PropArray.Num();
-//
-//		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Total props received %i"), PropsReceived));
-//	}		
-//}
