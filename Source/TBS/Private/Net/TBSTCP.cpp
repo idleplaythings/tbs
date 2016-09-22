@@ -29,14 +29,11 @@ uint32 TBSTCP::Run()
 	return 0;
 }
 
-bool TBSTCP::SendMessage(FSocket* Socket, const char* Message, uint32 Length)
+bool TBSTCP::SendMessage(FSocket* Socket, uint8_t* Message, uint32 Length)
 {
-	uint8* PayloadLengthMsg = new uint8();
-	memcpy(PayloadLengthMsg, &Length, sizeof(Length));
-
 	int32 BytesSent = 0;
-	Socket->Send(PayloadLengthMsg, sizeof(Length), BytesSent);
-	Socket->Send((uint8*)Message, Length, BytesSent);
+	Socket->Send((uint8_t*)&Length, sizeof(Length), BytesSent);
+	Socket->Send((uint8_t*)Message, Length, BytesSent);
 
 	return true;
 }
@@ -51,7 +48,7 @@ bool TBSTCP::RecvMessage(FSocket *Socket, uint32 DataSize, uint32 ConnectionId)
 	int32 BytesIn = 0;
 	if (Socket->Recv(Datagram->GetData(), Datagram->Num(), BytesIn))
 	{
-		for (auto& NetworkMessage : StreamReader->ReadData((char*)Datagram->GetData(), BytesIn))
+		for (auto& NetworkMessage : StreamReader->ReadData(Datagram->GetData(), BytesIn))
 		{
 			if (ConnectionId > 0)
 			{

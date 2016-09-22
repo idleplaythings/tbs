@@ -9,25 +9,28 @@ TBSStreamReader::TBSStreamReader(uint32 HeaderLength) : HeaderLength(HeaderLengt
 
 TBSStreamReader::~TBSStreamReader()
 {
+	FMemory::Free(MessageBuffer);
+	FMemory::Free(PartialBuffer);
 }
 
-TArray<NetworkMessage> TBSStreamReader::ReadData(char * Data, uint32 Length)
+TArray<NetworkMessage> TBSStreamReader::ReadData(uint8_t * Data, uint32 Length)
 {
 	TArray<NetworkMessage> Messages;
 
+	// Call ReadIntoMessageBuffer recursively until the binary data array has been exhausted
 	ReadIntoMessageBuffer(Data, Length, Messages);
 
+	// Fully received messages are returned as an array, partial message is retained in MessageBuffer
 	return Messages;
 }
 
-void TBSStreamReader::ReadIntoMessageBuffer(char * Data, uint32 Length, TArray<NetworkMessage>& Messages)
+void TBSStreamReader::ReadIntoMessageBuffer(uint8_t * InputBuffer, uint32 Length, TArray<NetworkMessage>& Messages)
 {
-	if (MessageBuffer == nullptr)
+	if (MessageLength == 0)
 	{
-		if (InitMessageBuffer(Data, Length))
+		// Try and initialise the message buffer if we don't yet know the length of the message
+		if (InitMessageBuffer(InputBuffer, Length))
 		{
-			delete PartialBuffer;
-			PartialBuffer = nullptr;
 			PartialLength = 0;
 		}
 		else
@@ -36,39 +39,30 @@ void TBSStreamReader::ReadIntoMessageBuffer(char * Data, uint32 Length, TArray<N
 		}
 	}
 
+	// Read up to payload length of bytes from the buffer
 	uint32 BytesToRead = PayloadLength - BytesRead;
-	BytesToRead = BytesToRead > (Length - DataOffset) ? (Length - DataOffset) : BytesToRead;
-	memcpy(MessageBuffer + BytesRead, Data + DataOffset, BytesToRead);
+	BytesToRead = BytesToRead > (Length - PayloadBegin) ? (Length - PayloadBegin) : BytesToRead;
+
+	FMemory::Memcpy(MessageBuffer + BytesRead, InputBuffer + PayloadBegin, BytesToRead);
 
 	BytesRead = BytesRead + BytesToRead;
 
+	// If we received the full message, recursively call this function again to read the remainder of the buffer
 	if (BytesRead == PayloadLength)
 	{
-		//char* Fixed = new char[PayloadLength + 1];
-		//memcpy(Fixed, MessageBuffer, PayloadLength);
-		//Fixed[PayloadLength] = '\0';
-
-		char* MessageData = new char[PayloadLength];
-		memcpy(MessageData, MessageBuffer, PayloadLength);
+		uint8_t* MessageData = new uint8_t[PayloadLength];
+		FMemory::Memcpy(MessageData, MessageBuffer, PayloadLength);
 
 		Messages.Add(NetworkMessage(PayloadLength, MessageData));
 
-		//NetworkMessageQueue.Enqueue(ANSI_TO_TCHAR(Fixed));
-
-		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Message of length %i read!"), BytesRead));
-
-		delete MessageBuffer;
-		MessageBuffer = nullptr;
-		delete PartialBuffer;
-		PartialBuffer = nullptr;
-
-		char* NewStart = Data + DataOffset + BytesToRead;
-		uint32 NewLength = Length - DataOffset - BytesToRead;
+		uint8_t* NewStart = InputBuffer + PayloadBegin + BytesToRead;
+		uint32 NewLength = Length - PayloadBegin - BytesToRead;
 
 		PartialLength = 0;
 		PayloadLength = 0;
 		BytesRead = 0;
-		DataOffset = 0;
+		PayloadBegin = 0;
+		MessageLength = 0;
 
 		if (NewLength > 0)
 		{
@@ -76,46 +70,71 @@ void TBSStreamReader::ReadIntoMessageBuffer(char * Data, uint32 Length, TArray<N
 		}
 	}
 
-	DataOffset = 0;
+	PayloadBegin = 0;
 }
 
-bool TBSStreamReader::InitMessageBuffer(char * Data, uint32 Length)
+/**
+ * Initialises message buffer by parsing the HeaderLength sized header
+ *
+ * Since the incoming binary buffer is of an arbitrary length, it may not contain the full header,
+ * or it may contain only the header and none of the actual data. In the "worst" case it may only
+ * contain a single byte of the header.
+ */
+bool TBSStreamReader::InitMessageBuffer(uint8_t * InputBuffer, uint32 Length)
 {
+	// Case 1: We already have partially received the header
 	if (PartialLength > 0)
 	{
+		// Case 1a: We have partial header, and this binary array contains the rest of the header
 		if (PartialLength + Length > 4)
 		{
-			memcpy(PartialBuffer + PartialLength, Data, 4 - PartialLength);
+			FMemory::Memcpy(PartialBuffer + PartialLength, InputBuffer, 4 - PartialLength);
 			PayloadLength = *(reinterpret_cast<uint32 *>(PartialBuffer));
-			MessageBuffer = new char[PayloadLength];
-			memcpy(MessageBuffer, Data + (4 - PartialLength), Length - (4 - PartialLength));
+			MessageBuffer = AllocateBuffer(MessageBuffer, PayloadLength);
+			MessageLength = PayloadLength;
+			FMemory::Memcpy(MessageBuffer, InputBuffer + (4 - PartialLength), Length - (4 - PartialLength));
 			BytesRead = 0;
-			DataOffset = 4 - PartialLength;
-
-			delete PartialBuffer;
-			PartialBuffer = nullptr;
+			PayloadBegin = 4 - PartialLength;
 			PartialLength = 0;
 			return true;
 		}
 
-		memcpy(PartialBuffer + PartialLength, Data, Length);
+		// Case 1b: We have partial header, and this binary array contains another part,
+		// but not the remainder of the header
+		FMemory::Memcpy(PartialBuffer + PartialLength, InputBuffer, Length);
 		PartialLength += Length;
 		return false;
 	}
 
+	// Case 2: We haven't received any bytes of the header yet, and this buffer only contains a part of the header
 	if (Length < 4)
 	{
-		PartialBuffer = new char[4];
-		memcpy(PartialBuffer, Data, Length);
+		PartialBuffer = AllocateBuffer(PartialBuffer, 4);
+		//PartialBuffer = new uint8_t[4];
+		FMemory::Memcpy(PartialBuffer, InputBuffer, Length);
 		PartialLength = Length;
 
 		return false;
 	}
 
-	PayloadLength = *(reinterpret_cast<uint32 *>(Data));
+	// Case 3: We haven't received any bytes of the header yet, and this buffer contains the full header
+	PayloadLength = *(reinterpret_cast<uint32 *>(InputBuffer));
 
-	MessageBuffer = new char[PayloadLength];
+	MessageBuffer = AllocateBuffer(MessageBuffer, PayloadLength);
+	MessageLength = PayloadLength;
 	BytesRead = 0;
-	DataOffset = 4;
+	PayloadBegin = 4;
 	return true;
+}
+
+uint8_t* TBSStreamReader::AllocateBuffer(uint8_t* Buffer, uint32 Length)
+{
+	if (Buffer != nullptr)
+	{
+		return (uint8_t*)FMemory::Realloc(Buffer, Length);
+	}
+	else
+	{
+		return (uint8_t*)FMemory::Malloc(Length);
+	}
 }

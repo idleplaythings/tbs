@@ -8,7 +8,6 @@
 // Sets default values
 ATBSGrid::ATBSGrid()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 	bReplicates = true;
 	bAlwaysRelevant = true;
@@ -18,7 +17,6 @@ void ATBSGrid::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetime
 {
 	DOREPLIFETIME(ATBSGrid, GridDimensions);
 	DOREPLIFETIME(ATBSGrid, Units);
-	//DOREPLIFETIME(ATBSGrid, Props);
 }
 
 // Called when the game starts or when spawned
@@ -28,21 +26,9 @@ void ATBSGrid::BeginPlay()
 	
 }
 
-// Called every frame
-//void ATBSGrid::Tick( float DeltaTime )
-//{
-//	Super::Tick( DeltaTime );
-//
-//}
-
 void ATBSGrid::InitialiseGrid(FIntVector InGridDimensions)
 {
 	GridDimensions = InGridDimensions;
-}
-
-TArray<ATBSProp*>::TIterator ATBSGrid::GetPropsIterator()
-{
-	return Props.CreateIterator();
 }
 
 TArray<ATBSUnit*>::TIterator ATBSGrid::GetUnitIterator()
@@ -101,24 +87,6 @@ ATBSUnit* ATBSGrid::SelectUnit(FIntVector Coordinates)
 	return nullptr;
 }
 
-ATBSProp* ATBSGrid::SelectProp(FIntVector Coordinates)
-{
-	for (auto &Prop : Props)
-	{
-		if (Prop == nullptr)
-		{
-			continue;
-		}
-
-		if (Prop->GameCoordinates == Coordinates)
-		{
-			return Prop;
-		}
-	}
-
-	return nullptr;
-}
-
 TArray<FIntVector> ATBSGrid::GetNeighbours(FIntVector Coordinates)
 {
 	TArray<FIntVector> Neighbours;
@@ -145,21 +113,11 @@ TArray<FIntVector> ATBSGrid::GetNeighbours(FIntVector Coordinates)
 bool ATBSGrid::IsAccessible(FIntVector Coordinates)
 {
 	FProp* Prop = PropMap.Find(Coordinates);
-
-	//ATBSProp** FoundProp = PropsIndex.Find(Coordinates);
-
-	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Looking at coordinates (%i, %i, %i)"), Coordinates.X, Coordinates.Y, Coordinates.Z));
-
-	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Prop index length %i"), PropsIndex.Num()));
 	
 	if (Prop)
 	{
-		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Prop found from index")));
-
 		if (Prop->BlocksAccess)
 		{
-			//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Prop is blocking")));
-
 			return false;
 		}
 	}
@@ -169,19 +127,9 @@ bool ATBSGrid::IsAccessible(FIntVector Coordinates)
 
 void ATBSGrid::ReindexProps_Implementation()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Reindexing Props. Prop array length %i"), Props.Num()));
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Reindexing Props.")));
 
-	PropsIndex.Empty();
-
-	for (auto& Prop : Props)
-	{
-		if (Prop)
-		{
-			PropsIndex.Add(Prop->GameCoordinates, Prop);
-		}		
-	}
-
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Prop index length %i"), PropsIndex.Num()));
+	// Todo...
 }
 
 void ATBSGrid::ReindexUnits_Implementation()
@@ -372,151 +320,4 @@ TArray<FIntVector> ATBSGrid::GetAccessibleNeighbours(FIntVector Coordinates)
 	return Neighbours.FilterByPredicate([&](const FIntVector& Neighbour) {
 		return IsAccessible(Neighbour);
 	});
-
-	//return Neighbours.FilterByPredicate([this, Coordinates](const FIntVector& Neighbour) {
-	//	bool SameX = Coordinates.X == Neighbour.X;
-	//	bool SameY = Coordinates.Y == Neighbour.Y;
-
-	//	// If only either X or Y coordinates change, neighbour is directly adjacent
-	//	// and we only need to consider props blocking direct access
-	//	if (SameX ? !SameY : SameY)
-	//	{
-	//		if (SameX)
-	//		{
-	//			if (Neighbour.Y > Coordinates.Y)
-	//			{					
-	//				return !IsTileAccessBlockedByProp(Coordinates, ETileSlot::S)
-	//					&& !IsTileAccessBlockedByProp(Neighbour, ETileSlot::N);
-	//			}
-	//			else
-	//			{	
-	//				return !IsTileAccessBlockedByProp(Coordinates, ETileSlot::N)
-	//					&& !IsTileAccessBlockedByProp(Neighbour, ETileSlot::S);
-	//			}
-	//		}
-	//		else {
-	//			if (Neighbour.X > Coordinates.X)
-	//			{
-	//				return !IsTileAccessBlockedByProp(Coordinates, ETileSlot::E)
-	//					&& !IsTileAccessBlockedByProp(Neighbour, ETileSlot::W);
-	//			}
-	//			else
-	//			{
-	//				return !IsTileAccessBlockedByProp(Coordinates, ETileSlot::W)
-	//					&& !IsTileAccessBlockedByProp(Neighbour, ETileSlot::E);
-	//			}
-	//		}
-	//	}
-	//	// Otherwise neighbour is diagonally adjacent, and we need to consider blocking access
-	//	// in neighbouring tiles as well
-	//	else
-	//	{
-	//		if (Neighbour.X > Coordinates.X)
-	//		{
-	//			if (Neighbour.Y > Coordinates.Y)
-	//			{
-	//				FIntVector OneEast = Coordinates + FIntVector(1, 0, 0);
-	//				FIntVector OneSouth = Coordinates + FIntVector(0, 1, 0);
-
-	//				return !IsTileAccessBlockedByProp(Coordinates, ETileSlot::E)
-	//					&& !IsTileAccessBlockedByProp(Coordinates, ETileSlot::S)
-	//					&& !IsTileAccessBlockedByProp(Neighbour, ETileSlot::N)
-	//					&& !IsTileAccessBlockedByProp(Neighbour, ETileSlot::W)
-	//					&& !IsTileAccessBlockedByProp(OneEast, ETileSlot::W)
-	//					&& !IsTileAccessBlockedByProp(OneEast, ETileSlot::S)
-	//					&& !IsTileAccessBlockedByProp(OneSouth, ETileSlot::N)
-	//					&& !IsTileAccessBlockedByProp(OneSouth, ETileSlot::E);
-	//			}
-	//			else {
-	//				FIntVector OneEast = Coordinates + FIntVector(1, 0, 0);
-	//				FIntVector OneNorth = Coordinates + FIntVector(0, -1, 0);
-
-	//				return !IsTileAccessBlockedByProp(Coordinates, ETileSlot::E)
-	//					&& !IsTileAccessBlockedByProp(Coordinates, ETileSlot::N)
-	//					&& !IsTileAccessBlockedByProp(Neighbour, ETileSlot::S)
-	//					&& !IsTileAccessBlockedByProp(Neighbour, ETileSlot::W)
-	//					&& !IsTileAccessBlockedByProp(OneEast, ETileSlot::W)
-	//					&& !IsTileAccessBlockedByProp(OneEast, ETileSlot::N)
-	//					&& !IsTileAccessBlockedByProp(OneNorth, ETileSlot::S)
-	//					&& !IsTileAccessBlockedByProp(OneNorth, ETileSlot::E);
-	//			}
-	//		}
-	//		else {
-	//			if (Neighbour.Y > Coordinates.Y)
-	//			{
-	//				FIntVector OneWest = Coordinates + FIntVector(-1, 0, 0);
-	//				FIntVector OneSouth = Coordinates + FIntVector(0, 1, 0);
-
-	//				return !IsTileAccessBlockedByProp(Coordinates, ETileSlot::W)
-	//					&& !IsTileAccessBlockedByProp(Coordinates, ETileSlot::S)
-	//					&& !IsTileAccessBlockedByProp(Neighbour, ETileSlot::N)
-	//					&& !IsTileAccessBlockedByProp(Neighbour, ETileSlot::E)
-	//					&& !IsTileAccessBlockedByProp(OneWest, ETileSlot::E)
-	//					&& !IsTileAccessBlockedByProp(OneWest, ETileSlot::S)
-	//					&& !IsTileAccessBlockedByProp(OneSouth, ETileSlot::N)
-	//					&& !IsTileAccessBlockedByProp(OneSouth, ETileSlot::W);
-	//			}
-	//			else
-	//			{
-	//				FIntVector OneWest = Coordinates + FIntVector(-1, 0, 0);
-	//				FIntVector OneNorth = Coordinates + FIntVector(0, -1, 0);					
-
-	//				return !IsTileAccessBlockedByProp(Coordinates, ETileSlot::N)
-	//					&& !IsTileAccessBlockedByProp(Coordinates, ETileSlot::W)
-	//					&& !IsTileAccessBlockedByProp(Neighbour, ETileSlot::S)
-	//					&& !IsTileAccessBlockedByProp(Neighbour, ETileSlot::E)
-	//					&& !IsTileAccessBlockedByProp(OneWest, ETileSlot::N)
-	//					&& !IsTileAccessBlockedByProp(OneWest, ETileSlot::E)
-	//					&& !IsTileAccessBlockedByProp(OneNorth, ETileSlot::W)
-	//					&& !IsTileAccessBlockedByProp(OneNorth, ETileSlot::S);
-	//			}
-	//		}
-	//	}
-	//	return true;
-	//});
-
-	//return Neighbours;
 }
-//
-//bool ATBSGrid::IsTileAccessBlockedByProp(FIntVector Coordinates, ETileSlot Slot)
-//{
-//	TArray<ATBSProp*>* PropsInTile = Props.Find(Coordinates);
-//
-//	if (PropsInTile == nullptr)
-//	{
-//		return false;
-//	}
-//
-//	FString Name;
-//	const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("ETileSlot"), true);
-//	if (!EnumPtr)
-//	{
-//		Name = FString(TEXT("Nope"));
-//	}
-//	else
-//	{
-//		Name = EnumPtr->GetDisplayNameText((int8)Slot).ToString();
-//	}	
-//
-//	for (auto& Prop : *PropsInTile)
-//	{
-//
-//		FString Name2;
-//		const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("ETileSlot"), true);
-//		if (!EnumPtr)
-//		{
-//			Name2 = FString(TEXT("Nope"));
-//		}
-//		else
-//		{
-//			Name2 = EnumPtr->GetDisplayNameText((int8)Prop.Slot).ToString();
-//		}
-//
-//		if (Prop->Slot == Slot && Prop->BlocksAccess)
-//		{
-//			return true;
-//		}
-//	}
-//
-//	return false;
-//}

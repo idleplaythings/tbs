@@ -22,19 +22,9 @@ public:
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	
-	// Called every frame
-	//virtual void Tick( float DeltaSeconds ) override;
-	
+		
 	UPROPERTY(Replicated)
 	FIntVector GridDimensions;
-
-	UPROPERTY(Replicated)
-	TArray<ATBSProp*> Props;
-	TMap<FIntVector, ATBSProp*> PropsIndex;
-
-	//std::multimap<const FIntVector, FProp>::iterator PropMapIterator;
-	//std::unordered_multimap<const FIntVector, FProp> PropMap;
 
 	TMap<FIntVector, FProp> PropMap;
 
@@ -65,11 +55,9 @@ public:
 	void AddProp(FProp Prop);
 	void RemovePropsAt(FIntVector Coordinates);
 	void AddUnit(ATBSUnit* Unit);
-	TArray<ATBSProp*>::TIterator GetPropsIterator();
 	TArray<ATBSUnit*>::TIterator GetUnitIterator();
 
 	ATBSUnit* SelectUnit(FIntVector Coordinates);
-	ATBSProp* SelectProp(FIntVector Coordinates);
 
 	FOnActorNoLongerVisible OnActorNoLongerVisible;
 

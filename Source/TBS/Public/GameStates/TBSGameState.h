@@ -39,8 +39,6 @@ public:
 	UFUNCTION()
 	void ForceCloseActorChannel(int32 TeamNumber, AActor* Actor);
 	
-	void OnMessage(FString);
-
 	// TODO: Player controller still depends on this
 	ATBSUnitManager* UnitManager;
 
@@ -72,17 +70,9 @@ private:
 	TMap<int32, ATBSPlayerController*> PlayerControllers;
 
 
-	//FTimerHandle SendTimer;
 	int32 PropsToGenerate = 166666 * 6; // Miljoona propsia :o
 	//int32 PropsToGenerate = 30000 * 6;
-	//int32 PropsSent = 0;
-	//int32 BatchSize = 2048;
-	//float Delay = 0.5;
-	char* PropsData = nullptr;
+	uint8_t* PropsData = nullptr;
 	uint32 PropsDataLength;
-	//char* PropsBuffer = new char();
-
-	//void SendProps();
-
 	UClass* ExplosionClass;
 };

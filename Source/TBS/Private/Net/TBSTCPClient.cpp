@@ -52,9 +52,9 @@ bool TBSTCPClient::Connect(FString IP, int32 Port)
 	return Connected;
 }
 
-bool TBSTCPClient::Send(const char* Payload, uint32 Length)
+bool TBSTCPClient::Send(uint8* Data, uint32 Length)
 {
-	return SendMessage(Socket, Payload, Length);
+	return SendMessage(Socket, Data, Length);
 }
 
 uint32 TBSTCPClient::Run()

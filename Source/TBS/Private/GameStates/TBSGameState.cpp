@@ -39,34 +39,6 @@ void ATBSGameState::StartGameplay()
 	if (HasAuthority())
 	{
 		InitFactoriesAndManagers();
-
-		//int PropsSpawned = 0;
-
-		//while (PropsSpawned < 20)
-		//{
-		//	FIntVector Coordinates = FIntVector(FMath::RandRange(10, 90)*10, FMath::RandRange(10, 90)*10, 0);
-		//	int32 Rotation = (float) FMath::RandRange(0, 3) * 90;
-
-		//	if (Grid->SelectProp(Coordinates))
-		//	{
-		//		continue;
-		//	}
-
-		//	//Grid->AddProp(PropFactory->CreateWall(Coordinates, FRotator(0.0, Rotation, 0.0)));
-		//	Grid->AddProp(PropFactory->CreateBlock(Coordinates, FIntVector(1, 1, 6), FRotator(0.0, Rotation, 0.0)));
-
-		//	PropsSpawned += 1;
-		//}
-		//PropManager->ResetProps();
-
-		//ISocketSubsystem* SocketSubsystem = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM);
-		//bool CanBind = false;
-		//TSharedRef<FInternetAddr> Address = SocketSubsystem->GetLocalHostAddr(*GLog, CanBind);
-		//Address->SetPort(10003);
-
-		//FString AddressStr = Address->ToString(true);
-		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Starting listener on address %s"), *AddressStr));
-
 		Grid->OnActorNoLongerVisible.AddDynamic(this, &ATBSGameState::ForceCloseActorChannel);
 	}
 }
@@ -77,8 +49,6 @@ void ATBSGameState::Tick(float DeltaTime)
 
 	if (HasAuthority())
 	{
-		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Tick")));
-
 		if (TCPServer)
 		{
 			if (!TCPServer->NetworkMessageQueue.IsEmpty())
@@ -86,11 +56,11 @@ void ATBSGameState::Tick(float DeltaTime)
 				NetworkMessage Message;
 				if (TCPServer->NetworkMessageQueue.Dequeue(Message))
 				{
-					char* Temp = new char[Message.Length + 1];
+					uint8_t* Temp = new uint8_t[Message.Length + 1];
 					memcpy(Temp, Message.Data, Message.Length);
 					Temp[Message.Length] = '\0';
 
-					GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Server received: %s"), ANSI_TO_TCHAR(Temp)));
+					//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Server received: %s"), ANSI_TO_TCHAR(Temp)));
 
 					//std::string Response = "Server says ohai!";
 					//TCPServer->Send(Message.ConnectionId, Response.c_str(), Response.length());
@@ -99,12 +69,6 @@ void ATBSGameState::Tick(float DeltaTime)
 			}
 		}
 	}	
-}
-
-
-void ATBSGameState::OnMessage(FString Message)
-{
-	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT(ATBSGameState::OnTCPMessage: %s"), *Message));
 }
 
 void ATBSGameState::AddPlayer(APlayerController* PlayerController)
@@ -203,7 +167,7 @@ void ATBSGameState::AllClientsReady()
 	TCPServer = new TBSTCPServer();
 	TCPServer->Listen(FString("192.168.0.107"), 10011);
 
-	PropsData = (char*)FMemory::Malloc((sizeof(FProp) + 1) * PropsToGenerate);
+	PropsData = (uint8_t*) FMemory::Malloc((sizeof(FProp) + 1) * PropsToGenerate);
 
 	while (Grid->PropCount() < PropsToGenerate / 6)
 	{
@@ -227,7 +191,7 @@ void ATBSGameState::AllClientsReady()
 			Prop.Rotation = (float)FMath::RandRange(0, 3) * 90;
 			Prop.BlocksAccess = true;
 
-			char* PropsBuffer = reinterpret_cast<char*>(&Prop);
+			uint8_t* PropsBuffer = reinterpret_cast<uint8_t*>(&Prop);
 			memset(PropsData + PropsDataLength, 0x01, 1);
 			memcpy(PropsData + 1 + PropsDataLength, PropsBuffer, sizeof(FProp));
 			PropsDataLength += sizeof(FProp) + 1;
@@ -250,23 +214,12 @@ void ATBSGameState::AllClientsReady()
 
 void ATBSGameState::SpawnNewProps(FIntVector Coordinates)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Spawning new props")));
-
-	//FIntVector Coordinates = FindFreeCoordinates();
-
-	//if (Coordinates == FIntVector::NoneValue)
-	//{
-	//	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Unable to find free coordinates!")));
-	//	return;
-	//}
-
 	if (!Grid->IsAccessible(Coordinates))
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Coordinates (%i, %i, %i) blocked!"), Coordinates.X, Coordinates.Y, Coordinates.Z));
 		return;
 	}
 
-	char* PropsData = (char*)FMemory::Malloc((sizeof(FProp) + 1) * 6);
+	uint8_t* PropsData = (uint8_t*)FMemory::Malloc((sizeof(FProp) + 1) * 6);
 	uint32 PropsDataLength = 0;
 
 	for (int i = 0; i < 6; i++)
@@ -278,7 +231,7 @@ void ATBSGameState::SpawnNewProps(FIntVector Coordinates)
 		Prop.Rotation = (float)FMath::RandRange(0, 3) * 90;
 		Prop.BlocksAccess = true;
 
-		char* PropsBuffer = reinterpret_cast<char*>(&Prop);
+		uint8_t* PropsBuffer = reinterpret_cast<uint8_t*>(&Prop);
 		memset(PropsData + PropsDataLength, 0x01, 1);
 		memcpy(PropsData + 1 + PropsDataLength, PropsBuffer, sizeof(FProp));
 		PropsDataLength += sizeof(FProp) + 1;
@@ -296,7 +249,7 @@ void ATBSGameState::Bomb(FIntVector Coordinates)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Bombing")));
 
-	char* BombData = (char*)FMemory::Malloc((sizeof(FIntVector) + 1) * 11 * 11 * 6);
+	uint8_t* BombData = (uint8_t*)FMemory::Malloc((sizeof(FIntVector) + 1) * 11 * 11 * 6);
 	uint32 BombDataLength = 0;
 
 	for (int32 X = Coordinates.X - 50; X <= Coordinates.X + 50; X = X + 10)
@@ -313,7 +266,7 @@ void ATBSGameState::Bomb(FIntVector Coordinates)
 
 				FIntVector TempCoordinates = FIntVector(X, Y, Z);
 
-				char* CoordinateBuffer = reinterpret_cast<char*>(&TempCoordinates);
+				uint8_t* CoordinateBuffer = reinterpret_cast<uint8_t*>(&TempCoordinates);
 				memset(BombData + BombDataLength, 0x02, 1);
 				memcpy(BombData + 1 + BombDataLength, CoordinateBuffer, sizeof(FIntVector));
 				BombDataLength += sizeof(FIntVector) + 1;
@@ -331,45 +284,6 @@ void ATBSGameState::Bomb(FIntVector Coordinates)
 	Explosion->SetActorLocation(GridUI->GetCoordinateLocations(Coordinates).Center);
 
 	Grid->ReindexUnits();
-	
-
-	//FIntVector Coordinates = FindFreeCoordinates();
-
-	//if (Coordinates == FIntVector::NoneValue)
-	//{
-	//	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Unable to find free coordinates!")));
-	//	return;
-	//}
-
-	//if (!Grid->IsAccessible(Coordinates))
-	//{
-	//	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Coordinates (%i, %i, %i) blocked!"), Coordinates.X, Coordinates.Y, Coordinates.Z));
-	//	return;
-	//}
-
-	//char* PropsData = (char*)FMemory::Malloc(sizeof(FProp) * 6);
-	//uint32 PropsDataLength = 0;
-
-	//for (int i = 0; i < 6; i++)
-	//{
-	//	Coordinates.Z = i;
-
-	//	FProp Prop;
-	//	Prop.Coordinates = Coordinates;
-	//	Prop.Rotation = (float)FMath::RandRange(0, 3) * 90;
-	//	Prop.BlocksAccess = true;
-
-	//	char* PropsBuffer = reinterpret_cast<char*>(&Prop);
-	//	memcpy(PropsData + PropsDataLength, PropsBuffer, sizeof(FProp));
-	//	PropsDataLength += sizeof(FProp);
-
-	//	//delete PropsBuffer;
-	//	//PropsBuffer = nullptr;
-
-	//	Grid->AddProp(Prop);
-	//}
-
-	//TCPServer->SendAll(PropsData, PropsDataLength);
 }
 
 FIntVector ATBSGameState::FindFreeCoordinates()
@@ -432,11 +346,6 @@ void ATBSGameState::SpawnUnits(int32 PlayerNumber)
 		}
 
 		if (Grid->SelectUnit(Coordinates))
-		{
-			continue;
-		}
-
-		if (Grid->SelectProp(Coordinates))
 		{
 			continue;
 		}

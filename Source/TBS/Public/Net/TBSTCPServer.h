@@ -18,8 +18,8 @@ public:
 	virtual uint32 Run() override;
 
 	bool Listen(FString IP, int32 Port);
-	bool Send(uint32 ConnectionId, const char* Message, uint32 Length);
-	bool SendAll(const char* Message, uint32 Length);
+	bool Send(uint32 ConnectionId, uint8_t* Message, uint32 Length);
+	bool SendAll(uint8_t* Message, uint32 Length);
 
 private:
 	bool OnConnection(class FSocket* ClientSocket, const FIPv4Endpoint& ClientEndpoint);	

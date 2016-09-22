@@ -22,7 +22,7 @@ public:
 	TQueue<NetworkMessage> NetworkMessageQueue;
 
 protected:
-	bool SendMessage(FSocket* Socket, const char* Message, uint32 Length);
+	bool SendMessage(FSocket* Socket, uint8_t* Message, uint32 Length);
 	bool RecvMessage(FSocket *Socket, uint32 DataSize, uint32 ConnectionId=0);
 
 	float ThreadSleepTime = 0.2f;

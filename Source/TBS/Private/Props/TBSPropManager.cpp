@@ -31,17 +31,3 @@ void ATBSPropManager::Initialise(ATBSGrid* InGrid, ATBSGridUI* InGridUI)
 	Grid = InGrid;
 	GridUI = InGridUI;
 }
-
-void ATBSPropManager::ResetProps()
-{
-	for (auto It = Grid->GetPropsIterator(); It; ++It)
-	{
-		ResetProp(*It);
-	}
-}
-
-void ATBSPropManager::ResetProp(ATBSProp* Prop)
-{
-	FCoordinateLocations Locations = GridUI->GetCoordinateLocations(Prop->GameCoordinates);
-	Prop->SetActorLocation(Locations.Center);
-}

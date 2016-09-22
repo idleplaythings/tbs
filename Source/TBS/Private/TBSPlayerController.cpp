@@ -109,7 +109,7 @@ void ATBSPlayerController::TrySideChannelConnection()
 	{
 		GetWorldTimerManager().ClearTimer(SideChannelConnectionTimer);
 		std::string Message = "Client says Hello!";
-		TCPClient->Send(Message.c_str(), Message.length());
+		TCPClient->Send((uint8_t*)Message.c_str(), Message.length());
 	}
 
 	if (SideChannelConnectionAttempts-- < 1)
@@ -151,11 +151,11 @@ void ATBSPlayerController::PlayerTick(float DeltaTime)
 
 					GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Message of length %i"), Message.Length));
 
-					char* MessagePtr = Message.Data;
+					uint8_t* MessagePtr = Message.Data;
 
 					while (MessagePtr < Message.Data + Message.Length)
 					{
-						if (*(char*)MessagePtr == 0x01)
+						if (*(uint8_t*)MessagePtr == 0x01)
 						{
 							FProp Prop;
 							memcpy(&Prop, MessagePtr + 1, sizeof(FProp));
@@ -200,7 +200,7 @@ void ATBSPlayerController::PlayerTick(float DeltaTime)
 							continue;
 						}	
 
-						if (*(char*)MessagePtr == 0x02)
+						if (*(uint8_t*)MessagePtr == 0x02)
 						{
 							FIntVector Coordinates;
 							memcpy(&Coordinates, MessagePtr + 1, sizeof(FIntVector));
@@ -381,9 +381,9 @@ void ATBSPlayerController::SendDebugMessage()
 		Message.append("0123456789");
 	}
 
-	TCPClient->Send(Message.c_str(), Message.length());
-	TCPClient->Send(Message.c_str(), Message.length());
-	TCPClient->Send(Message.c_str(), Message.length());
+	TCPClient->Send((uint8_t*)Message.c_str(), Message.length());
+	TCPClient->Send((uint8_t*)Message.c_str(), Message.length());
+	TCPClient->Send((uint8_t*)Message.c_str(), Message.length());
 }
 
 

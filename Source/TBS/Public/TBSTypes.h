@@ -94,7 +94,7 @@ struct NetworkMessage
 {
 	uint32 ConnectionId;
 	uint32 Length;
-	char* Data;
+	uint8_t* Data;
 
 	NetworkMessage()
 	{
@@ -103,14 +103,14 @@ struct NetworkMessage
 		Data = nullptr;
 	}
 
-	NetworkMessage(uint32 InLength, char* InData)
+	NetworkMessage(uint32 InLength, uint8_t* InData)
 	{
 		ConnectionId = 0;
 		Length = InLength;
 		Data = InData;
 	}
 
-	NetworkMessage(uint32 InConnectionId, uint32 InLength, char* InData)
+	NetworkMessage(uint32 InConnectionId, uint32 InLength, uint8_t* InData)
 	{
 		ConnectionId = InConnectionId;
 		Length = InLength;

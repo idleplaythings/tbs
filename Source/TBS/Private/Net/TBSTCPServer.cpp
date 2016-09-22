@@ -106,7 +106,7 @@ bool TBSTCPServer::OnConnection(FSocket * ClientSocket, const FIPv4Endpoint & Cl
 	return PendingClientSockets.Enqueue(ClientSocket);
 }
 
-bool TBSTCPServer::Send(uint32 ConnectionId, const char* Payload, uint32 Length)
+bool TBSTCPServer::Send(uint32 ConnectionId, uint8_t* Payload, uint32 Length)
 {
 	FSocket* Socket = *ClientSockets.Find(ConnectionId);
 
@@ -118,7 +118,7 @@ bool TBSTCPServer::Send(uint32 ConnectionId, const char* Payload, uint32 Length)
 	return false;
 }
 
-bool TBSTCPServer::SendAll(const char* Payload, uint32 Length)
+bool TBSTCPServer::SendAll(uint8_t* Payload, uint32 Length)
 {
 	bool Result = true;
 
