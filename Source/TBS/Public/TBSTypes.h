@@ -47,13 +47,19 @@ struct FProp
 	int32 Id;
 
 	UPROPERTY()
+	FIntVector Coordinates;
+
+	UPROPERTY()
+	FIntVector Dimensions;
+
+	UPROPERTY()
 	int32 Rotation;
 
 	UPROPERTY()
-	bool BlocksAccess;
+	FVector Offset;
 
 	UPROPERTY()
-	FIntVector Coordinates;
+	bool BlocksAccess;
 };
 
 FORCEINLINE FArchive& operator<<(FArchive &Ar, FProp& Prop)
