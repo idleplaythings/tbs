@@ -223,7 +223,7 @@ void ATBSGameState::SpawnNewProps(FIntVector Coordinates)
 		return;
 	}
 
-	uint8_t* PropsData = (uint8_t*)FMemory::Malloc((sizeof(FProp) + 1) * 6);
+	uint8_t* PropsData = (uint8_t*)FMemory::Malloc(sizeof(FProp) * 6);
 	uint32 PropsDataLength = 0;
 
 	for (int i = 0; i < 6; i++)
@@ -235,25 +235,22 @@ void ATBSGameState::SpawnNewProps(FIntVector Coordinates)
 		Prop.Rotation = (float)FMath::RandRange(0, 3) * 90;
 		Prop.BlocksAccess = true;
 
-		uint8_t* PropsBuffer = reinterpret_cast<uint8_t*>(&Prop);
-		memset(PropsData + PropsDataLength, 0x01, 1);
-		memcpy(PropsData + 1 + PropsDataLength, PropsBuffer, sizeof(FProp));
-		PropsDataLength += sizeof(FProp) + 1;
-
-		//FMemory::Free(PropsBuffer);
-
 		Grid->AddProp(Prop);
+
+		memcpy(PropsData + PropsDataLength, &Prop, sizeof(FProp));
+		PropsDataLength += sizeof(FProp);		
 	}
 
 	TCPServer->SendAll((uint8_t) 0x01, PropsData, PropsDataLength);
 	Grid->ReindexUnits();
+	FMemory::Free(PropsData);
 }
 
 void ATBSGameState::Bomb(FIntVector Coordinates)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Bombing")));
 
-	uint8_t* BombData = (uint8_t*)FMemory::Malloc((sizeof(FIntVector)) * 11 * 11 * 6);
+	uint8_t* BombData = (uint8_t*)FMemory::Malloc(sizeof(FIntVector) * 11 * 11 * 6);
 	uint32 BombDataLength = 0;
 
 	for (int32 X = Coordinates.X - 50; X <= Coordinates.X + 50; X = X + 10)
@@ -270,24 +267,26 @@ void ATBSGameState::Bomb(FIntVector Coordinates)
 
 				FIntVector TempCoordinates = FIntVector(X, Y, Z);
 
-				uint8_t* CoordinateBuffer = reinterpret_cast<uint8_t*>(&TempCoordinates);
+				Grid->RemovePropsAt(TempCoordinates);
+
+				//uint8_t* CoordinateBuffer = reinterpret_cast<uint8_t*>(&TempCoordinates);
 				//memset(BombData + BombDataLength, 0x02, 1);
-				memcpy(BombData + BombDataLength, CoordinateBuffer, sizeof(FIntVector));
+				memcpy(BombData + BombDataLength, &TempCoordinates, sizeof(FIntVector));
 				BombDataLength += sizeof(FIntVector);
 
-				//FMemory::Free(CoordinateBuffer);
-
-				Grid->RemovePropsAt(TempCoordinates);
+				//FMemory::Free(CoordinateBuffer);				
 			}
 		}
 	}
 
-	TCPServer->SendAll((uint8_t)0x02, BombData, BombDataLength);
+	TCPServer->SendAll((uint8_t)0x02, BombData, BombDataLength);	
 
 	AActor* Explosion = GetWorld()->SpawnActor<AActor>(ExplosionClass);
 	Explosion->SetActorLocation(GridUI->GetCoordinateLocations(Coordinates).Center);
 
 	Grid->ReindexUnits();
+
+	FMemory::Free(BombData);
 }
 
 FIntVector ATBSGameState::FindFreeCoordinates()

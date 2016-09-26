@@ -195,15 +195,14 @@ void ATBSPlayerController::PlayerTick(float DeltaTime)
 							MessagePtr += sizeof(FProp);
 						}
 					}
-
-					if (*(uint8_t*)MessagePtr == 0x02)
+					else if (*(uint8_t*)MessagePtr == 0x02)
 					{
 						MessagePtr += 1;
 
 						while (MessagePtr < Message.Data + Message.Length)
 						{
 							FIntVector Coordinates;
-							memcpy(&Coordinates, MessagePtr + 1, sizeof(FIntVector));
+							memcpy(&Coordinates, MessagePtr, sizeof(FIntVector));
 
 							//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Received remove props at (%i, %i, %i)"), Coordinates.X, Coordinates.Y, Coordinates.Z));
 
@@ -222,7 +221,7 @@ void ATBSPlayerController::PlayerTick(float DeltaTime)
 								(*BlockPtr)->RemoveInstance(Coordinates);
 							}
 
-							MessagePtr += 1 + sizeof(FIntVector);
+							MessagePtr += sizeof(FIntVector);
 						}
 					}
 
