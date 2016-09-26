@@ -321,3 +321,13 @@ TArray<FIntVector> ATBSGrid::GetAccessibleNeighbours(FIntVector Coordinates)
 		return IsAccessible(Neighbour);
 	});
 }
+
+TMap<FIntVector, FProp>::TConstIterator ATBSGrid::GetPropConstIterator()
+{
+	return PropMap.CreateConstIterator();
+}
+
+TMap<FIntVector, FProp>::TIterator ATBSGrid::GetPropIterator()
+{
+	return PropMap.CreateIterator();
+}

@@ -14,10 +14,10 @@ public:
 	TBSStreamReader(uint32 HeaderLength);
 	~TBSStreamReader();
 
-	TArray<NetworkMessage> ReadData(uint8_t* Data, uint32 Length);
+	void ReadData(uint8_t* Data, uint32 Length, TQueue<FNetworkMessage>& Messages);
 
 private:
-	void ReadIntoMessageBuffer(uint8_t* InputBuffer, uint32 Length, TArray<NetworkMessage>& Messages);
+	void ReadIntoMessageBuffer(uint8_t* InputBuffer, uint32 Length, TQueue<FNetworkMessage>& Messages);
 	bool InitMessageBuffer(uint8_t* InputBuffer, uint32 Length);
 	uint8_t* AllocateBuffer(uint8_t* Buffer, uint32 Length);
 

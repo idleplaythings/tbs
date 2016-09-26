@@ -22,18 +22,16 @@ ATBSGameState::~ATBSGameState()
 	{
 		TCPServer->Stop();
 		delete TCPServer;
+		TCPServer = NULL;
 	}
 
-	FMemory::Free(PropsData);
-	PropsData = nullptr;
-
-	//delete PropsBuffer;
-	//PropsBuffer = nullptr;
+	FMemory::Free(LevelDataBuffer);
+	LevelDataBuffer = nullptr;
 }
 
 void ATBSGameState::StartGameplay()
 {
-	InitGrid(FIntVector(3000, 3000, 18));
+	InitGrid(FIntVector(5000, 5000, 18));
 	InitGridUI();
 
 	if (HasAuthority())
@@ -53,22 +51,25 @@ void ATBSGameState::Tick(float DeltaTime)
 		{
 			if (!TCPServer->NetworkMessageQueue.IsEmpty())
 			{
-				NetworkMessage Message;
+				FNetworkMessage Message;
 				if (TCPServer->NetworkMessageQueue.Dequeue(Message))
 				{
-					uint8_t* Temp = new uint8_t[Message.Length + 1];
-					memcpy(Temp, Message.Data, Message.Length);
-					Temp[Message.Length] = '\0';
-
-					//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Server received: %s"), ANSI_TO_TCHAR(Temp)));
-
-					//std::string Response = "Server says ohai!";
-					//TCPServer->Send(Message.ConnectionId, Response.c_str(), Response.length());
-					TCPServer->Send(Message.ConnectionId, PropsData, PropsDataLength);
+					RespondToClientMessage(Message);
+					FMemory::Free(Message.Data);
 				}
 			}
 		}
 	}	
+}
+
+void ATBSGameState::RespondToClientMessage(FNetworkMessage Message)
+{
+	uint8_t* Temp = new uint8_t[Message.Length + 1];
+	memcpy(Temp, Message.Data, Message.Length);
+	Temp[Message.Length] = '\0';
+
+	int32 BytesSent = 0;
+	TCPServer->Send(Message.ConnectionId, (uint8_t) 0x01, LevelDataBuffer, LevelDataBufferLength, BytesSent);
 }
 
 void ATBSGameState::AddPlayer(APlayerController* PlayerController)
@@ -131,9 +132,6 @@ void ATBSGameState::InitFactoriesAndManagers()
 
 	if (Grid && GridUI)
 	{
-		PropManager = GetWorld()->SpawnActor<ATBSPropManager>(ATBSPropManager::StaticClass());
-		PropManager->Initialise(Grid, GridUI);
-
 		UnitManager = GetWorld()->SpawnActor<ATBSUnitManager>(ATBSUnitManager::StaticClass());
 		UnitManager->Initialise(Grid, GridUI);
 	}
@@ -164,12 +162,31 @@ void ATBSGameState::AllClientsReady()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("All clients ready")));
 
+	CreateRandomLevel();
+
 	TCPServer = new TBSTCPServer();
 	TCPServer->Listen(FString("192.168.0.107"), 10011);
 
-	PropsData = (uint8_t*) FMemory::Malloc((sizeof(FProp) + 1) * PropsToGenerate);
+	for (auto& It : PlayerControllers)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Open side channel")));
+		(*It.Value).Client_OpenSideChannelConnection();
+	}
 
-	while (Grid->PropCount() < PropsToGenerate / 6)
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Side channel done")));
+}
+
+void ATBSGameState::CreateRandomLevel()
+{
+	//int32 Props = 1000000;
+	//int32 Props = 500000;
+	int32 Props = 250000;
+
+	LevelDataBuffer = (uint8_t*)FMemory::Malloc(sizeof(FMapMeta) + Props * sizeof(FProp));
+
+	// Generate random meta data here...
+
+	while (Grid->PropCount() < Props)
 	{
 		FIntVector Coordinates = FIntVector(
 			FMath::RandRange(0, Grid->GridDimensions.X / 10) * 10,
@@ -191,25 +208,12 @@ void ATBSGameState::AllClientsReady()
 			Prop.Rotation = (float)FMath::RandRange(0, 3) * 90;
 			Prop.BlocksAccess = true;
 
-			uint8_t* PropsBuffer = reinterpret_cast<uint8_t*>(&Prop);
-			memset(PropsData + PropsDataLength, 0x01, 1);
-			memcpy(PropsData + 1 + PropsDataLength, PropsBuffer, sizeof(FProp));
-			PropsDataLength += sizeof(FProp) + 1;
-
-			//delete PropsBuffer;
-			//PropsBuffer = nullptr;
-
 			Grid->AddProp(Prop);
+
+			FMemory::Memcpy(LevelDataBuffer + LevelDataBufferLength, &Prop, sizeof(FProp));
+			LevelDataBufferLength += sizeof(FProp);
 		}
 	}
-
-	for (auto& It : PlayerControllers)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Open side channel")));
-		(*It.Value).Client_OpenSideChannelConnection();
-	}
-
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Side channel done")));
 }
 
 void ATBSGameState::SpawnNewProps(FIntVector Coordinates)
@@ -241,7 +245,7 @@ void ATBSGameState::SpawnNewProps(FIntVector Coordinates)
 		Grid->AddProp(Prop);
 	}
 
-	TCPServer->SendAll(PropsData, PropsDataLength);
+	TCPServer->SendAll((uint8_t) 0x01, PropsData, PropsDataLength);
 	Grid->ReindexUnits();
 }
 
@@ -249,7 +253,7 @@ void ATBSGameState::Bomb(FIntVector Coordinates)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Bombing")));
 
-	uint8_t* BombData = (uint8_t*)FMemory::Malloc((sizeof(FIntVector) + 1) * 11 * 11 * 6);
+	uint8_t* BombData = (uint8_t*)FMemory::Malloc((sizeof(FIntVector)) * 11 * 11 * 6);
 	uint32 BombDataLength = 0;
 
 	for (int32 X = Coordinates.X - 50; X <= Coordinates.X + 50; X = X + 10)
@@ -267,9 +271,9 @@ void ATBSGameState::Bomb(FIntVector Coordinates)
 				FIntVector TempCoordinates = FIntVector(X, Y, Z);
 
 				uint8_t* CoordinateBuffer = reinterpret_cast<uint8_t*>(&TempCoordinates);
-				memset(BombData + BombDataLength, 0x02, 1);
-				memcpy(BombData + 1 + BombDataLength, CoordinateBuffer, sizeof(FIntVector));
-				BombDataLength += sizeof(FIntVector) + 1;
+				//memset(BombData + BombDataLength, 0x02, 1);
+				memcpy(BombData + BombDataLength, CoordinateBuffer, sizeof(FIntVector));
+				BombDataLength += sizeof(FIntVector);
 
 				//FMemory::Free(CoordinateBuffer);
 
@@ -278,7 +282,7 @@ void ATBSGameState::Bomb(FIntVector Coordinates)
 		}
 	}
 
-	TCPServer->SendAll(BombData, BombDataLength);
+	TCPServer->SendAll((uint8_t)0x02, BombData, BombDataLength);
 
 	AActor* Explosion = GetWorld()->SpawnActor<AActor>(ExplosionClass);
 	Explosion->SetActorLocation(GridUI->GetCoordinateLocations(Coordinates).Center);

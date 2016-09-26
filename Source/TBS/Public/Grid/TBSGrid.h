@@ -61,6 +61,9 @@ public:
 
 	FOnActorNoLongerVisible OnActorNoLongerVisible;
 
+	TMap<FIntVector, FProp>::TConstIterator GetPropConstIterator();
+	TMap<FIntVector, FProp>::TIterator GetPropIterator();
+
 private:	
 	
 	//bool IsTileAccessBlockedByProp(FIntVector Coordinates, ETileSlot Slot);

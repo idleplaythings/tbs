@@ -47,8 +47,6 @@ public:
 
 	TBSTCPServer* TCPServer;
 
-	TQueue<FString> NetworkMessageQueue;
-
 	void SpawnNewProps(FIntVector Coordinates);
 	void Bomb(FIntVector Coordinates);
 
@@ -58,11 +56,12 @@ private:
 	void InitFactoriesAndManagers();
 	void InitPlayerController(int32 PlayerNumber, APlayerController* PlayerController);
 	void SpawnUnits(int32 PlayerNumber);
+	void RespondToClientMessage(FNetworkMessage Message);
+	void CreateRandomLevel();
 
 	void AllClientsReady();
 	FIntVector FindFreeCoordinates();
 
-	ATBSPropManager* PropManager;
 	ATBSPropFactory* PropFactory;
 	ATBSUnitFactory* UnitFactory;
 	ATBSGrid* Grid;
@@ -70,9 +69,10 @@ private:
 	TMap<int32, ATBSPlayerController*> PlayerControllers;
 
 
-	int32 PropsToGenerate = 166666 * 6; // Miljoona propsia :o
-	//int32 PropsToGenerate = 30000 * 6;
-	uint8_t* PropsData = nullptr;
-	uint32 PropsDataLength;
+	//int32 PropsToGenerate = 83000 * 6;
+	//int32 PropsToGenerate = 166667 * 6;
+	//int32 PropsToGenerate = 3000 * 6;
+	uint8_t* LevelDataBuffer = nullptr;
+	uint32 LevelDataBufferLength;
 	UClass* ExplosionClass;
 };

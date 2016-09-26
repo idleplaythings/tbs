@@ -19,10 +19,11 @@ public:
 	virtual void Stop() override;
 	virtual void Exit() override { }
 
-	TQueue<NetworkMessage> NetworkMessageQueue;
+	TQueue<FNetworkMessage> NetworkMessageQueue;
 
 protected:
-	bool SendMessage(FSocket* Socket, uint8_t* Message, uint32 Length);
+	//bool SendMessage(FSocket* Socket, uint8_t* Message, uint32 Length);
+	bool SendMessage(FSocket* Socket, uint8_t Prefix, uint8_t* Message, uint32 Length, int32 &BytesSent);
 	bool RecvMessage(FSocket *Socket, uint32 DataSize, uint32 ConnectionId=0);
 
 	float ThreadSleepTime = 0.2f;

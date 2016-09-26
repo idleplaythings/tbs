@@ -13,18 +13,16 @@ TBSStreamReader::~TBSStreamReader()
 	FMemory::Free(PartialBuffer);
 }
 
-TArray<NetworkMessage> TBSStreamReader::ReadData(uint8_t * Data, uint32 Length)
+void TBSStreamReader::ReadData(uint8_t * Data, uint32 Length, TQueue<FNetworkMessage>& Messages)
 {
-	TArray<NetworkMessage> Messages;
-
 	// Call ReadIntoMessageBuffer recursively until the binary data array has been exhausted
 	ReadIntoMessageBuffer(Data, Length, Messages);
 
 	// Fully received messages are returned as an array, partial message is retained in MessageBuffer
-	return Messages;
+	//return Aaa;
 }
 
-void TBSStreamReader::ReadIntoMessageBuffer(uint8_t * InputBuffer, uint32 Length, TArray<NetworkMessage>& Messages)
+void TBSStreamReader::ReadIntoMessageBuffer(uint8_t * InputBuffer, uint32 Length, TQueue<FNetworkMessage>& Messages)
 {
 	if (MessageLength == 0)
 	{
@@ -50,10 +48,10 @@ void TBSStreamReader::ReadIntoMessageBuffer(uint8_t * InputBuffer, uint32 Length
 	// If we received the full message, recursively call this function again to read the remainder of the buffer
 	if (BytesRead == PayloadLength)
 	{
-		uint8_t* MessageData = new uint8_t[PayloadLength];
+		uint8_t* MessageData = (uint8_t*)FMemory::Malloc(PayloadLength);
 		FMemory::Memcpy(MessageData, MessageBuffer, PayloadLength);
 
-		Messages.Add(NetworkMessage(PayloadLength, MessageData));
+		Messages.Enqueue(FNetworkMessage(PayloadLength, MessageData));
 
 		uint8_t* NewStart = InputBuffer + PayloadBegin + BytesToRead;
 		uint32 NewLength = Length - PayloadBegin - BytesToRead;
@@ -69,8 +67,10 @@ void TBSStreamReader::ReadIntoMessageBuffer(uint8_t * InputBuffer, uint32 Length
 			ReadIntoMessageBuffer(NewStart, NewLength, Messages);
 		}
 	}
-
-	PayloadBegin = 0;
+	else
+	{
+		PayloadBegin = 0;
+	}	
 }
 
 /**

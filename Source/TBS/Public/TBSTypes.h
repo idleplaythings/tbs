@@ -39,12 +39,21 @@ struct FCoordinateLocations
 };
 
 USTRUCT()
+struct FMapMeta
+{
+	GENERATED_USTRUCT_BODY()
+};
+
+USTRUCT()
 struct FProp
 {
 	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY()
-	int32 Id;
+	uint32 Id;
+
+	UPROPERTY()
+	uint32 TypeId;
 
 	UPROPERTY()
 	FIntVector Coordinates;
@@ -96,27 +105,27 @@ struct PathStepPredicate
 	}
 };
 
-struct NetworkMessage
+struct FNetworkMessage
 {
 	uint32 ConnectionId;
 	uint32 Length;
 	uint8_t* Data;
 
-	NetworkMessage()
+	FNetworkMessage()
 	{
 		ConnectionId = 0;
 		Length = 0;
 		Data = nullptr;
 	}
 
-	NetworkMessage(uint32 InLength, uint8_t* InData)
+	FNetworkMessage(uint32 InLength, uint8_t* InData)
 	{
 		ConnectionId = 0;
 		Length = InLength;
 		Data = InData;
 	}
 
-	NetworkMessage(uint32 InConnectionId, uint32 InLength, uint8_t* InData)
+	FNetworkMessage(uint32 InConnectionId, uint32 InLength, uint8_t* InData)
 	{
 		ConnectionId = InConnectionId;
 		Length = InLength;

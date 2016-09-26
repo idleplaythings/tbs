@@ -52,9 +52,9 @@ bool TBSTCPClient::Connect(FString IP, int32 Port)
 	return Connected;
 }
 
-bool TBSTCPClient::Send(uint8* Data, uint32 Length)
+bool TBSTCPClient::Send(uint8_t Prefix, uint8_t* Data, uint32 Length, int32 &BytesSent)
 {
-	return SendMessage(Socket, Data, Length);
+	return SendMessage(Socket, Prefix, Data, Length, BytesSent);
 }
 
 uint32 TBSTCPClient::Run()
@@ -66,7 +66,11 @@ uint32 TBSTCPClient::Run()
 			uint32 DataSize = 0;
 			while (Socket->HasPendingData(DataSize))
 			{
-				RecvMessage(Socket, DataSize);
+				//GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, FString::Printf(TEXT("Receiving buffer from socket, size %i"), DataSize));
+				if (!RecvMessage(Socket, DataSize))
+				{
+					GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Receiving messages failed")));
+				}
 			}
 		}
 		FPlatformProcess::Sleep(ThreadSleepTime);

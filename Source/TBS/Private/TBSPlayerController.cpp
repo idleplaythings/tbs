@@ -8,7 +8,6 @@
 #include "TBSUIDefaultContext.h"
 #include "TBSUIContextAxisEvent.h"
 #include "TBSUIContextCoordinateEvent.h"
-#include "Server.h"
 #include <string>
 #include "TBSPlayerController.h"
 
@@ -107,7 +106,8 @@ void ATBSPlayerController::TrySideChannelConnection()
 	{
 		GetWorldTimerManager().ClearTimer(SideChannelConnectionTimer);
 		std::string Message = "Client says Hello!";
-		TCPClient->Send((uint8_t*)Message.c_str(), Message.length());
+		int32 BytesSent = 0;
+		TCPClient->Send((uint8_t)0x10, (uint8_t*)Message.c_str(), Message.length(), BytesSent);
 	}
 
 	if (SideChannelConnectionAttempts-- < 1)
@@ -140,19 +140,22 @@ void ATBSPlayerController::PlayerTick(float DeltaTime)
 		{
 			if (!TCPClient->NetworkMessageQueue.IsEmpty())
 			{
-				NetworkMessage Message;
-				if (TCPClient->NetworkMessageQueue.Dequeue(Message))
+				int32 MessageNum = 0;
+				FNetworkMessage Message;
+				while (TCPClient->NetworkMessageQueue.Dequeue(Message))
 				{
-					GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Message of length %i"), Message.Length));
-
+					//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Message of length %i"), Message.Length));
+					MessageNum++;
 					uint8_t* MessagePtr = Message.Data;
 
-					while (MessagePtr < Message.Data + Message.Length)
+					if (*(uint8_t*)MessagePtr == 0x01)
 					{
-						if (*(uint8_t*)MessagePtr == 0x01)
+						MessagePtr += 1;
+
+						while (MessagePtr < Message.Data + Message.Length)
 						{
 							FProp Prop;
-							memcpy(&Prop, MessagePtr + 1, sizeof(FProp));
+							memcpy(&Prop, MessagePtr, sizeof(FProp));
 
 							ClassLoader->Grid->AddProp(Prop);
 							int32 Rotation = (float)FMath::RandRange(0, 3) * 90;
@@ -189,12 +192,15 @@ void ATBSPlayerController::PlayerTick(float DeltaTime)
 
 							Block->SpawnInstance(Prop.Coordinates, InstanceTransform);
 
-							MessagePtr += 1 + sizeof(FProp);
+							MessagePtr += sizeof(FProp);
+						}
+					}
 
-							continue;
-						}	
+					if (*(uint8_t*)MessagePtr == 0x02)
+					{
+						MessagePtr += 1;
 
-						if (*(uint8_t*)MessagePtr == 0x02)
+						while (MessagePtr < Message.Data + Message.Length)
 						{
 							FIntVector Coordinates;
 							memcpy(&Coordinates, MessagePtr + 1, sizeof(FIntVector));
@@ -202,7 +208,7 @@ void ATBSPlayerController::PlayerTick(float DeltaTime)
 							//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Received remove props at (%i, %i, %i)"), Coordinates.X, Coordinates.Y, Coordinates.Z));
 
 							ClassLoader->Grid->RemovePropsAt(Coordinates);
-							
+
 							FIntVector BlockCell = FIntVector(
 								FMath::FloorToInt(Coordinates.X / 300),
 								FMath::FloorToInt(Coordinates.Y / 300),
@@ -214,14 +220,17 @@ void ATBSPlayerController::PlayerTick(float DeltaTime)
 							if (BlockPtr)
 							{
 								(*BlockPtr)->RemoveInstance(Coordinates);
-							}							
+							}
 
 							MessagePtr += 1 + sizeof(FIntVector);
-
-							continue;
 						}
 					}
+
+					FMemory::Free(Message.Data);
 				}
+
+				GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, FString::Printf(TEXT("%i Messages handled"), MessageNum));
+				GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, FString::Printf(TEXT("%i Props"), ClassLoader->Grid->PropCount()));
 			}
 		}
 	}
@@ -330,18 +339,18 @@ void ATBSPlayerController::Bomb()
 
 void ATBSPlayerController::SendDebugMessage()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Sending debug message")));
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Sending debug message")));
 
-	std::string Message = "";
+	//std::string Message = "";
 
-	for (int32 i = 0; i < FMath::RandRange(1, 3); i++)
-	{		
-		Message.append("0123456789");
-	}
+	//for (int32 i = 0; i < FMath::RandRange(1, 3); i++)
+	//{		
+	//	Message.append("0123456789");
+	//}
 
-	TCPClient->Send((uint8_t*)Message.c_str(), Message.length());
-	TCPClient->Send((uint8_t*)Message.c_str(), Message.length());
-	TCPClient->Send((uint8_t*)Message.c_str(), Message.length());
+	//TCPClient->Send((uint8_t*)Message.c_str(), Message.length());
+	//TCPClient->Send((uint8_t*)Message.c_str(), Message.length());
+	//TCPClient->Send((uint8_t*)Message.c_str(), Message.length());
 }
 
 
