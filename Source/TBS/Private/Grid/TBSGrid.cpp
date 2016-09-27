@@ -43,12 +43,58 @@ void ATBSGrid::AddProp(FProp Prop)
 		Prop.Id = NextPropId++;
 	}
 
-	PropMap.Add(Prop.Coordinates, Prop);
+	TArray<FProp>* Props = PropMap.Find(Prop.Coordinates);
+
+	if (!Props)
+	{
+		TArray<FProp> PropsArray;
+		PropsArray.Add(Prop);
+		PropMap.Add(Prop.Coordinates, PropsArray);
+	}
+	else
+	{
+		Props->Add(Prop);
+	}
+
+	PropIndexMap.Add(Prop.Id, Prop.Coordinates);
+	NumOfProps++;
 }
 
 void ATBSGrid::RemovePropsAt(FIntVector Coordinates)
 {
+	TArray<FProp>* Props = PropMap.Find(Coordinates);
+
+	if (Props)
+	{
+		NumOfProps -= Props->Num();
+
+		for (auto& Prop : *Props)
+		{
+			PropIndexMap.Remove(Prop.Id);
+		}
+	}
+
 	PropMap.Remove(Coordinates);
+}
+
+void ATBSGrid::RemovePropById(uint32 PropId)
+{
+	FIntVector* Coordinates = PropIndexMap.Find(PropId);
+
+	if (Coordinates)
+	{
+		TArray<FProp>* Props = PropMap.Find(*Coordinates);
+
+		if (Props)
+		{
+			Props->RemoveAllSwap([PropId](FProp Prop) {
+				return Prop.Id == PropId;
+			});
+
+			PropIndexMap.Remove(PropId);
+			NumOfProps--;
+		}
+	}
 }
 
 void ATBSGrid::AddUnit(ATBSUnit* Unit)
@@ -56,9 +102,9 @@ void ATBSGrid::AddUnit(ATBSUnit* Unit)
 	Units.Add(Unit);
 }
 
-int32 ATBSGrid::PropCount()
+uint32 ATBSGrid::PropCount()
 {
-	return PropMap.Num();
+	return NumOfProps;
 }
 
 ATBSUnit* ATBSGrid::SelectUnit(FIntVector Coordinates)
@@ -112,17 +158,22 @@ TArray<FIntVector> ATBSGrid::GetNeighbours(FIntVector Coordinates)
 
 bool ATBSGrid::IsAccessible(FIntVector Coordinates)
 {
-	FProp* Prop = PropMap.Find(Coordinates);
+	TArray<FProp>* Props = PropMap.Find(Coordinates);
+	bool Accessible = true;
 	
-	if (Prop)
+	if (Props)
 	{
-		if (Prop->BlocksAccess)
+		for (auto& Prop : *Props)
 		{
-			return false;
+			if (Prop.BlocksAccess)
+			{
+				Accessible = false;
+				break;
+			}
 		}
 	}
 
-	return true;
+	return Accessible;
 }
 
 void ATBSGrid::ReindexProps_Implementation()
@@ -322,12 +373,12 @@ TArray<FIntVector> ATBSGrid::GetAccessibleNeighbours(FIntVector Coordinates)
 	});
 }
 
-TMap<FIntVector, FProp>::TConstIterator ATBSGrid::GetPropConstIterator()
+TMap<FIntVector, TArray<FProp>>::TConstIterator ATBSGrid::GetPropConstIterator()
 {
 	return PropMap.CreateConstIterator();
 }
 
-TMap<FIntVector, FProp>::TIterator ATBSGrid::GetPropIterator()
+TMap<FIntVector, TArray<FProp>>::TIterator ATBSGrid::GetPropIterator()
 {
 	return PropMap.CreateIterator();
 }

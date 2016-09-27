@@ -26,11 +26,13 @@ public:
 	UPROPERTY(Replicated)
 	FIntVector GridDimensions;
 
-	TMap<FIntVector, FProp> PropMap;
+	TMap<FIntVector, TArray<FProp>> PropMap;
+	TMap<uint32, FIntVector> PropIndexMap;
 
-	int32 PropCount();
+	uint32 PropCount();
+	uint32 NumOfProps;
 
-	int32 NextPropId = 1;
+	uint32 NextPropId = 1;
 
 	UPROPERTY(Replicated)
 	TArray<ATBSUnit*> Units;
@@ -54,6 +56,7 @@ public:
 	void AddProp(ATBSProp* Prop);
 	void AddProp(FProp Prop);
 	void RemovePropsAt(FIntVector Coordinates);
+	void RemovePropById(uint32 PropId);
 	void AddUnit(ATBSUnit* Unit);
 	TArray<ATBSUnit*>::TIterator GetUnitIterator();
 
@@ -61,8 +64,8 @@ public:
 
 	FOnActorNoLongerVisible OnActorNoLongerVisible;
 
-	TMap<FIntVector, FProp>::TConstIterator GetPropConstIterator();
-	TMap<FIntVector, FProp>::TIterator GetPropIterator();
+	TMap<FIntVector, TArray<FProp>>::TConstIterator GetPropConstIterator();
+	TMap<FIntVector, TArray<FProp>>::TIterator GetPropIterator();
 
 private:	
 	

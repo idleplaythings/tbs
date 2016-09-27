@@ -64,12 +64,15 @@ void ATBSGameState::Tick(float DeltaTime)
 
 void ATBSGameState::RespondToClientMessage(FNetworkMessage Message)
 {
-	uint8_t* Temp = new uint8_t[Message.Length + 1];
-	memcpy(Temp, Message.Data, Message.Length);
-	Temp[Message.Length] = '\0';
+	//uint8_t* Temp = new uint8_t[Message.Length + 1];
+	//memcpy(Temp, Message.Data, Message.Length);
+	//Temp[Message.Length] = '\0';
 
-	int32 BytesSent = 0;
-	TCPServer->Send(Message.ConnectionId, (uint8_t) 0x01, LevelDataBuffer, LevelDataBufferLength, BytesSent);
+	if (LevelDataBufferLength > 0)
+	{
+		int32 BytesSent = 0;
+		TCPServer->Send(Message.ConnectionId, (uint8_t)0x01, LevelDataBuffer, LevelDataBufferLength, BytesSent);
+	}
 }
 
 void ATBSGameState::AddPlayer(APlayerController* PlayerController)
@@ -180,9 +183,10 @@ void ATBSGameState::CreateRandomLevel()
 {
 	//int32 Props = 1000000;
 	//int32 Props = 500000;
-	int32 Props = 250000;
+	uint32 Props = 41600 * 6;
 
-	LevelDataBuffer = (uint8_t*)FMemory::Malloc(sizeof(FMapMeta) + Props * sizeof(FProp));
+	//LevelDataBuffer = (uint8_t*)FMemory::Malloc(sizeof(FMapMeta) + Props * sizeof(FProp));
+	LevelDataBuffer = (uint8_t*)FMemory::Malloc(Props * sizeof(FProp));
 
 	// Generate random meta data here...
 
