@@ -9,12 +9,13 @@
 #include "TBSUIContextCoordinateEvent.h"
 #include "TBSUIFriendlyUnitContext.h"
 #include "TBSUIDefaultContext.h"
+#include "TBSUIPropDebugContext.h"
 
-void TBSUIDefaultContext::HandleEvent(TBSUIContextEvent* Event)
+void TBSUIDefaultContext::HandleEvent(TBSUIContextEvent &Event)
 {
-	if (Event->Type == FName(TEXT("TileClick")))
+	if (Event.Type == FName(TEXT("TileClick")))
 	{
-		FIntVector Coordinates = ((TBSUIContextCoordinateEvent*)Event)->Coordinates;
+		FIntVector Coordinates = ((TBSUIContextCoordinateEvent*)&Event)->Coordinates;
 		ATBSUnit* Unit = ClassLoader->Grid->SelectUnit(Coordinates);
 
 		if (Unit && Unit->PlayerNumber == ClassLoader->PlayerController->PlayerNumber)
@@ -29,9 +30,9 @@ void TBSUIDefaultContext::HandleEvent(TBSUIContextEvent* Event)
 			ContextStack->PushContext(new TBSUIFriendlyUnitContext);
 		}		
 	}
-	else if (Event->Type == FName(TEXT("TileHoverBegin")))
+	else if (Event.Type == FName(TEXT("TileHoverBegin")))
 	{
-		FIntVector Coordinates = ((TBSUIContextCoordinateEvent*)Event)->Coordinates;
+		FIntVector Coordinates = ((TBSUIContextCoordinateEvent*)&Event)->Coordinates;
 
 		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Hover (%i, %i, %i)"), Coordinates.X, Coordinates.Y, Coordinates.Z));
 
@@ -56,60 +57,64 @@ void TBSUIDefaultContext::HandleEvent(TBSUIContextEvent* Event)
 			ClassLoader->GridUI->ReleaseCursor();
 		}
 	}
-	else if (Event->Type == FName(TEXT("TileRightClick")))
+	else if (Event.Type == FName(TEXT("TileRightClick")))
 	{
 
 	}
-	else if (Event->Type == FName(TEXT("TileHoverBegin")))
+	else if (Event.Type == FName(TEXT("TileHoverBegin")))
 	{
 
 	}
-	else if (Event->Type == FName(TEXT("TileHoverEnd")))
+	else if (Event.Type == FName(TEXT("TileHoverEnd")))
 	{
 
 	}
-	else if (Event->Type == FName(TEXT("MoveCameraForward")))
+	else if (Event.Type == FName(TEXT("MoveCameraForward")))
 	{
-		ClassLoader->DefaultPawn->MoveCameraForward(((TBSUIContextAxisEvent*)Event)->AxisValue);
+		ClassLoader->DefaultPawn->MoveCameraForward(((TBSUIContextAxisEvent*)&Event)->AxisValue);
 	}
-	else if (Event->Type == FName(TEXT("MoveCameraRight")))
+	else if (Event.Type == FName(TEXT("MoveCameraRight")))
 	{
-		ClassLoader->DefaultPawn->MoveCameraRight(((TBSUIContextAxisEvent*)Event)->AxisValue);
+		ClassLoader->DefaultPawn->MoveCameraRight(((TBSUIContextAxisEvent*)&Event)->AxisValue);
 	}
-	else if (Event->Type == FName(TEXT("ViewLevelUp")))
+	else if (Event.Type == FName(TEXT("ViewLevelUp")))
 	{
 		ClassLoader->GridUI->LevelUp();
 	}
-	else if (Event->Type == FName(TEXT("ViewLevelDown")))
+	else if (Event.Type == FName(TEXT("ViewLevelDown")))
 	{
 		ClassLoader->GridUI->LevelDown();
 	}
-	else if (Event->Type == FName(TEXT("RotateCameraRight")))
+	else if (Event.Type == FName(TEXT("RotateCameraRight")))
 	{
 		ClassLoader->DefaultPawn->RotateCameraRight();
 	}
-	else if (Event->Type == FName(TEXT("RotateCameraLeft")))
+	else if (Event.Type == FName(TEXT("RotateCameraLeft")))
 	{
 		ClassLoader->DefaultPawn->RotateCameraLeft();
 	}
-	else if (Event->Type == FName(TEXT("ZoomCameraIn")))
+	else if (Event.Type == FName(TEXT("ZoomCameraIn")))
 	{
 		ClassLoader->DefaultPawn->ZoomCameraIn();
 	}
-	else if (Event->Type == FName(TEXT("ZoomCameraOut")))
+	else if (Event.Type == FName(TEXT("ZoomCameraOut")))
 	{
 		ClassLoader->DefaultPawn->ZoomCameraOut();
 	}
-	else if (Event->Type == FName(TEXT("TogglePerspectiveCamera")))
+	else if (Event.Type == FName(TEXT("TogglePerspectiveCamera")))
 	{
 		ClassLoader->DefaultPawn->TogglePerspectiveCamera();
 	}
-	else if (Event->Type == FName(TEXT("MoveCameraForwardOffset")))
+	else if (Event.Type == FName(TEXT("MoveCameraForwardOffset")))
 	{
-		ClassLoader->DefaultPawn->SetMoveForwardAxisOffset(((TBSUIContextAxisEvent*)Event)->AxisValue);
+		ClassLoader->DefaultPawn->SetMoveForwardAxisOffset(((TBSUIContextAxisEvent*)&Event)->AxisValue);
 	}
-	else if (Event->Type == FName(TEXT("MoveCameraRightOffset")))
+	else if (Event.Type == FName(TEXT("MoveCameraRightOffset")))
 	{
-		ClassLoader->DefaultPawn->SetMoveRightAxisOffset(((TBSUIContextAxisEvent*)Event)->AxisValue);
+		ClassLoader->DefaultPawn->SetMoveRightAxisOffset(((TBSUIContextAxisEvent*)&Event)->AxisValue);
+	}
+	else if (Event.Type == FName(TEXT("PropDebug")))
+	{
+		ContextStack->PushContext(new TBSUIPropDebugContext);
 	}
 }

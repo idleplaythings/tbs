@@ -13,4 +13,5 @@ public:
 	~TBSUIContextEvent();
 
 	FName Type;
+	bool StopPropagation = false;
 };

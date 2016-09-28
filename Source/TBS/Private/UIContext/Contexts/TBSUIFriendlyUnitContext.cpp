@@ -23,9 +23,9 @@ void TBSUIFriendlyUnitContext::ExitContext()
 	ClassLoader->GridPathFinder->InvalidateCache();
 }
 
-void TBSUIFriendlyUnitContext::HandleEvent(TBSUIContextEvent* Event)
+void TBSUIFriendlyUnitContext::HandleEvent(TBSUIContextEvent &Event)
 {
-	if (Event->Type == FName(TEXT("TileHoverBegin")))
+	if (Event.Type == FName(TEXT("TileHoverBegin")))
 	{
 		if (ClassLoader->PlayerController->SelectedUnit)
 		{
@@ -33,7 +33,7 @@ void TBSUIFriendlyUnitContext::HandleEvent(TBSUIContextEvent* Event)
 
 			if (ClassLoader->GridPathFinder->FindPath(
 				ClassLoader->PlayerController->SelectedUnit->GameCoordinates,
-				((TBSUIContextCoordinateEvent*)Event)->Coordinates,
+				((TBSUIContextCoordinateEvent*)&Event)->Coordinates,
 				ClassLoader->PlayerController->SelectedPath,
 				ClassLoader->PlayerController->SelectedUnit->Dimensions
 			))
@@ -46,11 +46,11 @@ void TBSUIFriendlyUnitContext::HandleEvent(TBSUIContextEvent* Event)
 			}
 		}
 	}
-	else if (Event->Type == FName(TEXT("TileHoverEnd")))
+	else if (Event.Type == FName(TEXT("TileHoverEnd")))
 	{
 		ClassLoader->GridPathRenderer->ClearPath();
 	}
-	else if (Event->Type == FName(TEXT("TileClick")))
+	else if (Event.Type == FName(TEXT("TileClick")))
 	{
 		ClassLoader->PlayerController->Server_CommandMoveUnit(
 			ClassLoader->PlayerController->SelectedUnit,
@@ -61,7 +61,7 @@ void TBSUIFriendlyUnitContext::HandleEvent(TBSUIContextEvent* Event)
 		ClassLoader->GridPathRenderer->ClearPath();
 		ContextStack->PopContext();
 	}
-	else if (Event->Type == FName(TEXT("TileRightClick")) || Event->Type == FName(TEXT("Escape")))
+	else if (Event.Type == FName(TEXT("TileRightClick")) || Event.Type == FName(TEXT("Escape")))
 	{
 		ClassLoader->PlayerController->PathSelected = false;
 		ClassLoader->GridPathRenderer->ClearPath();

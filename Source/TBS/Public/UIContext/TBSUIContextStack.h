@@ -22,7 +22,7 @@ public:
 	void PushContext(TBSUIContext* Context);
 	void PopContext();
 
-	void HandleEvent(TBSUIContextEvent* Event);	
+	void HandleEvent(TBSUIContextEvent &Event);	
 
 private:
 	ATBSClassLoader* ClassLoader;

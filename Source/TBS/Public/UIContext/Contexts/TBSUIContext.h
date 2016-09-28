@@ -20,7 +20,7 @@ public:
 
 	virtual void EnterContext();
 	virtual void ExitContext();
-	virtual void HandleEvent(TBSUIContextEvent* Event);
+	virtual void HandleEvent(TBSUIContextEvent &Event);
 
 protected:
 	TBSUIContextStack* ContextStack;

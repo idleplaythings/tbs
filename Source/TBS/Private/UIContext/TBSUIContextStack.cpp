@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "TBS.h"
+#include "TBSUIContextEvent.h"
 #include "TBSUIContextStack.h"
 
 TBSUIContextStack::TBSUIContextStack(ATBSClassLoader* ClassLoader) : ClassLoader(ClassLoader)
@@ -24,7 +25,7 @@ void TBSUIContextStack::PopContext()
 	UIContexts.pop_back();
 }
 
-void TBSUIContextStack::HandleEvent(TBSUIContextEvent* Event)
+void TBSUIContextStack::HandleEvent(TBSUIContextEvent &Event)
 {
 	if (UIContexts.size() > 0)
 	{
@@ -33,6 +34,11 @@ void TBSUIContextStack::HandleEvent(TBSUIContextEvent* Event)
 
 		for (std::vector<TBSUIContext*>::reverse_iterator It = CopyOfContexts.rbegin(); It != CopyOfContexts.rend(); ++It)
 		{
+			if (Event.StopPropagation)
+			{
+				break;
+			}
+
 			if (*It)
 			{
 				(*It)->HandleEvent(Event);

@@ -7,7 +7,7 @@
 /**
  * 
  */
-class TBS_API TBSUIFriendlyUnitContext : public TBSUIContext
+class TBS_API TBSUIPropDebugContext : public TBSUIContext
 {
 public:
 	void EnterContext();

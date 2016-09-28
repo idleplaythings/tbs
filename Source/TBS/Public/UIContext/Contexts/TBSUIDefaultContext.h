@@ -10,7 +10,7 @@
 class TBS_API TBSUIDefaultContext : public TBSUIContext
 {
 public:
-	void HandleEvent(TBSUIContextEvent* Event);
+	void HandleEvent(TBSUIContextEvent &Event);
 
 private:
 	ATBSUnit* HoverUnit;

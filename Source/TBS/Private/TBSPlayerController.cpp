@@ -70,6 +70,7 @@ void ATBSPlayerController::OnClassesLoaded()
 	InputComponent->BindAction("ActionMouseLeft", IE_Pressed, this, &ATBSPlayerController::MouseLeft);
 	InputComponent->BindAction("ActionMouseRight", IE_Pressed, this, &ATBSPlayerController::MouseRight);
 	InputComponent->BindAction("ActionEscape", IE_Pressed, this, &ATBSPlayerController::Escape);
+	InputComponent->BindAction("ActionPropDebug", IE_Pressed, this, &ATBSPlayerController::PropDebug);
 	InputComponent->BindAxis("AxisMoveCameraForward", this, &ATBSPlayerController::MoveCameraForward);
 	InputComponent->BindAxis("AxisMoveCameraRight", this, &ATBSPlayerController::MoveCameraRight);
 
@@ -128,11 +129,13 @@ void ATBSPlayerController::PlayerTick(float DeltaTime)
 
 		if (ClassLoader->GridUI->CoordinatesChanged)
 		{
-			UIContextStack->HandleEvent(new TBSUIContextCoordinateEvent(FName(TEXT("TileHoverEnd")), ClassLoader->GridUI->CurrentCoordinates));
+			TBSUIContextCoordinateEvent Event = TBSUIContextCoordinateEvent(FName(TEXT("TileHoverEnd")), ClassLoader->GridUI->CurrentCoordinates);
+			UIContextStack->HandleEvent(Event);
 
 			if (ClassLoader->GridUI->CursorOnGrid)
 			{
-				UIContextStack->HandleEvent(new TBSUIContextCoordinateEvent(FName(TEXT("TileHoverBegin")), ClassLoader->GridUI->CurrentCoordinates));
+				TBSUIContextCoordinateEvent Event = TBSUIContextCoordinateEvent(FName(TEXT("TileHoverBegin")), ClassLoader->GridUI->CurrentCoordinates);
+				UIContextStack->HandleEvent(Event);
 			}
 		}
 
@@ -244,47 +247,56 @@ void ATBSPlayerController::PlayerTick(float DeltaTime)
 
 void ATBSPlayerController::ViewLevelUp()
 {
-	UIContextStack->HandleEvent(new TBSUIContextEvent(FName(TEXT("ViewLevelUp"))));
+	TBSUIContextEvent Event = TBSUIContextEvent(FName(TEXT("ViewLevelUp")));
+	UIContextStack->HandleEvent(Event);
 }
 
 void ATBSPlayerController::ViewLevelDown()
 {
-	UIContextStack->HandleEvent(new TBSUIContextEvent(FName(TEXT("ViewLevelDown"))));
+	TBSUIContextEvent Event = TBSUIContextEvent(FName(TEXT("ViewLevelDown")));
+	UIContextStack->HandleEvent(Event);
 }
 
 void ATBSPlayerController::RotateCameraRight()
 {
-	UIContextStack->HandleEvent(new TBSUIContextEvent(FName(TEXT("RotateCameraRight"))));
+	TBSUIContextEvent Event = TBSUIContextEvent(FName(TEXT("RotateCameraRight")));
+	UIContextStack->HandleEvent(Event);
 }
 
 void ATBSPlayerController::RotateCameraLeft()
 {
-	UIContextStack->HandleEvent(new TBSUIContextEvent(FName(TEXT("RotateCameraLeft"))));
+	TBSUIContextEvent Event = TBSUIContextEvent(FName(TEXT("RotateCameraLeft")));
+	UIContextStack->HandleEvent(Event);
 }
 
 void ATBSPlayerController::ZoomCameraIn()
 {
-	UIContextStack->HandleEvent(new TBSUIContextEvent(FName(TEXT("ZoomCameraIn"))));
+	TBSUIContextEvent Event = TBSUIContextEvent(FName(TEXT("ZoomCameraIn")));
+	UIContextStack->HandleEvent(Event);
 }
 
 void ATBSPlayerController::ZoomCameraOut()
 {
-	UIContextStack->HandleEvent(new TBSUIContextEvent(FName(TEXT("ZoomCameraOut"))));
+	TBSUIContextEvent Event = TBSUIContextEvent(FName(TEXT("ZoomCameraOut")));
+	UIContextStack->HandleEvent(Event);
 }
 
 void ATBSPlayerController::TogglePerspectiveCamera()
 {
-	UIContextStack->HandleEvent(new TBSUIContextEvent(FName(TEXT("TogglePerspectiveCamera"))));
+	TBSUIContextEvent Event = TBSUIContextEvent(FName(TEXT("TogglePerspectiveCamera")));
+	UIContextStack->HandleEvent(Event);
 }
 
 void ATBSPlayerController::MoveCameraForward(float AxisValue)
 {
-	UIContextStack->HandleEvent(new TBSUIContextAxisEvent(FName(TEXT("MoveCameraForward")), AxisValue));
+	TBSUIContextAxisEvent Event = TBSUIContextAxisEvent(FName(TEXT("MoveCameraForward")), AxisValue);
+	UIContextStack->HandleEvent(Event);
 }
 
 void ATBSPlayerController::MoveCameraRight(float AxisValue)
 {
-	UIContextStack->HandleEvent(new TBSUIContextAxisEvent(FName(TEXT("MoveCameraRight")), AxisValue));
+	TBSUIContextAxisEvent Event = TBSUIContextAxisEvent(FName(TEXT("MoveCameraRight")), AxisValue);
+	UIContextStack->HandleEvent(Event);
 }
 
 void ATBSPlayerController::MoveCameraForwardOffset(float AxisValue)
@@ -293,7 +305,8 @@ void ATBSPlayerController::MoveCameraForwardOffset(float AxisValue)
 	// ensure we have all the classes loaded before attempting to handle it
 	if (ClassesLoaded)
 	{
-		UIContextStack->HandleEvent(new TBSUIContextAxisEvent(FName(TEXT("MoveCameraForwardOffset")), AxisValue));
+		TBSUIContextAxisEvent Event = TBSUIContextAxisEvent(FName(TEXT("MoveCameraForwardOffset")), AxisValue);
+		UIContextStack->HandleEvent(Event);
 	}
 }
 
@@ -303,7 +316,8 @@ void ATBSPlayerController::MoveCameraRightOffset(float AxisValue)
 	// ensure we have all the classes loaded before attempting to handle it
 	if (ClassesLoaded)
 	{
-		UIContextStack->HandleEvent(new TBSUIContextAxisEvent(FName(TEXT("MoveCameraRightOffset")), AxisValue));
+		TBSUIContextAxisEvent Event = TBSUIContextAxisEvent(FName(TEXT("MoveCameraRightOffset")), AxisValue);
+		UIContextStack->HandleEvent(Event);
 	}
 }
 
@@ -311,7 +325,8 @@ void ATBSPlayerController::MouseLeft()
 {
 	if (ClassLoader->GridUI->CursorOnGrid)
 	{
-		UIContextStack->HandleEvent(new TBSUIContextCoordinateEvent(FName(TEXT("TileClick")), ClassLoader->GridUI->CurrentCoordinates));
+		TBSUIContextCoordinateEvent Event = TBSUIContextCoordinateEvent(FName(TEXT("TileClick")), ClassLoader->GridUI->CurrentCoordinates);
+		UIContextStack->HandleEvent(Event);
 	}
 }
 
@@ -319,13 +334,21 @@ void ATBSPlayerController::MouseRight()
 {
 	if (ClassLoader->GridUI->CursorOnGrid)
 	{
-		UIContextStack->HandleEvent(new TBSUIContextCoordinateEvent(FName(TEXT("TileRightClick")), ClassLoader->GridUI->CurrentCoordinates));
+		TBSUIContextCoordinateEvent Event = TBSUIContextCoordinateEvent(FName(TEXT("TileRightClick")), ClassLoader->GridUI->CurrentCoordinates);
+		UIContextStack->HandleEvent(Event);
 	}
 }
 
 void ATBSPlayerController::Escape()
 {
-	UIContextStack->HandleEvent(new TBSUIContextEvent(FName(TEXT("Escape"))));
+	TBSUIContextEvent Event = TBSUIContextEvent(FName(TEXT("Escape")));
+	UIContextStack->HandleEvent(Event);
+}
+
+void ATBSPlayerController::PropDebug()
+{
+	TBSUIContextEvent Event = TBSUIContextEvent(FName(TEXT("PropDebug")));
+	UIContextStack->HandleEvent(Event);
 }
 
 void ATBSPlayerController::NewProp()

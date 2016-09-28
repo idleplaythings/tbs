@@ -27,7 +27,7 @@ void TBSUIContext::ExitContext()
 
 }
 
-void TBSUIContext::HandleEvent(TBSUIContextEvent* Event)
+void TBSUIContext::HandleEvent(TBSUIContextEvent &Event)
 {
 
 }

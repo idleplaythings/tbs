@@ -72,6 +72,7 @@ public:
 	void SendDebugMessage();
 	void NewProp();
 	void Bomb();
+	void PropDebug();
 	void MoveCameraForwardOffset(float AxisValue);
 	void MoveCameraRightOffset(float AxisValue);
 
