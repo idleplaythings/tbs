@@ -26,12 +26,10 @@ public:
 	UInstancedStaticMeshComponent *ISMComponent;
 	
 	void ScalePropMesh() override;
-	void SpawnInstance(FIntVector Coordinates, const FTransform& InstanceTransform);
-	void RemoveInstance(FIntVector Coordinates);
-	void PurgeRemoved();
+	void SpawnInstance(uint32 PropId, const FTransform& InstanceTransform);
+	void RemoveInstance(uint32 PropId);
 
-	TMap<FIntVector, int32> InstanceMap;
-	TArray<int32> RemovedIndexes;
+	TMap<uint32, int32> InstanceMap;
 
 	bool Debug = false;
 };

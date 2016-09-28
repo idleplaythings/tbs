@@ -69,6 +69,17 @@ struct FProp
 
 	UPROPERTY()
 	bool BlocksAccess;
+
+	FProp()
+	{
+		Id = 0;
+		TypeId = 0;
+		Coordinates = FIntVector(0, 0, 0);
+		Dimensions = FIntVector(1, 1, 1);
+		Rotation = 0;
+		Offset = FVector(0.0, 0.0, 0.0);
+		BlocksAccess = false;
+	}
 };
 
 FORCEINLINE FArchive& operator<<(FArchive &Ar, FProp& Prop)

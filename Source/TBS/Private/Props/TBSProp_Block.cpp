@@ -51,12 +51,12 @@ void ATBSProp_Block::ScalePropMesh()
 	}	
 }
 
-void ATBSProp_Block::SpawnInstance(FIntVector Coordinates, const FTransform& InstanceTransform)
+void ATBSProp_Block::SpawnInstance(uint32 PropId, const FTransform& InstanceTransform)
 {
 	if (ISMComponent)
 	{
 		int32 InstanceIndex = ISMComponent->AddInstanceWorldSpace(InstanceTransform);
-		InstanceMap.Add(Coordinates, InstanceIndex);
+		InstanceMap.Add(PropId, InstanceIndex);
 
 		if (Debug)
 		{
@@ -65,35 +65,19 @@ void ATBSProp_Block::SpawnInstance(FIntVector Coordinates, const FTransform& Ins
 	}
 }
 
-void ATBSProp_Block::RemoveInstance(FIntVector Coordinates)
+void ATBSProp_Block::RemoveInstance(uint32 PropId)
 {
 	if (ISMComponent)
 	{
-		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Looking for instance index (%i, %i, %i)"), Coordinates.X, Coordinates.Y, Coordinates.Z));
-		int32* InstanceIndex = InstanceMap.Find(Coordinates);
+		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, FString::Printf(TEXT("looking for instance idx on prop %i"), PropId));
+
+		int32* InstanceIndex = InstanceMap.Find(PropId);
 
 		if (InstanceIndex)
 		{				
-			ISMComponent->UpdateInstanceTransform(*InstanceIndex, FTransform(FVector(10000.0, 10000.0, 10000.0)), true, true);
-			RemovedIndexes.Add(*InstanceIndex);
-			//if (ISMComponent->RemoveInstance(*InstanceIndex))
-			//{
-			//	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Removed index %i"), *InstanceIndex));
-			//	InstanceMap.Remove(Coordinates);
+			GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, FString::Printf(TEXT("got instance idx %i"), *InstanceIndex));
 
-			//	for (auto& It : InstanceMap)
-			//	{
-			//		if (It.Value > *InstanceIndex)
-			//		{
-			//			InstanceMap[It.Key] = It.Value - 1;
-			//		}
-			//	}
-			//}			
+			ISMComponent->UpdateInstanceTransform(*InstanceIndex, FTransform(FVector(10000.0, 10000.0, 10000.0)), true, true);	
 		}
 	}
-}
-
-void ATBSProp_Block::PurgeRemoved()
-{
-
 }

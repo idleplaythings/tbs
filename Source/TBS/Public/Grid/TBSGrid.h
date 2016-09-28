@@ -26,9 +26,6 @@ public:
 	UPROPERTY(Replicated)
 	FIntVector GridDimensions;
 
-	TMap<FIntVector, TArray<FProp>> PropMap;
-	TMap<uint32, FIntVector> PropIndexMap;
-
 	uint32 PropCount();
 	uint32 NumOfProps;
 
@@ -53,10 +50,10 @@ public:
 	TArray<FIntVector> GetNeighbours(FIntVector Coordinates);
 	bool IsAccessible(FIntVector Coordinates);
 
-	void AddProp(ATBSProp* Prop);
-	void AddProp(FProp Prop);
+	void AddProp(FProp &Prop);
 	void RemovePropsAt(FIntVector Coordinates);
 	void RemovePropById(uint32 PropId);
+	TArray<FProp> GetPropsAt(FIntVector Coordinates);
 	void AddUnit(ATBSUnit* Unit);
 	TArray<ATBSUnit*>::TIterator GetUnitIterator();
 
@@ -64,10 +61,12 @@ public:
 
 	FOnActorNoLongerVisible OnActorNoLongerVisible;
 
-	TMap<FIntVector, TArray<FProp>>::TConstIterator GetPropConstIterator();
-	TMap<FIntVector, TArray<FProp>>::TIterator GetPropIterator();
-
 private:	
 	
+	TMap<FIntVector, TArray<uint32>> OccupiedCoordinatesMap;
+	TMap<uint32, FProp> PropMap;
+
+	TArray<FIntVector> GetOccupiedCoordinates(FProp Prop);
+
 	//bool IsTileAccessBlockedByProp(FIntVector Coordinates, ETileSlot Slot);
 };

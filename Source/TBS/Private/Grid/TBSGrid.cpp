@@ -36,65 +36,128 @@ TArray<ATBSUnit*>::TIterator ATBSGrid::GetUnitIterator()
 	return Units.CreateIterator();
 }
 
-void ATBSGrid::AddProp(FProp Prop)
+void ATBSGrid::AddProp(FProp &Prop)
 {
 	if (Prop.Id == 0)
 	{
 		Prop.Id = NextPropId++;
 	}
 
-	TArray<FProp>* Props = PropMap.Find(Prop.Coordinates);
+	PropMap.Add(Prop.Id, Prop);
 
-	if (!Props)
+	for (auto& Coordinates : GetOccupiedCoordinates(Prop))
 	{
-		TArray<FProp> PropsArray;
-		PropsArray.Add(Prop);
-		PropMap.Add(Prop.Coordinates, PropsArray);
-	}
-	else
-	{
-		Props->Add(Prop);
+		TArray<uint32>* PropIds = OccupiedCoordinatesMap.Find(Coordinates);
+
+		if (!PropIds)
+		{
+			TArray<uint32> PropIdsArray;
+			PropIdsArray.Add(Prop.Id);
+			OccupiedCoordinatesMap.Add(Coordinates, PropIdsArray);
+		}
+		else
+		{
+			PropIds->Add(Prop.Id);
+		}
 	}
 
-	PropIndexMap.Add(Prop.Id, Prop.Coordinates);
 	NumOfProps++;
+}
+
+TArray<FIntVector> ATBSGrid::GetOccupiedCoordinates(FProp Prop)
+{
+	TArray<FIntVector> Tiles;
+	FIntVector Dimensions = Prop.Dimensions;
+
+	if (Prop.Rotation == 90 || Prop.Rotation == 180)
+	{
+		Dimensions.X = Prop.Dimensions.Y;
+		Dimensions.Y = Prop.Dimensions.X;
+	}
+
+	int32 XStep = Dimensions.X % 2 == 0 ? -5 : 0;
+	int32 YStep = Dimensions.Y % 2 == 0 ? -5 : 0;
+
+	FIntVector Origin = FIntVector(
+		Prop.Coordinates.X + XStep - (FMath::CeilToInt((float)Dimensions.X / 2) * 10 - 10),
+		Prop.Coordinates.Y + YStep - (FMath::CeilToInt((float)Dimensions.Y / 2) * 10 - 10),
+		Prop.Coordinates.Z
+	);
+
+	for (int32 X = 0; X < Dimensions.X * 10; X = X + 10)
+	{
+		for (int32 Y = 0; Y < Dimensions.Y * 10; Y = Y + 10)
+		{
+			for (int32 Z = 0; Z < Dimensions.Z; Z++)
+			{
+				Tiles.Add(FIntVector(
+					Origin.X + X,
+					Origin.Y + Y,
+					Origin.Z + Z
+				));
+			}
+		}
+	}
+
+	return Tiles;
 }
 
 void ATBSGrid::RemovePropsAt(FIntVector Coordinates)
 {
-	TArray<FProp>* Props = PropMap.Find(Coordinates);
+	TArray<uint32>* PropIds = OccupiedCoordinatesMap.Find(Coordinates);
 
-	if (Props)
+	if (PropIds)
 	{
-		NumOfProps -= Props->Num();
+		NumOfProps -= PropIds->Num();
 
-		for (auto& Prop : *Props)
+		for (auto& PropId : *PropIds)
 		{
-			PropIndexMap.Remove(Prop.Id);
+			PropMap.Remove(PropId);
 		}
 	}
 
-	PropMap.Remove(Coordinates);
+	OccupiedCoordinatesMap.Remove(Coordinates);
 }
 
 void ATBSGrid::RemovePropById(uint32 PropId)
 {
-	FIntVector* Coordinates = PropIndexMap.Find(PropId);
+	FProp* Prop = PropMap.Find(PropId);
 
-	if (Coordinates)
+	if (Prop)
 	{
-		TArray<FProp>* Props = PropMap.Find(*Coordinates);
-
-		if (Props)
+		for (auto& Coordinates : GetOccupiedCoordinates(*Prop))
 		{
-			Props->RemoveAllSwap([PropId](FProp Prop) {
-				return Prop.Id == PropId;
-			});
+			TArray<uint32>* PropIds = OccupiedCoordinatesMap.Find(Prop->Coordinates);
 
-			PropIndexMap.Remove(PropId);
-			NumOfProps--;
+			if (PropIds)
+			{
+				PropIds->Remove(PropId);
+			}
 		}
 	}
+}
+
+TArray<FProp> ATBSGrid::GetPropsAt(FIntVector Coordinates)
+{
+	TArray<FProp> Props;
+
+	TArray<uint32>* PropIds = OccupiedCoordinatesMap.Find(Coordinates);
+
+	if (PropIds)
+	{
+		for (auto& PropId : *PropIds)
+		{
+			FProp* FoundProp = PropMap.Find(PropId);
+
+			if (FoundProp)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, FString::Printf(TEXT("Found prop %i (%i, %i, %i"), FoundProp->Id, FoundProp->Coordinates.X, FoundProp->Coordinates.Y, FoundProp->Coordinates.Z));
+				Props.Add(*FoundProp);
+			}			
+		}
+	}
+
+	return Props;
 }
 
 void ATBSGrid::AddUnit(ATBSUnit* Unit)
@@ -158,14 +221,16 @@ TArray<FIntVector> ATBSGrid::GetNeighbours(FIntVector Coordinates)
 
 bool ATBSGrid::IsAccessible(FIntVector Coordinates)
 {
-	TArray<FProp>* Props = PropMap.Find(Coordinates);
+	TArray<uint32>* PropIds = OccupiedCoordinatesMap.Find(Coordinates);
 	bool Accessible = true;
 	
-	if (Props)
+	if (PropIds)
 	{
-		for (auto& Prop : *Props)
+		for (auto& PropId : *PropIds)
 		{
-			if (Prop.BlocksAccess)
+			FProp* Prop = PropMap.Find(PropId);
+
+			if (Prop && Prop->BlocksAccess)
 			{
 				Accessible = false;
 				break;
@@ -371,14 +436,4 @@ TArray<FIntVector> ATBSGrid::GetAccessibleNeighbours(FIntVector Coordinates)
 	return Neighbours.FilterByPredicate([&](const FIntVector& Neighbour) {
 		return IsAccessible(Neighbour);
 	});
-}
-
-TMap<FIntVector, TArray<FProp>>::TConstIterator ATBSGrid::GetPropConstIterator()
-{
-	return PropMap.CreateConstIterator();
-}
-
-TMap<FIntVector, TArray<FProp>>::TIterator ATBSGrid::GetPropIterator()
-{
-	return PropMap.CreateIterator();
 }

@@ -183,7 +183,8 @@ void ATBSGameState::CreateRandomLevel()
 {
 	//int32 Props = 1000000;
 	//int32 Props = 500000;
-	uint32 Props = 41600 * 6;
+	uint32 Props = 41600;
+	//uint32 Props = 1;
 
 	//LevelDataBuffer = (uint8_t*)FMemory::Malloc(sizeof(FMapMeta) + Props * sizeof(FProp));
 	LevelDataBuffer = (uint8_t*)FMemory::Malloc(Props * sizeof(FProp));
@@ -203,20 +204,21 @@ void ATBSGameState::CreateRandomLevel()
 			continue;
 		}
 
-		for (int i = 0; i < 6; i++)
-		{
-			Coordinates.Z = i;
+		//for (int i = 0; i < 6; i++)
+		//{
+			//Coordinates.Z = i;
 
 			FProp Prop;
 			Prop.Coordinates = Coordinates;
 			Prop.Rotation = (float)FMath::RandRange(0, 3) * 90;
+			Prop.Dimensions = FIntVector(1, 3, FMath::RandRange(1,6));
 			Prop.BlocksAccess = true;
 
 			Grid->AddProp(Prop);
 
 			FMemory::Memcpy(LevelDataBuffer + LevelDataBufferLength, &Prop, sizeof(FProp));
 			LevelDataBufferLength += sizeof(FProp);
-		}
+		//}
 	}
 }
 
@@ -254,34 +256,47 @@ void ATBSGameState::Bomb(FIntVector Coordinates)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Bombing")));
 
-	uint8_t* BombData = (uint8_t*)FMemory::Malloc(sizeof(FIntVector) * 11 * 11 * 6);
+	uint8_t* BombData = (uint8_t*)FMemory::Malloc(sizeof(FIntVector) * 6);
 	uint32 BombDataLength = 0;
 
-	for (int32 X = Coordinates.X - 50; X <= Coordinates.X + 50; X = X + 10)
+	for (int32 Z = 0; Z < 6; Z++)
 	{
-		for (int32 Y = Coordinates.Y - 50; Y <= Coordinates.Y + 50; Y = Y + 10)
-		{
-			for (int32 Z = 0; Z < 6; Z++)
-			{
-				//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Bombing (%i, %i, %i)"), X, Y, Z));
+		FIntVector TempCoordinates = FIntVector(Coordinates.X, Coordinates.Y, Z);
 
-				//Coordinates.X = X;
-				//Coordinates.Y = Y;
-				//Coordinates.Z = Z;
+		Grid->RemovePropsAt(TempCoordinates);
 
-				FIntVector TempCoordinates = FIntVector(X, Y, Z);
-
-				Grid->RemovePropsAt(TempCoordinates);
-
-				//uint8_t* CoordinateBuffer = reinterpret_cast<uint8_t*>(&TempCoordinates);
-				//memset(BombData + BombDataLength, 0x02, 1);
-				memcpy(BombData + BombDataLength, &TempCoordinates, sizeof(FIntVector));
-				BombDataLength += sizeof(FIntVector);
-
-				//FMemory::Free(CoordinateBuffer);				
-			}
-		}
+		memcpy(BombData + BombDataLength, &TempCoordinates, sizeof(FIntVector));
+		BombDataLength += sizeof(FIntVector);
 	}
+
+	//uint8_t* BombData = (uint8_t*)FMemory::Malloc(sizeof(FIntVector) * 11 * 11 * 6);
+	//uint32 BombDataLength = 0;
+
+	//for (int32 X = Coordinates.X - 50; X <= Coordinates.X + 50; X = X + 10)
+	//{
+	//	for (int32 Y = Coordinates.Y - 50; Y <= Coordinates.Y + 50; Y = Y + 10)
+	//	{
+	//		for (int32 Z = 0; Z < 6; Z++)
+	//		{
+	//			//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Bombing (%i, %i, %i)"), X, Y, Z));
+
+	//			//Coordinates.X = X;
+	//			//Coordinates.Y = Y;
+	//			//Coordinates.Z = Z;
+
+	//			FIntVector TempCoordinates = FIntVector(X, Y, Z);
+
+	//			Grid->RemovePropsAt(TempCoordinates);
+
+	//			//uint8_t* CoordinateBuffer = reinterpret_cast<uint8_t*>(&TempCoordinates);
+	//			//memset(BombData + BombDataLength, 0x02, 1);
+	//			memcpy(BombData + BombDataLength, &TempCoordinates, sizeof(FIntVector));
+	//			BombDataLength += sizeof(FIntVector);
+
+	//			//FMemory::Free(CoordinateBuffer);				
+	//		}
+	//	}
+	//}
 
 	TCPServer->SendAll((uint8_t)0x02, BombData, BombDataLength);	
 

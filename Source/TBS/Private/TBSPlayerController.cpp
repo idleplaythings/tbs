@@ -157,8 +157,9 @@ void ATBSPlayerController::PlayerTick(float DeltaTime)
 							FProp Prop;
 							memcpy(&Prop, MessagePtr, sizeof(FProp));
 
+							GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, FString::Printf(TEXT("received prop id %i"), Prop.Id));
+
 							ClassLoader->Grid->AddProp(Prop);
-							int32 Rotation = (float)FMath::RandRange(0, 3) * 90;
 
 							FIntVector BlockCell = FIntVector(
 								FMath::FloorToInt(Prop.Coordinates.X / 300),
@@ -171,11 +172,6 @@ void ATBSPlayerController::PlayerTick(float DeltaTime)
 							if (!BlockPtr)
 							{
 								Block = GetWorld()->SpawnActor<ATBSProp_Block>(ATBSProp_Block::StaticClass());
-								Block->GameCoordinates = Prop.Coordinates;
-								Block->Dimensions = FIntVector(1, 1, 1);
-								Block->BlocksAccess = true;
-								Block->Rotation = FRotator(0.0, Rotation, 0.0);
-								Block->RecalculateCoordinates();
 								BlockMap.Add(BlockCell, Block);
 							}
 							else
@@ -185,12 +181,12 @@ void ATBSPlayerController::PlayerTick(float DeltaTime)
 
 							FCoordinateLocations Locations = ClassLoader->GridUI->GetCoordinateLocations(Prop.Coordinates);
 							FTransform InstanceTransform(
-								FRotator(0.0, Rotation, 0.0),
+								FRotator(0.0, Prop.Rotation, 0.0),
 								Locations.Center,
-								FVector((float)1 / 2, (float)1 / 2, (float)1 / 2)
+								FVector(((float)1 / 2) * Prop.Dimensions.X, ((float)1 / 2) * Prop.Dimensions.Y, ((float)1 / 2) * Prop.Dimensions.Z)
 							);
 
-							Block->SpawnInstance(Prop.Coordinates, InstanceTransform);
+							Block->SpawnInstance(Prop.Id, InstanceTransform);
 
 							MessagePtr += sizeof(FProp);
 						}
@@ -206,19 +202,30 @@ void ATBSPlayerController::PlayerTick(float DeltaTime)
 
 							//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Received remove props at (%i, %i, %i)"), Coordinates.X, Coordinates.Y, Coordinates.Z));
 
-							ClassLoader->Grid->RemovePropsAt(Coordinates);
+							//ClassLoader->Grid->RemovePropsAt(Coordinates);
 
-							FIntVector BlockCell = FIntVector(
-								FMath::FloorToInt(Coordinates.X / 300),
-								FMath::FloorToInt(Coordinates.Y / 300),
-								0
-							);
-
-							ATBSProp_Block** BlockPtr = BlockMap.Find(BlockCell);
-
-							if (BlockPtr)
+							for (auto& Prop : ClassLoader->Grid->GetPropsAt(Coordinates))
 							{
-								(*BlockPtr)->RemoveInstance(Coordinates);
+								GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, FString::Printf(TEXT("found a prop %i"), Prop.Id));
+								
+								FIntVector BlockCell = FIntVector(
+									FMath::FloorToInt(Prop.Coordinates.X / 300),
+									FMath::FloorToInt(Prop.Coordinates.Y / 300),
+									0
+								);
+
+								ATBSProp_Block** BlockPtr = BlockMap.Find(BlockCell);
+
+								if (BlockPtr)
+								{
+
+									GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, FString::Printf(TEXT("got block")));
+
+									(*BlockPtr)->RemoveInstance(Prop.Id);
+
+									ClassLoader->Grid->RemovePropById(Prop.Id);
+								}
+
 							}
 
 							MessagePtr += sizeof(FIntVector);
@@ -328,7 +335,7 @@ void ATBSPlayerController::NewProp()
 		Block->Debug = true;
 	}
 
-	Server_CommandNewProp(ClassLoader->GridUI->CurrentCoordinates);
+	//Server_CommandNewProp(ClassLoader->GridUI->CurrentCoordinates);
 }
 
 void ATBSPlayerController::Bomb()
