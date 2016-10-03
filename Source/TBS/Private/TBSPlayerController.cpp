@@ -80,6 +80,7 @@ void ATBSPlayerController::OnClassesLoaded()
 	InputComponent->BindAction("ActionBomb", IE_Pressed, this, &ATBSPlayerController::Bomb);
 
 	Server_ClientReady();
+	TraceGrid();
 
 	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Controller ready, server address %s"), *GetServerNetworkAddress()));
 
@@ -117,6 +118,25 @@ void ATBSPlayerController::TrySideChannelConnection()
 	}
 }
 
+void ATBSPlayerController::TraceGrid()
+{
+	if (ClassesLoaded)
+	{
+		TraceChannel = ECollisionChannel::ECC_GameTraceChannel1;
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Tracing grid %i"), (int32)TraceChannel));
+	}
+	
+}
+
+void ATBSPlayerController::TraceProps()
+{
+	if (ClassesLoaded)
+	{		
+		TraceChannel = ECollisionChannel::ECC_GameTraceChannel2;
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Tracing props %i"), (int32)TraceChannel));
+	}
+}
+
 void ATBSPlayerController::PlayerTick(float DeltaTime)
 {
 	Super::PlayerTick(DeltaTime);
@@ -124,8 +144,16 @@ void ATBSPlayerController::PlayerTick(float DeltaTime)
 	if (ClassesLoaded)
 	{
 		FHitResult Result;
-		GetHitResultUnderCursor(ECollisionChannel::ECC_GameTraceChannel1, true, Result);
-		ClassLoader->GridUI->HandleGridHitResult(Result);
+		GetHitResultUnderCursor(TraceChannel, true, Result);
+
+		if (TraceChannel == ECollisionChannel::ECC_GameTraceChannel1)
+		{
+			ClassLoader->GridUI->HandleGridHitResult(Result);
+		}
+		else
+		{
+			ClassLoader->GridUI->HandlePropHitResult(Result, ClassLoader->DefaultPawn->GetCameraViewAngle());
+		}		
 
 		if (ClassLoader->GridUI->CoordinatesChanged)
 		{
@@ -160,7 +188,7 @@ void ATBSPlayerController::PlayerTick(float DeltaTime)
 							FProp Prop;
 							memcpy(&Prop, MessagePtr, sizeof(FProp));
 
-							GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, FString::Printf(TEXT("received prop id %i"), Prop.Id));
+							//GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, FString::Printf(TEXT("received prop id %i"), Prop.Id));
 
 							ClassLoader->Grid->AddProp(Prop);
 
@@ -175,6 +203,7 @@ void ATBSPlayerController::PlayerTick(float DeltaTime)
 							if (!BlockPtr)
 							{
 								Block = GetWorld()->SpawnActor<ATBSProp_Block>(ATBSProp_Block::StaticClass());
+								Block->SetActorLocation(FVector(0.0, 0.0, 0.0));
 								BlockMap.Add(BlockCell, Block);
 							}
 							else
@@ -184,7 +213,7 @@ void ATBSPlayerController::PlayerTick(float DeltaTime)
 
 							FCoordinateLocations Locations = ClassLoader->GridUI->GetCoordinateLocations(Prop.Coordinates);
 							FTransform InstanceTransform(
-								FRotator(0.0, Prop.Rotation, 0.0),
+								FRotator(0.0, (float)Prop.Rotation, 0.0),
 								Locations.Center,
 								FVector(((float)1 / 2) * Prop.Dimensions.X, ((float)1 / 2) * Prop.Dimensions.Y, ((float)1 / 2) * Prop.Dimensions.Z)
 							);
@@ -209,7 +238,7 @@ void ATBSPlayerController::PlayerTick(float DeltaTime)
 
 							for (auto& Prop : ClassLoader->Grid->GetPropsAt(Coordinates))
 							{
-								GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, FString::Printf(TEXT("found a prop %i"), Prop.Id));
+								//GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, FString::Printf(TEXT("found a prop %i"), Prop.Id));
 								
 								FIntVector BlockCell = FIntVector(
 									FMath::FloorToInt(Prop.Coordinates.X / 300),
@@ -222,7 +251,7 @@ void ATBSPlayerController::PlayerTick(float DeltaTime)
 								if (BlockPtr)
 								{
 
-									GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, FString::Printf(TEXT("got block")));
+									//GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, FString::Printf(TEXT("got block")));
 
 									(*BlockPtr)->RemoveInstance(Prop.Id);
 

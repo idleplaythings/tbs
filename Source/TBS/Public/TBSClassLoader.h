@@ -8,6 +8,7 @@
 #include "TBSClassLoader.generated.h"
 
 class ATBSPlayerController;
+class ATBSHUD;
 class ATBSDefaultPawn;
 class ATBSGrid;
 class ATBSGridUI;
@@ -34,6 +35,7 @@ public:
 	void Initialise(ATBSPlayerController* InPlayerController);
 
 	ATBSPlayerController* PlayerController;
+	ATBSHUD* HUD;
 	ATBSDefaultPawn* DefaultPawn;
 	ATBSGrid* Grid;
 	ATBSGridUI* GridUI;

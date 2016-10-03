@@ -69,7 +69,7 @@ TArray<FIntVector> ATBSGrid::GetOccupiedCoordinates(FProp Prop)
 	TArray<FIntVector> Tiles;
 	FIntVector Dimensions = Prop.Dimensions;
 
-	if (Prop.Rotation == 90 || Prop.Rotation == 180)
+	if (Prop.Rotation == 90 || Prop.Rotation == 270)
 	{
 		Dimensions.X = Prop.Dimensions.Y;
 		Dimensions.Y = Prop.Dimensions.X;
@@ -88,7 +88,7 @@ TArray<FIntVector> ATBSGrid::GetOccupiedCoordinates(FProp Prop)
 	{
 		for (int32 Y = 0; Y < Dimensions.Y * 10; Y = Y + 10)
 		{
-			for (int32 Z = 0; Z < Dimensions.Z; Z++)
+			for (int32 Z = 0; Z < Dimensions.Z * 10; Z = Z + 10)
 			{
 				Tiles.Add(FIntVector(
 					Origin.X + X,
@@ -151,7 +151,7 @@ TArray<FProp> ATBSGrid::GetPropsAt(FIntVector Coordinates)
 
 			if (FoundProp)
 			{
-				GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, FString::Printf(TEXT("Found prop %i (%i, %i, %i"), FoundProp->Id, FoundProp->Coordinates.X, FoundProp->Coordinates.Y, FoundProp->Coordinates.Z));
+				//GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, FString::Printf(TEXT("Found prop %i (%i, %i, %i"), FoundProp->Id, FoundProp->Coordinates.X, FoundProp->Coordinates.Y, FoundProp->Coordinates.Z));
 				Props.Add(*FoundProp);
 			}			
 		}

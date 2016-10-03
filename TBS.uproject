@@ -11,7 +11,8 @@
 			"AdditionalDependencies": [
 				"Engine",
 				"Sockets",
-				"Networking"
+				"Networking",
+				"UMG"
 			]
 		}
 	]

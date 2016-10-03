@@ -21,9 +21,11 @@ public:
 	// Called every frame
 	virtual void Tick( float DeltaSeconds ) override;
 
+	UStaticMesh* BlockMesh;
+
 	USceneComponent* SceneComponent;
-	UStaticMeshComponent* BlockMesh;
-	UInstancedStaticMeshComponent *ISMComponent;
+	UStaticMeshComponent* SMC;
+	UInstancedStaticMeshComponent* ISMC;
 	
 	void ScalePropMesh() override;
 	void SpawnInstance(uint32 PropId, const FTransform& InstanceTransform);

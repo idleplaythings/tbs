@@ -28,6 +28,7 @@ public:
 
 	void RenderGrid(ATBSGrid* Grid);
 	void HandleGridHitResult(FHitResult HitResult);
+	void HandlePropHitResult(FHitResult HitResult, float CameraViewAngle);
 	FCoordinateLocations GetCoordinateLocations(FIntVector Coordinates);
 	void LevelUp();
 	void LevelDown();	
@@ -64,7 +65,6 @@ private:
 	float TileSize = 50;
 	float FloorHeight = 200;
 
-	
 	void InitialiseParametersFromGrid();
 	void CreateGridMaterialInstances();
 	void CreateGridMeshComponents();

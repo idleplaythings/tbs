@@ -34,7 +34,7 @@ void TBSUIDefaultContext::HandleEvent(TBSUIContextEvent &Event)
 	{
 		FIntVector Coordinates = ((TBSUIContextCoordinateEvent*)&Event)->Coordinates;
 
-		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Hover (%i, %i, %i)"), Coordinates.X, Coordinates.Y, Coordinates.Z));
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Hover (%i, %i, %i)"), Coordinates.X, Coordinates.Y, Coordinates.Z));
 
 		ATBSUnit* Unit = ClassLoader->Grid->SelectUnit(Coordinates);
 

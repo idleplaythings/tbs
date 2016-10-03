@@ -15,7 +15,13 @@ const FName ATBSHUD::ScrollHitBoxW = FName("ScrollHitBoxW");
 
 ATBSHUD::ATBSHUD(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	
+	static ConstructorHelpers::FClassFinder<UTBSPropDebugWidget> WidgetAsset(TEXT("/Game/Blueprints/Widgets/PropTooltip.PropTooltip_C"));
+
+	if (WidgetAsset.Succeeded())
+	{
+		/** Assign the class of the loaded asset to the WigetClass variable, which is a "subclass" of UUserWidget : Which our asset class is */
+		PropDebugClass = WidgetAsset.Class;
+	}
 }
 
 void ATBSHUD::BeginPlay()
@@ -29,6 +35,39 @@ void ATBSHUD::DrawHUD()
 	CalculateScrollHitBoxSizesAndLocations();
 	AddScrollHitBoxes();
 	DrawScrollHitBoxOverlays();
+}
+
+void ATBSHUD::ShowPropDebugWidget(TArray<FProp> Props)
+{
+	if (!PropDebugClass)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString(TEXT("No prop debug class")));
+		return;
+	}
+
+	if (!PropDebugWidget)
+	{
+		PropDebugWidget = CreateWidget<UTBSPropDebugWidget>(GetWorld(), PropDebugClass);
+	}
+
+	if (PropDebugWidget)
+	{
+		if (!PropDebugWidget->IsInViewport())
+		{
+			PropDebugWidget->AddToViewport();
+		}
+		
+		PropDebugWidget->SetVisibility(ESlateVisibility::Visible);
+		PropDebugWidget->SetProps(Props);
+	}
+}
+
+void ATBSHUD::HidePropDebugWidget()
+{
+	if (PropDebugWidget)
+	{
+		PropDebugWidget->SetVisibility(ESlateVisibility::Hidden);
+	}
 }
 
 void ATBSHUD::CalculateScrollHitBoxSizesAndLocations()

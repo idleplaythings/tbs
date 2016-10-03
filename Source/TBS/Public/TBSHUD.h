@@ -4,6 +4,7 @@
 
 #include "GameFramework/HUD.h"
 #include "TBSGridUI.h"
+#include "TBSPropDebugWidget.h"
 #include "TBSHUD.generated.h"
 
 class ATBSPlayerController;
@@ -40,6 +41,9 @@ public:
 	static const FName ScrollHitBoxSW;
 	static const FName ScrollHitBoxW;
 
+	void ShowPropDebugWidget(TArray<FProp> Props);
+	void HidePropDebugWidget();
+
 private:
 	float HitBoxWidth = 20.0;
 	bool ConsumeScrollInput = true;
@@ -49,6 +53,9 @@ private:
 	int32 CanvasX;
 	int32 CanvasY;
 	ATBSPlayerController* PlayerController;
+
+	TSubclassOf<class UTBSPropDebugWidget> PropDebugClass;
+	UTBSPropDebugWidget* PropDebugWidget;
 
 	void CalculateScrollHitBoxSizesAndLocations();
 	void AddScrollHitBoxes();

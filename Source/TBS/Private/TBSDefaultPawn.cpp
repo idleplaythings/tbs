@@ -159,3 +159,8 @@ void ATBSDefaultPawn::SetMoveRightAxisOffset(float Offset)
 {
 	MoveRightAxisOffset = Offset;
 }
+
+float ATBSDefaultPawn::GetCameraViewAngle()
+{
+	return CameraViewAngleDeg;
+}

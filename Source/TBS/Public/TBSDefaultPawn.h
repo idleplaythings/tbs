@@ -28,6 +28,7 @@ public:
 	void TogglePerspectiveCamera();
 	void SetMoveForwardAxisOffset(float Offset);
 	void SetMoveRightAxisOffset(float Offset);
+	float GetCameraViewAngle();
 
 private:
 	USceneComponent* SceneComponent;
@@ -37,7 +38,7 @@ private:
 	FVector CalculateCameraPosition();
 	FQuat CalculateCameraRotation();
 
-	float CameraViewAngleDeg = 125;
+	float CameraViewAngleDeg = 135;
 	float CameraHeightAngleDeg = 45.0;
 	float CameraDistance = 4000;
 	float CameraMovementSpeed = 12.0;

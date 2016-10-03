@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "TBS.h"
+#include "TBSHUD.h"
 #include "TBSPlayerController.h"
 #include "TBSClassLoader.h"
 
@@ -50,6 +51,11 @@ void ATBSClassLoader::TryLoadClasses()
 	if (!DefaultPawn)
 	{
 		DefaultPawn = Cast<ATBSDefaultPawn>(PlayerController->GetPawn());
+	}
+
+	if (!HUD)
+	{
+		HUD = Cast<ATBSHUD>(PlayerController->GetHUD());
 	}
 
 	if (!Grid)

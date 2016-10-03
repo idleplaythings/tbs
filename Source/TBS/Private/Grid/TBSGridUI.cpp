@@ -150,6 +150,90 @@ void ATBSGridUI::HandleGridHitResult(FHitResult HitResult)
 	}	
 }
 
+void ATBSGridUI::HandlePropHitResult(FHitResult HitResult, float CameraViewAngle)
+{
+	CoordinatesChanged = false;
+	CursorOnGrid = false;
+
+	if (HitResult.Actor == nullptr)
+	{
+		if (PreviousCoordinates != NullCoordinates)
+		{
+			PreviousCoordinates = CurrentCoordinates;
+			CoordinatesChanged = true;
+		}
+
+		CurrentCoordinates = NullCoordinates;
+		HideCursor();
+		return;
+	}
+
+	CursorOnGrid = true;
+	ShowCursor();
+
+	// Crudely adjust the impact point based on camera location to take into account
+	// rounding and tracing errors. Not pretty, but works. Camera angles should be constants.
+	FVector AdjustedImpactPoint = HitResult.ImpactPoint;
+
+	if (FMath::Abs(CameraViewAngle - 135) < 0.001)
+	{
+		AdjustedImpactPoint.Y -= 0.001;
+	}
+	else if (FMath::Abs(CameraViewAngle - 225) < 0.001)
+	{
+	}
+	else if (FMath::Abs(CameraViewAngle - 315) < 0.001)
+	{
+		AdjustedImpactPoint.X -= 0.001;
+	}
+	else
+	{
+		AdjustedImpactPoint.X -= 0.001;
+		AdjustedImpactPoint.Y -= 0.001;		
+	}
+
+	AdjustedImpactPoint.Z -= 0.001;
+
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Adjusted impact (%f, %f, %f)"), AdjustedImpactPoint.X, AdjustedImpactPoint.Y, AdjustedImpactPoint.Z));
+
+	FVector ActorLocation = GetActorLocation();
+	FVector LocalLocation = AdjustedImpactPoint - ActorLocation; // Offset by actor location in case actor not in origin
+
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Local (%f, %f, %f)"), LocalLocation.X, LocalLocation.Y, LocalLocation.Z));
+
+	// Actor location is relative to it's center point; offset by half width/height to get positive local coordinates
+	FIntVector NewCoordinates;
+
+	if (CursorDimensions.X % 2 == 0)
+	{
+		NewCoordinates = FIntVector(
+			(int32)((LocalLocation.X + GridMeshWidth / 2) / TileSize) * 10 + SelectionOffset.X,
+			(int32)((LocalLocation.Y + GridMeshHeight / 2) / TileSize) * 10 + SelectionOffset.Y,
+			(int32)((LocalLocation.Z) / TileSize) * 10
+		);
+	}
+	else
+	{
+		NewCoordinates = FIntVector(
+			(int32)((LocalLocation.X + GridMeshWidth / 2) / TileSize) * 10,
+			(int32)((LocalLocation.Y + GridMeshHeight / 2) / TileSize) * 10,
+			(int32)((LocalLocation.Z) / TileSize) * 10
+		);
+	}
+
+	if (NewCoordinates != PreviousCoordinates)
+	{
+		CoordinatesChanged = true;
+		PreviousCoordinates = CurrentCoordinates;
+		CurrentCoordinates = NewCoordinates;
+	}
+
+	if (!CursorForced)
+	{
+		SetCursorCoordinates(NewCoordinates);
+	}
+}
+
 void ATBSGridUI::SetCursorCoordinates(FIntVector Coordinates)
 {
 	if (GridCursor != nullptr)
@@ -158,7 +242,7 @@ void ATBSGridUI::SetCursorCoordinates(FIntVector Coordinates)
 		FVector TileCenter = FVector(
 			((float)Coordinates.X / 10 * TileSize + TileSize / 2) + ActorLocation.X - GridMeshWidth / 2,
 			((float)Coordinates.Y / 10 * TileSize + TileSize / 2) + ActorLocation.Y - GridMeshHeight / 2,
-			(float)Coordinates.Z * FloorHeight
+			(float)Coordinates.Z / 10 * TileSize
 		);
 
 		GridCursor->SetActorLocation(TileCenter);

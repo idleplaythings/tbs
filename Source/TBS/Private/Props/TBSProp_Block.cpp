@@ -15,17 +15,13 @@ ATBSProp_Block::ATBSProp_Block()
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> Mesh(TEXT("StaticMesh'/Game/Meshes/block.block'"));
 
+	//static ConstructorHelpers::FObjectFinder<UStaticMesh> Mesh(TEXT("StaticMesh'/Engine/BasicShapes/Cube.Cube'"));
+	
+	SetActorEnableCollision(true);
+
 	if (Mesh.Succeeded())
 	{
-		//BlockMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Block"));
-		//BlockMesh->SetSimulatePhysics(false);
-		//BlockMesh->SetStaticMesh(Mesh.Object);
-		//BlockMesh->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
-
-		ISMComponent = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("ISMC"));
-		ISMComponent->SetStaticMesh(Mesh.Object);
-		ISMComponent->SetFlags(RF_Transactional);
-		AddInstanceComponent(ISMComponent);
+		BlockMesh = Mesh.Object;
 	}	
 }
 
@@ -45,39 +41,49 @@ void ATBSProp_Block::Tick( float DeltaTime )
 
 void ATBSProp_Block::ScalePropMesh()
 {
-	if (BlockMesh)
-	{
-		BlockMesh->SetRelativeScale3D(FVector((float)Dimensions.X / 2, (float)Dimensions.Y / 2, (float)Dimensions.Z / 2));
-	}	
+	//if (BlockMesh)
+	//{
+	//	BlockMesh->SetRelativeScale3D(FVector((float)Dimensions.X / 2, (float)Dimensions.Y / 2, (float)Dimensions.Z / 2));
+	//}	
 }
 
 void ATBSProp_Block::SpawnInstance(uint32 PropId, const FTransform& InstanceTransform)
 {
-	if (ISMComponent)
+	if (!ISMC)
 	{
-		int32 InstanceIndex = ISMComponent->AddInstanceWorldSpace(InstanceTransform);
+		ISMC = NewObject<UInstancedStaticMeshComponent>(this);		
+		ISMC->SetStaticMesh(BlockMesh);
+		ISMC->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		ISMC->SetCollisionProfileName(FName(TEXT("PropCollisionProfile")));
+		ISMC->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
+		FinishAndRegisterComponent(ISMC);
+	}
+
+	if (ISMC)
+	{
+		int32 InstanceIndex = ISMC->AddInstanceWorldSpace(InstanceTransform);
 		InstanceMap.Add(PropId, InstanceIndex);
 
 		if (Debug)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Added index %i"), InstanceIndex));
+			//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Added index %i"), InstanceIndex));
 		}
 	}
 }
 
 void ATBSProp_Block::RemoveInstance(uint32 PropId)
 {
-	if (ISMComponent)
+	if (ISMC)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, FString::Printf(TEXT("looking for instance idx on prop %i"), PropId));
+		//GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, FString::Printf(TEXT("looking for instance idx on prop %i"), PropId));
 
 		int32* InstanceIndex = InstanceMap.Find(PropId);
 
 		if (InstanceIndex)
 		{				
-			GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, FString::Printf(TEXT("got instance idx %i"), *InstanceIndex));
+			//GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, FString::Printf(TEXT("got instance idx %i"), *InstanceIndex));
 
-			ISMComponent->UpdateInstanceTransform(*InstanceIndex, FTransform(FVector(10000.0, 10000.0, 10000.0)), true, true);	
+			ISMC->UpdateInstanceTransform(*InstanceIndex, FTransform(FVector(10000.0, 10000.0, 10000.0)), true, true);
 		}
 	}
 }

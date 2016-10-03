@@ -210,7 +210,7 @@ void ATBSGameState::CreateRandomLevel()
 
 			FProp Prop;
 			Prop.Coordinates = Coordinates;
-			Prop.Rotation = (float)FMath::RandRange(0, 3) * 90;
+			Prop.Rotation = FMath::RandRange(0, 3) * 90;
 			Prop.Dimensions = FIntVector(1, 3, FMath::RandRange(1,6));
 			Prop.BlocksAccess = true;
 

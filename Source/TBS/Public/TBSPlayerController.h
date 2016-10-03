@@ -76,6 +76,10 @@ public:
 	void MoveCameraForwardOffset(float AxisValue);
 	void MoveCameraRightOffset(float AxisValue);
 
+	void TraceGrid();
+	void TraceProps();
+	ECollisionChannel TraceChannel;
+
 	FOnClientReady OnClientReady;
 	TBSTCPClient* TCPClient;
 

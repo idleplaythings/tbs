@@ -6,22 +6,13 @@
 
 void TBSUIPropDebugContext::EnterContext()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Prop debug")));
-
-	//ATBSUnit* Unit = ClassLoader->PlayerController->SelectedUnit;
-
-	//ClassLoader->GridUI->SelectLocation(Unit->Dimensions, Unit->GameCoordinates);
-	//ClassLoader->GridUI->SetCursorDimensions(ClassLoader->PlayerController->SelectedUnit->Dimensions);
-	//ClassLoader->GridPathFinder->BuildCache(Unit->GameCoordinates, Unit->Dimensions);
+	ClassLoader->PlayerController->TraceProps();
 }
 
 void TBSUIPropDebugContext::ExitContext()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Exit prop debug")));
-
-	//ClassLoader->GridUI->ClearSelection();
-	//ClassLoader->GridUI->ResetCursorDimensions();
-	//ClassLoader->GridPathFinder->InvalidateCache();
+	ClassLoader->HUD->HidePropDebugWidget();
+	ClassLoader->PlayerController->TraceGrid();
 }
 
 void TBSUIPropDebugContext::HandleEvent(TBSUIContextEvent &Event)
@@ -30,6 +21,20 @@ void TBSUIPropDebugContext::HandleEvent(TBSUIContextEvent &Event)
 	{
 		Event.StopPropagation = true;
 		ContextStack->PopContext();
+	}
+	else if (Event.Type == FName(TEXT("TileHoverBegin")))
+	{
+		// ((TBSUIContextCoordinateEvent*)&Event)->Coordinates
+
+		ClassLoader->HUD->ShowPropDebugWidget(
+			ClassLoader->Grid->GetPropsAt(
+				((TBSUIContextCoordinateEvent*)&Event)->Coordinates
+			)
+		);
+	}
+	else if (Event.Type == FName(TEXT("TileHoverEnd")))
+	{
+		ClassLoader->HUD->HidePropDebugWidget();
 	}
 
 	//if (Event.Type == FName(TEXT("TileHoverBegin")))
