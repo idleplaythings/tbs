@@ -71,8 +71,8 @@ void ATBSGridUI::CreateGridMeshComponents()
 UMaterialInstanceDynamic* ATBSGridUI::CreateMaterialInstance()
 {
 	UMaterialInstanceDynamic* GridMaterialInstance = UMaterialInstanceDynamic::Create(GridMaterial, this);
-	GridMaterialInstance->SetScalarParameterValue(FName(TEXT("UTiling")), (Grid->GridDimensions.X / 10) + 0.02);
-	GridMaterialInstance->SetScalarParameterValue(FName(TEXT("VTiling")), (Grid->GridDimensions.Y / 10) + 0.02);
+	GridMaterialInstance->SetScalarParameterValue(FName(TEXT("UTiling")), (Grid->GridDimensions.X / 10) + 0.2);
+	GridMaterialInstance->SetScalarParameterValue(FName(TEXT("VTiling")), (Grid->GridDimensions.Y / 10) + 0.2);
 	GridMaterialInstance->SetScalarParameterValue(FName(TEXT("OpacityMultiplier")), 0.5);	
 	return GridMaterialInstance;
 }
@@ -296,7 +296,7 @@ FCoordinateLocations ATBSGridUI::GetCoordinateLocations(FIntVector Coordinates)
 	Location = Location + FVector(
 		(float)Coordinates.X/10 * TileSize + TileSize/2,
 		(float)Coordinates.Y/10 * TileSize + TileSize/2,
-		(float)Coordinates.Z * TileSize
+		(float)Coordinates.Z/10 * TileSize
 	);
 
 	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Asking for coordinate locations (%f, %f, %f)"), Location.X, Location.Y, Location.Z));

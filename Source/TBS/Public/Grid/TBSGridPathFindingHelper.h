@@ -29,13 +29,13 @@ public:
 	//Checks if current position has enough things to stand on
 	static bool IsSupportedPosition(TArray<FIntVector> Tiles);
 
-	static bool IsAccessablePosition(ATBSGrid* Grid, TArray<FIntVector> Tiles, FIntVector Dimensions);
+	static bool IsAccessiblePosition(ATBSGrid* Grid, TArray<FIntVector> Tiles, FIntVector Dimensions);
 
 	static bool IsPossiblePath(ATBSGrid* Grid, FIntVector Start, FIntVector End, FIntVector Dimensions);
 
 	static bool IsCloseEnough(FIntVector Start, FIntVector End);
 
-	static bool IsAccessableEnd(ATBSGrid* Grid, FIntVector End, FIntVector Dimensions);
+	static bool IsAccessibleEnd(ATBSGrid* Grid, FIntVector End, FIntVector Dimensions);
 
 
 private:

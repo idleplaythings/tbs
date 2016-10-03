@@ -165,7 +165,7 @@ TArray<FIntVector> TBSGridPathFindingHelper::GetNeighbourNodes(ATBSGrid* Grid, F
 
 	Nodes = Nodes.FilterByPredicate([&](const FIntVector& Node) {
 		TArray<FIntVector> Tiles = GetTilesUnderFootprint(Node, Dimensions);
-		return IsSupportedPosition(Tiles) && IsAccessablePosition(Grid, Tiles, Dimensions);
+		return IsSupportedPosition(Tiles) && IsAccessiblePosition(Grid, Tiles, Dimensions);
 	});
 
 	return Nodes;
@@ -216,12 +216,12 @@ bool TBSGridPathFindingHelper::IsSupportedPosition(TArray<FIntVector> Tiles)
 /*
 Units height must fit in current position, and no tile can already blocked by unwalkable prop
 */
-bool TBSGridPathFindingHelper::IsAccessablePosition(ATBSGrid* Grid, TArray<FIntVector> Tiles, FIntVector Dimensions)
+bool TBSGridPathFindingHelper::IsAccessiblePosition(ATBSGrid* Grid, TArray<FIntVector> Tiles, FIntVector Dimensions)
 {
 	FIntVector Location = FIntVector(0, 0, 0);
 	for (auto& Tile : Tiles)
 	{
-		for (int32 Z = 0; Z <= Dimensions.Z; Z++)
+		for (int32 Z = 0; Z <= Dimensions.Z; Z = Z + 10)
 		{
 			Location.X = Tile.X;
 			Location.Y = Tile.Y;
@@ -239,7 +239,7 @@ bool TBSGridPathFindingHelper::IsAccessablePosition(ATBSGrid* Grid, TArray<FIntV
 
 bool TBSGridPathFindingHelper::IsPossiblePath(ATBSGrid* Grid, FIntVector Start, FIntVector End, FIntVector Dimensions)
 {
-	return IsCloseEnough(Start, End) && IsAccessableEnd(Grid, End, Dimensions);
+	return IsCloseEnough(Start, End) && IsAccessibleEnd(Grid, End, Dimensions);
 }
 
 bool TBSGridPathFindingHelper::IsCloseEnough(FIntVector Start, FIntVector End)
@@ -250,8 +250,8 @@ bool TBSGridPathFindingHelper::IsCloseEnough(FIntVector Start, FIntVector End)
 	return Size < 350;
 }
 
-bool TBSGridPathFindingHelper::IsAccessableEnd(ATBSGrid* Grid, FIntVector End, FIntVector Dimensions)
+bool TBSGridPathFindingHelper::IsAccessibleEnd(ATBSGrid* Grid, FIntVector End, FIntVector Dimensions)
 {
 	TArray<FIntVector> Tiles = GetTilesUnderFootprint(End, Dimensions);
-	return IsAccessablePosition(Grid, Tiles, Dimensions);
+	return IsAccessiblePosition(Grid, Tiles, Dimensions);
 }

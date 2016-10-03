@@ -183,7 +183,8 @@ void ATBSGameState::CreateRandomLevel()
 {
 	//int32 Props = 1000000;
 	//int32 Props = 500000;
-	uint32 Props = 41600;
+	//uint32 Props = 41600;
+	uint32 Props = 10000;
 	//uint32 Props = 1;
 
 	//LevelDataBuffer = (uint8_t*)FMemory::Malloc(sizeof(FMapMeta) + Props * sizeof(FProp));
@@ -194,8 +195,8 @@ void ATBSGameState::CreateRandomLevel()
 	while (Grid->PropCount() < Props)
 	{
 		FIntVector Coordinates = FIntVector(
-			FMath::RandRange(0, Grid->GridDimensions.X / 10) * 10,
-			FMath::RandRange(0, Grid->GridDimensions.Y / 10) * 10,
+			FMath::RandRange(0, (Grid->GridDimensions.X - 1) / 10) * 10,
+			FMath::RandRange(0, (Grid->GridDimensions.Y - 1) / 10) * 10,
 			0
 		);
 
