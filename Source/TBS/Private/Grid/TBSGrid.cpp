@@ -135,6 +135,8 @@ void ATBSGrid::RemovePropById(uint32 PropId)
 			}
 		}
 	}
+
+	PropMap.Remove(PropId);
 }
 
 TArray<FProp> ATBSGrid::GetPropsAt(FIntVector Coordinates)
