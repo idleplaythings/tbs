@@ -40,28 +40,35 @@ TBSTCPServer::~TBSTCPServer()
 	}
 }
 
-bool TBSTCPServer::Listen(FString IP, int32 Port)
+bool TBSTCPServer::Listen(TSharedRef<FInternetAddr> Address)
 {
 	if (!SocketListener)
 	{		
-		TSharedRef<FInternetAddr> Address = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->CreateInternetAddr();
+		//TSharedRef<FInternetAddr> Address = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->CreateInternetAddr();
 
-		bool IsValidAddr = true;
-		Address->SetIp(*IP, IsValidAddr);
-		Address->SetPort(Port);
+		//bool IsValidAddr = true;
+		//Address->SetIp(*IP, IsValidAddr);
+		//Address->SetPort(Port);
 
-		FString AddressStr = Address->ToString(true);
+		//FString AddressStr = Address->ToString(true);
 
-		if (!IsValidAddr)
-		{
-			return false;
-		}
+		//if (!IsValidAddr)
+		//{
+			//return false;
+		//}
 
 		SocketListener = new FTcpListener(FIPv4Endpoint(Address), FTimespan(0, 0, 1));
 		SocketListener->OnConnectionAccepted().BindRaw(this, &TBSTCPServer::OnConnection);
+
+		Listening = true;
 	}
 
 	return true;
+}
+
+bool TBSTCPServer::IsListening()
+{
+	return Listening;
 }
 
 uint32 TBSTCPServer::Run()

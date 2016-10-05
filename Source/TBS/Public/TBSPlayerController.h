@@ -48,7 +48,7 @@ public:
 	void Server_CommandNewProp(FIntVector Coordinates);
 
 	UFUNCTION(Client, Reliable)
-	void Client_OpenSideChannelConnection();
+	void Client_OpenSideChannelConnection(const FString &Address);
 
 	UFUNCTION()
 	void OnClassesLoaded();
@@ -84,6 +84,8 @@ public:
 	TBSTCPClient* TCPClient;
 
 private:
+	FString SideChannelAddress;
+
 	TBSUIContextStack* UIContextStack;
 	ATBSClassLoader* ClassLoader;
 	bool ClassesLoaded = false;

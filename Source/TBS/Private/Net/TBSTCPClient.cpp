@@ -22,19 +22,18 @@ TBSTCPClient::~TBSTCPClient()
 	}
 }
 
-bool TBSTCPClient::Connect(FString IP, int32 Port)
+bool TBSTCPClient::Connect(TSharedRef<FInternetAddr> Address)
 {
 	ISocketSubsystem* SocketSubsystem = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM);
 
-	TSharedRef<FInternetAddr> Address = SocketSubsystem->CreateInternetAddr();
-	bool IsValidAddr = true;
-	Address->SetIp(*IP, IsValidAddr);
-	Address->SetPort(Port);
+	//TSharedRef<FInternetAddr> Address = SocketSubsystem->CreateInternetAddr();
+	//bool IsValidAddr = true;
+	//Address->SetIp(*IP, IsValidAddr);
+	//Address->SetPort(Port);
 	
-	if (IsValidAddr)
-	{
-		FString AddressStr = Address->ToString(true);
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Connecting to %s"), *AddressStr));
+	//if (IsValidAddr)
+	//{
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Connecting to %s"), *Address->ToString(true)));
 
 		Socket = SocketSubsystem->CreateSocket(NAME_Stream, FString(TEXT("Foo")), false);
 
@@ -47,7 +46,8 @@ bool TBSTCPClient::Connect(FString IP, int32 Port)
 				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("NOT connected :(")));
 			}
 		}
-	}
+
+	//}
 
 	return Connected;
 }

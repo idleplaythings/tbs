@@ -167,13 +167,26 @@ void ATBSGameState::AllClientsReady()
 
 	CreateRandomLevel();
 
-	TCPServer = new TBSTCPServer();
-	TCPServer->Listen(FString("192.168.0.107"), 10011);
+	bool CanBind = false;
+	TSharedRef<FInternetAddr> Address = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->GetLocalHostAddr(*GLog, CanBind);
+	Address->SetPort(10021);
 
-	for (auto& It : PlayerControllers)
+	if (Address->IsValid())
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Open side channel")));
-		(*It.Value).Client_OpenSideChannelConnection();
+		TCPServer = new TBSTCPServer();
+		TCPServer->Listen(Address);
+
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Side channel listening on %s"), *Address->ToString(true)));
+
+		for (auto& It : PlayerControllers)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Open side channel")));
+			(*It.Value).Client_OpenSideChannelConnection(Address->ToString(true));
+		}
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("No ip found!")));
 	}
 
 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Side channel done")));

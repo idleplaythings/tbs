@@ -17,12 +17,14 @@ public:
 
 	virtual uint32 Run() override;
 
-	bool Listen(FString IP, int32 Port);
+	bool Listen(TSharedRef<FInternetAddr> Address);
+	bool IsListening();
 	bool Send(uint32 ConnectionId, uint8_t Prefix, uint8_t* Message, uint32 Length, int32 &BytesSent);
 	bool SendAll(uint8_t Prefix, uint8_t* Message, uint32 Length);
 
 private:
-	bool OnConnection(class FSocket* ClientSocket, const FIPv4Endpoint& ClientEndpoint);	
+	bool OnConnection(class FSocket* ClientSocket, const FIPv4Endpoint& ClientEndpoint);
+	bool Listening = false;
 
 	uint32 NextConnectionId = 1;
 	TQueue<FSocket*> PendingClientSockets;

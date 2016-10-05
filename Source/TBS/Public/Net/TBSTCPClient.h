@@ -16,7 +16,7 @@ public:
 
 	virtual uint32 Run() override;
 
-	bool Connect(FString IP, int32 Port);
+	bool Connect(TSharedRef<FInternetAddr> Address);
 	bool Send(uint8_t Prefix, uint8_t* Data, uint32 Length, int32 &BytesSent);
 
 private:	

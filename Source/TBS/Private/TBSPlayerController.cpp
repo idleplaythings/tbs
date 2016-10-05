@@ -88,9 +88,11 @@ void ATBSPlayerController::OnClassesLoaded()
 	//TSharedRef<FInternetAddr> Address = SocketSubsystem->CreateInternetAddr();
 }
 
-void ATBSPlayerController::Client_OpenSideChannelConnection_Implementation()
+void ATBSPlayerController::Client_OpenSideChannelConnection_Implementation(const FString &Address)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Init side channel connection")));
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Init side channel connection, host %s"), *Address));
+
+	SideChannelAddress = Address;
 
 	TCPClient = new TBSTCPClient();
 	GetWorldTimerManager().SetTimer(
@@ -104,7 +106,18 @@ void ATBSPlayerController::Client_OpenSideChannelConnection_Implementation()
 
 void ATBSPlayerController::TrySideChannelConnection()
 {
-	if (TCPClient->Connect(FString("192.168.0.107"), 10011))
+	FString Host;
+	FString Port;
+
+	SideChannelAddress.Split(FString(":"), &Host, &Port);
+
+	bool IsValidAddr = true;
+	TSharedRef<FInternetAddr> Addr = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->CreateInternetAddr();
+	Addr->SetIp(*Host, IsValidAddr);
+	Addr->SetPort(FCString::Atoi(*Port));
+	
+
+	if (TCPClient->Connect(Addr))
 	{
 		GetWorldTimerManager().ClearTimer(SideChannelConnectionTimer);
 		std::string Message = "Client says Hello!";
