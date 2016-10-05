@@ -39,7 +39,7 @@ void ATBSClassLoader::TryLoadClasses()
 {
 	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("ATBSPlayerController::LoadLocalClasses")));
 
-	if (DefaultPawn && Grid && GridUI && GridPathFinder && GridPathRenderer && PropFactory && PropManager)
+	if (DefaultPawn && Grid && GridUI && GridPathFinder && GridPathRenderer && GridTraceRenderer && PropFactory && PropManager)
 	{
 		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("All local classes Initialised")));
 
@@ -83,6 +83,9 @@ void ATBSClassLoader::TryLoadClasses()
 
 		GridPathRenderer = GetWorld()->SpawnActor<ATBSGridPathRenderer>(ATBSGridPathRenderer::StaticClass());
 		GridPathRenderer->Initialise(Grid, GridUI);
+
+		GridTraceRenderer = GetWorld()->SpawnActor<ATBSGridTraceRenderer>(ATBSGridTraceRenderer::StaticClass());
+		GridTraceRenderer->Initialise(Grid, GridUI);
 
 		PropFactory = GetWorld()->SpawnActor<ATBSPropFactory>(ATBSPropFactory::StaticClass());
 		PropManager = GetWorld()->SpawnActor<ATBSPropManager>(ATBSPropManager::StaticClass());

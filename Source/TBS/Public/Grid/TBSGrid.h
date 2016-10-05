@@ -5,8 +5,6 @@
 #include "GameFramework/Actor.h"
 #include "TBSProp.h"
 #include "TBSUnit.h"
-//#include <string>
-//#include <unordered_map>
 #include "TBSGrid.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnActorNoLongerVisible, int32, TeamNumber, AActor*, Actor);
@@ -41,7 +39,9 @@ public:
 	void ReindexUnits();
 
 	TArray<ATBSUnit*> GetUnitsByPlayer(int32 PlayerNumber);
-	bool CanDrawLineOfFire(FIntVector Start, FIntVector End);
+
+	bool GetLineOfFireBetweenUnits(ATBSUnit* UnitA, ATBSUnit* UnitB, TArray<FIntVector> &OutTrace);
+	bool CanDrawLineOfFire(FIntVector Start, FIntVector End, TArray<FIntVector> &OutTrace);
 
 	TArray<FIntVector> Trace(FIntVector Start, FIntVector End);
 
@@ -67,6 +67,7 @@ private:
 	TMap<uint32, FProp> PropMap;
 
 	TArray<FIntVector> GetOccupiedCoordinates(FProp Prop);
+	TArray<FIntVector> GetOccupiedCoordinates(ATBSUnit* Unit);
 
 	//bool IsTileAccessBlockedByProp(FIntVector Coordinates, ETileSlot Slot);
 };

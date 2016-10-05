@@ -102,6 +102,38 @@ TArray<FIntVector> ATBSGrid::GetOccupiedCoordinates(FProp Prop)
 	return Tiles;
 }
 
+TArray<FIntVector> ATBSGrid::GetOccupiedCoordinates(ATBSUnit* Unit)
+{
+	TArray<FIntVector> Tiles;
+	FIntVector Dimensions = Unit->Dimensions;
+
+	int32 XStep = Dimensions.X % 2 == 0 ? -5 : 0;
+	int32 YStep = Dimensions.Y % 2 == 0 ? -5 : 0;
+
+	FIntVector Origin = FIntVector(
+		Unit->GameCoordinates.X + XStep - (FMath::CeilToInt((float)Dimensions.X / 2) * 10 - 10),
+		Unit->GameCoordinates.Y + YStep - (FMath::CeilToInt((float)Dimensions.Y / 2) * 10 - 10),
+		Unit->GameCoordinates.Z
+	);
+
+	for (int32 X = 0; X < Dimensions.X * 10; X = X + 10)
+	{
+		for (int32 Y = 0; Y < Dimensions.Y * 10; Y = Y + 10)
+		{
+			for (int32 Z = 0; Z < Dimensions.Z * 10; Z = Z + 10)
+			{
+				Tiles.Add(FIntVector(
+					Origin.X + X,
+					Origin.Y + Y,
+					Origin.Z + Z
+				));
+			}
+		}
+	}
+
+	return Tiles;
+}
+
 void ATBSGrid::RemovePropsAt(FIntVector Coordinates)
 {
 	TArray<uint32>* PropIds = OccupiedCoordinatesMap.Find(Coordinates);
@@ -186,7 +218,7 @@ ATBSUnit* ATBSGrid::SelectUnit(FIntVector Coordinates)
 			return Unit;
 		}
 
-		for (auto& OccupiedGoordinates : Unit->GameCoordinatesOccupied)
+		for (auto& OccupiedGoordinates : GetOccupiedCoordinates(Unit))
 		{
 			if (OccupiedGoordinates == Coordinates)
 			{
@@ -250,6 +282,34 @@ void ATBSGrid::ReindexProps_Implementation()
 	// Todo...
 }
 
+bool ATBSGrid::GetLineOfFireBetweenUnits(ATBSUnit* UnitA, ATBSUnit* UnitB, TArray<FIntVector> &OutTrace)
+{
+	// Naive mutual LoF implementation, this is a deep and nasty loop
+	bool HasLof = false;
+
+	for (auto& Coordinates0 : GetOccupiedCoordinates(UnitA))
+	{
+		for (auto& Coordinates1 : GetOccupiedCoordinates(UnitB))
+		{
+			TArray<FIntVector> Trace;
+
+			if (CanDrawLineOfFire(Coordinates0, Coordinates1, Trace))
+			{
+				OutTrace = Trace;
+				HasLof = true;
+				break;
+			}
+		}
+
+		if (HasLof)
+		{
+			break;
+		}
+	}
+
+	return HasLof;
+}
+
 void ATBSGrid::ReindexUnits_Implementation()
 {
 	if (HasAuthority())
@@ -261,11 +321,39 @@ void ATBSGrid::ReindexUnits_Implementation()
 		TArray<ATBSUnit*> Player0VisibleUnits;
 		TArray<ATBSUnit*> Player1VisibleUnits;
 
+		//uint32 NumberOfTraces = 0;
+
+		//TraceRenderer->ClearTraces();
+
 		for (auto& Unit0 : Player0Units)
 		{
 			for (auto& Unit1 : Player1Units)
 			{
-				if (CanDrawLineOfFire(Unit0->GameCoordinates, Unit1->GameCoordinates))
+				//// Naive mutual LoF implementation, this is a deep and nasty loop
+				//bool HasLof = false;
+
+				//for (auto& Coordinates0 : GetOccupiedCoordinates(Unit0))
+				//{
+				//	for (auto& Coordinates1 : GetOccupiedCoordinates(Unit1))
+				//	{
+				//		NumberOfTraces++;
+				//		if (CanDrawLineOfFire(Coordinates0, Coordinates1))
+				//		{
+				//			//TraceRenderer->RenderTrace(Coordinates0, Coordinates1, Trace(Coordinates0, Coordinates1));
+
+				//			HasLof = true;
+				//			break;
+				//		}
+				//	}
+
+				//	if (HasLof)
+				//	{
+				//		break;
+				//	}
+				//}
+
+				TArray<FIntVector> Trace;
+				if (GetLineOfFireBetweenUnits(Unit0, Unit1, Trace))
 				{
 					// Mutual line of fire
 					Player0VisibleUnits.AddUnique(Unit0);
@@ -274,7 +362,9 @@ void ATBSGrid::ReindexUnits_Implementation()
 			}
 		}
 
-		// Now Loop through each player's visible units and update visibilityh only once per reindex...
+		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("%i LoF traces"), NumberOfTraces));
+
+		// Now Loop through each player's visible units and update visibility only once per reindex...
 
 		for (auto& Unit0 : Player0Units)
 		{
@@ -314,43 +404,36 @@ void ATBSGrid::ReindexUnits_Implementation()
 	}	
 }
 
-bool ATBSGrid::CanDrawLineOfFire(FIntVector Start, FIntVector End)
+bool ATBSGrid::CanDrawLineOfFire(FIntVector Start, FIntVector End, TArray<FIntVector> &OutTrace)
 {
+	TArray<FIntVector> TraceResult = Trace(Start, End);
+
 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Tracing (%i, %i, %i) -> (%i, %i, %i)"), Start.X, Start.Y, Start.Z, End.X, End.Y, End.Z));
 
-	for (auto& Coordinate : Trace(Start, End))
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Raw trace length %i"), TraceResult.Num()));
+
+	OutTrace.Empty();
+
+	for (auto& Step : TraceResult)
 	{
-		//if (Coordinate.X % 10 == 5)
-		//{
-		//	FIntVector Left = Coordinate;
-		//	Left.X -= 5;
-		//	FIntVector Right = Coordinate;
-		//	Right.X += 5;
+		OutTrace.AddUnique(
+			FIntVector(
+				(int32)Step.X / 10 * 10,
+				(int32)Step.Y / 10 * 10,
+				(int32)Step.Z / 10 * 10
+			)
+		);
+	}
 
-		//	if (!IsAccessible(Left) || !IsAccessible(Right))
-		//	{
-		//		return false;
-		//	}
-		//}
-
-		//if (Coordinate.Y % 10 == 5)
-		//{
-		//	FIntVector Top = Coordinate;
-		//	Top.Y -= 5;
-		//	FIntVector Bottom = Coordinate;
-		//	Bottom.Y += 5;
-
-		//	if (!IsAccessible(Top) || !IsAccessible(Bottom))
-		//	{
-		//		return false;
-		//	}
-		//}
-
+	for (auto& Coordinate : OutTrace)
+	{
 		if (!IsAccessible(Coordinate))
 		{
 			return false;
 		}
 	}
+
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Processed trace length %i"), OutTrace.Num()));
 
 	return true;
 }
@@ -380,39 +463,39 @@ TArray<FIntVector> ATBSGrid::Trace(FIntVector Start, FIntVector End)
 	x1 = y1 = z1 = dm / 2; /* error offset */
 
 	for (;;) {  /* loop */
-		int32 TempX, TempY;
+		//int32 TempX, TempY;
 
-		int32 ModX = x0 % 10;
-		int32 ModY = y0 % 10;
+		//int32 ModX = x0 % 10;
+		//int32 ModY = y0 % 10;
 
-		if (ModX == 0 || ModX == 5)
-		{
-			TempX = x0;
-		}
-		else if (ModX < 5)
-		{
-			TempX = x0 - ModX;
-		}
-		else
-		{
-			TempX = x0 + 1 + ModX;
-		}
+		//if (ModX == 0 || ModX == 5)
+		//{
+		//	TempX = x0;
+		//}
+		//else if (ModX < 5)
+		//{
+		//	TempX = x0 - ModX;
+		//}
+		//else
+		//{
+		//	TempX = x0 + 1 + ModX;
+		//}
 
-		if (ModY == 0 || ModY == 5)
-		{
-			TempY = y0;
-		}
-		else if (ModY < 5)
-		{
-			TempY = y0 - ModY;
-		}
-		else
-		{
-			TempY = y0 + 1 + ModY;
-		}
+		//if (ModY == 0 || ModY == 5)
+		//{
+		//	TempY = y0;
+		//}
+		//else if (ModY < 5)
+		//{
+		//	TempY = y0 - ModY;
+		//}
+		//else
+		//{
+		//	TempY = y0 + 1 + ModY;
+		//}
 
-		//Trace.Add(FIntVector(x0, y0, z0));
-		Trace.Add(FIntVector(TempX, TempY, z0));
+		Trace.Add(FIntVector(x0, y0, z0));
+		//Trace.Add(FIntVector(TempX, TempY, z0));
 
 		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Tracing (%i, %i, %i)"), x0, y0, z0));
 		if (i-- == 0) break;

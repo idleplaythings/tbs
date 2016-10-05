@@ -27,22 +27,51 @@ void TBSUIFriendlyUnitContext::HandleEvent(TBSUIContextEvent &Event)
 {
 	if (Event.Type == FName(TEXT("TileHoverBegin")))
 	{
-		if (ClassLoader->PlayerController->SelectedUnit)
-		{
-			ClassLoader->PlayerController->PathSelected = true;
+		ClassLoader->GridTraceRenderer->ClearTraces();
 
-			if (ClassLoader->GridPathFinder->FindPath(
-				ClassLoader->PlayerController->SelectedUnit->GameCoordinates,
-				((TBSUIContextCoordinateEvent*)&Event)->Coordinates,
-				ClassLoader->PlayerController->SelectedPath,
-				ClassLoader->PlayerController->SelectedUnit->Dimensions
-			))
+		ATBSUnit* SelectedUnit = ClassLoader->PlayerController->SelectedUnit;
+		FIntVector HoverCoordinates = ((TBSUIContextCoordinateEvent*)&Event)->Coordinates;
+
+		if (SelectedUnit)
+		{
+			ATBSUnit* TargetUnit = ClassLoader->Grid->SelectUnit(HoverCoordinates);
+
+			if (TargetUnit)
 			{
-				ClassLoader->GridPathRenderer->RenderPath(ClassLoader->PlayerController->SelectedPath);
-			}			
+				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Targeting unit")));
+
+				TArray<FIntVector> Trace;
+
+				if (ClassLoader->Grid->GetLineOfFireBetweenUnits(SelectedUnit, TargetUnit, Trace))
+				{
+					if (Trace.Num() > 0)
+					{
+						ClassLoader->GridTraceRenderer->RenderTrace(Trace[0], Trace[Trace.Num() - 1], Trace);
+					}
+					else
+					{
+						//ClassLoader->GridTraceRenderer->ClearTraces();
+						GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Empty trace")));
+					}
+				}				
+			}
 			else
 			{
-				ClassLoader->GridPathRenderer->ClearPath();
+				ClassLoader->PlayerController->PathSelected = true;
+
+				if (ClassLoader->GridPathFinder->FindPath(
+					SelectedUnit->GameCoordinates,
+					HoverCoordinates,
+					ClassLoader->PlayerController->SelectedPath,
+					SelectedUnit->Dimensions
+				))
+				{
+					ClassLoader->GridPathRenderer->RenderPath(ClassLoader->PlayerController->SelectedPath);
+				}
+				else
+				{
+					ClassLoader->GridPathRenderer->ClearPath();
+				}
 			}
 		}
 	}

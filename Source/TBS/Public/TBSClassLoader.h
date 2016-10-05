@@ -5,6 +5,7 @@
 #include "GameFramework/Actor.h"
 #include "TBSGridPathFinder.h"
 #include "TBSGridPathRenderer.h"
+#include "TBSGridTraceRenderer.h"
 #include "TBSClassLoader.generated.h"
 
 class ATBSPlayerController;
@@ -41,6 +42,7 @@ public:
 	ATBSGridUI* GridUI;
 	ATBSGridPathFinder* GridPathFinder;
 	ATBSGridPathRenderer* GridPathRenderer;
+	ATBSGridTraceRenderer* GridTraceRenderer;
 	ATBSPropFactory* PropFactory;
 	ATBSPropManager* PropManager;
 
