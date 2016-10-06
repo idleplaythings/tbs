@@ -57,11 +57,11 @@ void ATBSProp::RecalculateCoordinates()
 		GameCoordinates.Z
 	);
 
-	for (int32 X = 0; X <= Dimensions.X * 10; X = X + 10)
+	for (int32 X = 0; X < Dimensions.X * 10; X = X + 10)
 	{
-		for (int32 Y = 0; Y <= Dimensions.Y * 10; Y = Y + 10)
+		for (int32 Y = 0; Y < Dimensions.Y * 10; Y = Y + 10)
 		{
-			for (int32 Z = 0; Z <= Dimensions.Z * 10; Z = Z + 10)
+			for (int32 Z = 0; Z < Dimensions.Z * 10; Z = Z + 10)
 			{
 				NewCoordinates.Add(FIntVector(
 					Origin.X + X,
