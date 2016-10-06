@@ -95,7 +95,7 @@ void ATBSUnitManager::StartMovement()
 		CurrentMovement.Unit->MoveSouth();
 	}
 
-	CurrentMovement.Unit->GameCoordinates = CurrentMovement.Movement;
+	//CurrentMovement.Unit->GameCoordinates = CurrentMovement.Movement;
 
 	Grid->ReindexUnits();
 }

@@ -16,14 +16,31 @@ ATBSGrid::ATBSGrid()
 void ATBSGrid::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
 {
 	DOREPLIFETIME(ATBSGrid, GridDimensions);
-	DOREPLIFETIME(ATBSGrid, Units);
+	//DOREPLIFETIME(ATBSGrid, Units);
 }
 
 // Called when the game starts or when spawned
 void ATBSGrid::BeginPlay()
 {
 	Super::BeginPlay();
-	
+		
+	if (!HasAuthority())
+	{
+		// Attach actor spawn listener on clients only
+		FOnActorSpawned::FDelegate ActorSpawnDelegate = FOnActorSpawned::FDelegate::CreateUObject(this, &ATBSGrid::OnActorSpawned);
+		GetWorld()->AddOnActorSpawnedHandler(ActorSpawnDelegate);
+	}
+}
+
+void ATBSGrid::OnActorSpawned(AActor* Actor)
+{
+	// Listen for actor spawning events, and reindex units when that happens
+	// This is used to catch new units that were previously outside of line of fire, but
+	// are now visible. Has to be run client side to ensure reindexing happens *after*
+	// the unit spawn on client.
+
+	// Todo: only run this on ATBSUnits
+	ReindexUnits();
 }
 
 void ATBSGrid::InitialiseGrid(FIntVector InGridDimensions)
@@ -287,9 +304,9 @@ bool ATBSGrid::GetLineOfFireBetweenUnits(ATBSUnit* UnitA, ATBSUnit* UnitB, TArra
 	// Naive mutual LoF implementation, this is a deep and nasty loop
 	bool HasLof = false;
 
-	for (auto& Coordinates0 : GetOccupiedCoordinates(UnitA))
+	for (auto& Coordinates0 : SortCoordinatesByProximityTo(GetOccupiedCoordinates(UnitA), UnitB->GameCoordinates))
 	{
-		for (auto& Coordinates1 : GetOccupiedCoordinates(UnitB))
+		for (auto& Coordinates1 : SortCoordinatesByProximityTo(GetOccupiedCoordinates(UnitB), UnitA->GameCoordinates))
 		{
 			TArray<FIntVector> Trace;
 
@@ -310,10 +327,22 @@ bool ATBSGrid::GetLineOfFireBetweenUnits(ATBSUnit* UnitA, ATBSUnit* UnitB, TArra
 	return HasLof;
 }
 
+TArray<FIntVector> ATBSGrid::SortCoordinatesByProximityTo(TArray<FIntVector> Coordinates, FIntVector Target)
+{
+	Coordinates.Sort([Target](FIntVector CoordA, FIntVector CoordB) {
+		return FMath::Abs(CoordA.X - Target.X) + FMath::Abs(CoordA.Y - Target.Y) + FMath::Abs(CoordA.Z - Target.Z) <
+			FMath::Abs(CoordB.X - Target.X) + FMath::Abs(CoordB.Y - Target.Y) + FMath::Abs(CoordB.Z - Target.Z);
+	});
+
+	return Coordinates;
+}
+
 void ATBSGrid::ReindexUnits_Implementation()
 {
 	if (HasAuthority())
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Reindex units server")));
+
 		TArray<ATBSUnit*> Player0Units = GetUnitsByPlayer(0);
 		TArray<ATBSUnit*> Player1Units = GetUnitsByPlayer(1);
 
@@ -321,37 +350,10 @@ void ATBSGrid::ReindexUnits_Implementation()
 		TArray<ATBSUnit*> Player0VisibleUnits;
 		TArray<ATBSUnit*> Player1VisibleUnits;
 
-		//uint32 NumberOfTraces = 0;
-
-		//TraceRenderer->ClearTraces();
-
 		for (auto& Unit0 : Player0Units)
 		{
 			for (auto& Unit1 : Player1Units)
 			{
-				//// Naive mutual LoF implementation, this is a deep and nasty loop
-				//bool HasLof = false;
-
-				//for (auto& Coordinates0 : GetOccupiedCoordinates(Unit0))
-				//{
-				//	for (auto& Coordinates1 : GetOccupiedCoordinates(Unit1))
-				//	{
-				//		NumberOfTraces++;
-				//		if (CanDrawLineOfFire(Coordinates0, Coordinates1))
-				//		{
-				//			//TraceRenderer->RenderTrace(Coordinates0, Coordinates1, Trace(Coordinates0, Coordinates1));
-
-				//			HasLof = true;
-				//			break;
-				//		}
-				//	}
-
-				//	if (HasLof)
-				//	{
-				//		break;
-				//	}
-				//}
-
 				TArray<FIntVector> Trace;
 				if (GetLineOfFireBetweenUnits(Unit0, Unit1, Trace))
 				{
@@ -361,8 +363,6 @@ void ATBSGrid::ReindexUnits_Implementation()
 				}
 			}
 		}
-
-		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("%i LoF traces"), NumberOfTraces));
 
 		// Now Loop through each player's visible units and update visibility only once per reindex...
 
@@ -402,15 +402,27 @@ void ATBSGrid::ReindexUnits_Implementation()
 			}
 		}
 	}	
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Reindex units client")));
+
+		Units.Empty();
+
+		for (TActorIterator<ATBSUnit> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+		{
+			//Unit = *ActorItr;
+			Units.Add(*ActorItr);
+		}
+	}
 }
 
 bool ATBSGrid::CanDrawLineOfFire(FIntVector Start, FIntVector End, TArray<FIntVector> &OutTrace)
 {
 	TArray<FIntVector> TraceResult = Trace(Start, End);
 
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Tracing (%i, %i, %i) -> (%i, %i, %i)"), Start.X, Start.Y, Start.Z, End.X, End.Y, End.Z));
+	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Tracing (%i, %i, %i) -> (%i, %i, %i)"), Start.X, Start.Y, Start.Z, End.X, End.Y, End.Z));
 
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Raw trace length %i"), TraceResult.Num()));
+	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Raw trace length %i"), TraceResult.Num()));
 
 	OutTrace.Empty();
 
@@ -433,7 +445,7 @@ bool ATBSGrid::CanDrawLineOfFire(FIntVector Start, FIntVector End, TArray<FIntVe
 		}
 	}
 
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Processed trace length %i"), OutTrace.Num()));
+	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Processed trace length %i"), OutTrace.Num()));
 
 	return true;
 }

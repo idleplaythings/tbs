@@ -164,6 +164,8 @@ void ATBSUnit::MoveNorth()
 		NewCoordinates.Add(FIntVector(Coordinates.X, Coordinates.Y - 10, Coordinates.Z));
 	}
 
+	GameCoordinates.Y -= 10;
+
 	GameCoordinatesOccupied = NewCoordinates;
 }
 
@@ -176,6 +178,8 @@ void ATBSUnit::MoveEast()
 	{
 		NewCoordinates.Add(FIntVector(Coordinates.X + 10, Coordinates.Y, Coordinates.Z));
 	}
+
+	GameCoordinates.X += 10;
 
 	GameCoordinatesOccupied = NewCoordinates;
 }
@@ -190,6 +194,8 @@ void ATBSUnit::MoveSouth()
 		NewCoordinates.Add(FIntVector(Coordinates.X, Coordinates.Y + 10, Coordinates.Z));
 	}
 
+	GameCoordinates.Y += 10;
+
 	GameCoordinatesOccupied = NewCoordinates;
 }
 
@@ -202,6 +208,8 @@ void ATBSUnit::MoveWest()
 	{
 		NewCoordinates.Add(FIntVector(Coordinates.X - 10, Coordinates.Y, Coordinates.Z));
 	}
+
+	GameCoordinates.X -= 10;
 
 	GameCoordinatesOccupied = NewCoordinates;
 }

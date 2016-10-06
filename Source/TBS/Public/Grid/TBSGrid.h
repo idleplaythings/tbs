@@ -29,7 +29,7 @@ public:
 
 	uint32 NextPropId = 1;
 
-	UPROPERTY(Replicated)
+	UPROPERTY()
 	TArray<ATBSUnit*> Units;
 
 	UFUNCTION(NetMulticast, Reliable)
@@ -61,6 +61,9 @@ public:
 
 	FOnActorNoLongerVisible OnActorNoLongerVisible;
 
+	UFUNCTION()
+	void OnActorSpawned(AActor* Actor);
+
 private:	
 	
 	TMap<FIntVector, TArray<uint32>> OccupiedCoordinatesMap;
@@ -68,6 +71,8 @@ private:
 
 	TArray<FIntVector> GetOccupiedCoordinates(FProp Prop);
 	TArray<FIntVector> GetOccupiedCoordinates(ATBSUnit* Unit);
+
+	TArray<FIntVector> SortCoordinatesByProximityTo(TArray<FIntVector> Coordinates, FIntVector Target);
 
 	//bool IsTileAccessBlockedByProp(FIntVector Coordinates, ETileSlot Slot);
 };

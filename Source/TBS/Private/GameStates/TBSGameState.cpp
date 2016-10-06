@@ -189,6 +189,8 @@ void ATBSGameState::AllClientsReady()
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("No ip found!")));
 	}
 
+	Grid->ReindexUnits();
+
 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Side channel done")));
 }
 
@@ -282,35 +284,6 @@ void ATBSGameState::Bomb(FIntVector Coordinates)
 		memcpy(BombData + BombDataLength, &TempCoordinates, sizeof(FIntVector));
 		BombDataLength += sizeof(FIntVector);
 	}
-
-	//uint8_t* BombData = (uint8_t*)FMemory::Malloc(sizeof(FIntVector) * 11 * 11 * 6);
-	//uint32 BombDataLength = 0;
-
-	//for (int32 X = Coordinates.X - 50; X <= Coordinates.X + 50; X = X + 10)
-	//{
-	//	for (int32 Y = Coordinates.Y - 50; Y <= Coordinates.Y + 50; Y = Y + 10)
-	//	{
-	//		for (int32 Z = 0; Z < 6; Z++)
-	//		{
-	//			//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Bombing (%i, %i, %i)"), X, Y, Z));
-
-	//			//Coordinates.X = X;
-	//			//Coordinates.Y = Y;
-	//			//Coordinates.Z = Z;
-
-	//			FIntVector TempCoordinates = FIntVector(X, Y, Z);
-
-	//			Grid->RemovePropsAt(TempCoordinates);
-
-	//			//uint8_t* CoordinateBuffer = reinterpret_cast<uint8_t*>(&TempCoordinates);
-	//			//memset(BombData + BombDataLength, 0x02, 1);
-	//			memcpy(BombData + BombDataLength, &TempCoordinates, sizeof(FIntVector));
-	//			BombDataLength += sizeof(FIntVector);
-
-	//			//FMemory::Free(CoordinateBuffer);				
-	//		}
-	//	}
-	//}
 
 	TCPServer->SendAll((uint8_t)0x02, BombData, BombDataLength);	
 
