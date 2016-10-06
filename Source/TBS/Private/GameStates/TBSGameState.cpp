@@ -333,7 +333,7 @@ void ATBSGameState::SpawnUnits(int32 PlayerNumber)
 		XOffset = -10;
 	}
 
-	while (UnitsSpawned < 1)
+	while (UnitsSpawned < 10)
 	{
 		FIntVector Coordinates;
 
