@@ -10,10 +10,10 @@ ATBSGridTraceRenderer::ATBSGridTraceRenderer()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> Mesh(TEXT("StaticMesh'/Engine/BasicShapes/Cylinder.Cylinder'"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> Mesh(TEXT("StaticMesh'/Game/Meshes/block.block'"));
 	StepComponentMesh = Mesh.Object;
 
-	static ConstructorHelpers::FObjectFinder<UMaterial> Material(TEXT("Material'/Game/Materials/M_GridPathmat.M_GridPathmat'"));
+	static ConstructorHelpers::FObjectFinder<UMaterial> Material(TEXT("Material'/Game/Materials/M_GridTraceMat.M_GridTraceMat'"));
 	StepComponentMaterial = Material.Object;
 
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
@@ -72,7 +72,8 @@ UStaticMeshComponent* ATBSGridTraceRenderer::CreateStepComponent()
 	StepComponent->SetStaticMesh(StepComponentMesh);
 	StepComponent->SetMaterial(0, StepComponentMaterial);
 	StepComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-	StepComponent->SetRelativeScale3D(FVector(0.3, 0.3, 0.01));
+	StepComponent->SetRelativeScale3D(FVector(0.3, 0.3, 0.3));
+	StepComponent->SetRelativeLocation(FVector(0.0, 0.0, 0.1));
 	FinishAndRegisterComponent(StepComponent);
 	return StepComponent;
 }

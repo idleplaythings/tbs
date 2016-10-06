@@ -21,6 +21,8 @@ void TBSUIFriendlyUnitContext::ExitContext()
 	ClassLoader->GridUI->ClearSelection();
 	ClassLoader->GridUI->ResetCursorDimensions();
 	ClassLoader->GridPathFinder->InvalidateCache();
+
+	ClassLoader->GridTraceRenderer->ClearTraces();
 }
 
 void TBSUIFriendlyUnitContext::HandleEvent(TBSUIContextEvent &Event)
